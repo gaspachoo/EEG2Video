@@ -1,0 +1,7 @@
+ ../../../EEG_preprocessing/__pycache__/
+../../models/__pycache__/
+../../models/checkpoints/
+ ../../wandb/
+  ../../../checkpoints/
+../../../wandb/
+../../../dataset/
