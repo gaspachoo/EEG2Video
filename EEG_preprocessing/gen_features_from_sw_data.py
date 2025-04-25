@@ -26,6 +26,9 @@ for fname in sorted(f for f in os.listdir(input_folder) if f.endswith('.npz')):
     de_arr  = np.stack(de_list)   # (N, 62, 5)
     psd_arr = np.stack(psd_list)
 
+    de_arr = de_arr.reshape(7, 40, 5, 62, 5)
+    psd_arr = psd_arr.reshape(7, 40, 5, 62, 5)
+    
     base = fname.replace('_segmented.npz', '').replace('.npz', '')
     np.savez(f"{output_psd}/{base}_features.npz",
              psd=psd_arr.astype(np.float32),

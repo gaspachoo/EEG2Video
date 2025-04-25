@@ -25,7 +25,10 @@ num_epochs = 100
 lr = 0.001   # learning rate
 C = 62       # the number of channels
 T = 5        # the time samples of EEG signals
+
 output_dir = './output_dir/'
+os.makedirs(output_dir, exist_ok=True)
+
 network_name = "GLMNet_mlp"
 saved_model_path = output_dir + network_name + '_40c.pth'
 
@@ -341,6 +344,7 @@ for subname in sub_list:
     save_results = np.concatenate((all_test_pred.reshape(1, all_test_label.shape[0]), all_test_label.reshape(1, all_test_label.shape[0])))
     print(save_results.shape)
 
+    os.makedirs('./ClassificationResults/40c_top1', exist_ok=True)
     np.save('./ClassificationResults/40c_top1/'+network_name+'_Predict_Label_' + subname + '.npy', save_results)
 
     # break
@@ -350,6 +354,9 @@ print(All_sub_top5)
 
 print("TOP1: ", np.mean(np.array(All_sub_top1)), np.std(np.array(All_sub_top1)))
 print("TOP5: ", np.mean(np.array(All_sub_top5)), np.std(np.array(All_sub_top5)))
+
+os.makedirs('./ClassificationResults/40c_top1', exist_ok=True)
+os.makedirs('./ClassificationResults/40c_top5', exist_ok=True)
 
 np.save('./ClassificationResults/40c_top1/'+network_name+'_All_subject_acc.npy', np.array(All_sub_top1))
 np.save('./ClassificationResults/40c_top5/'+network_name+'_All_subject_acc.npy', np.array(All_sub_top5))

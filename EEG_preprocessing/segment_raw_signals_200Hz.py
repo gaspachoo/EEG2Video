@@ -7,6 +7,7 @@ from tqdm import tqdm
 # meaning 7 blocks, 40 concepts, 5 video clips, 62 channels, and 2s*fre time-points.
 
 fre = 200
+os.makedirs('./data/Segmented_Rawf_200Hz_2s', exist_ok=True)
 
 def get_files_names_in_directory(directory):
     files_names = []
@@ -15,10 +16,11 @@ def get_files_names_in_directory(directory):
             files_names.append(filename)
     return files_names
 
-sub_list = get_files_names_in_directory("./data/Rawf_200Hz/")
+sub_list = [f for f in get_files_names_in_directory('./data/EEG/') if f.endswith('.npy')]
+#sub_list = get_files_names_in_directory('./data/EEG/') #"./data/Rawf_200Hz/"
 
 for subname in sub_list:
-    npydata = np.load('./data/Rawf_200Hz/' + subname)
+    npydata = np.load('./data/EEG/' + subname) #./data/Rawf_200Hz/'
 
     save_data = np.empty((0, 40, 5, 62, 2*fre))
 
@@ -36,4 +38,4 @@ for subname in sub_list:
             block_data = np.concatenate((block_data, class_data.reshape(1, 5, 62, 2*fre)))
         save_data = np.concatenate((save_data, block_data.reshape(1, 40, 5, 62, 2*fre)))
 
-    np.save('./data/Segmented_Rawf_200Hz_2s/' + subname, save_data)
+    np.save('./data/Segmented_Rawf_200Hz_2s/' + subname, save_data) ## ./data/Segmented_Rawf_200Hz_2s/

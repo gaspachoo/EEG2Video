@@ -1,5 +1,5 @@
 wandb/
-dataset/
+data/
 *.pt
 *.pth
 checkpoints/
