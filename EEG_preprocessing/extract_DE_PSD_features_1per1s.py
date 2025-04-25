@@ -17,11 +17,11 @@ def get_files_names_in_directory(directory):
             files_names.append(filename)
     return files_names
 
-sub_list = get_files_names_in_directory("data/Segmented_Rawf_200Hz_2s/")
+sub_list = get_files_names_in_directory("./dataset/Segmented_Rawf_200Hz_2s/")
 
 for subname in sub_list:
 
-    loaded_data = np.load('data/Segmented_Rawf_200Hz_2s/' + subname)
+    loaded_data = np.load('./dataset/Segmented_Rawf_200Hz_2s/' + subname)
     # (7 * 40 * 5 * 62 * 2*fre)
 
     print("Successfully loaded .npy file.")
@@ -48,7 +48,7 @@ for subname in sub_list:
         DE_data = np.concatenate((DE_data, de_block_data.reshape(1, 40, 5, 2, 62, 5)))
         PSD_data = np.concatenate((PSD_data, psd_block_data.reshape(1, 40, 5, 2, 62, 5)))
 
-    np.save("data/DE_1per1s/" + subname + ".npy", DE_data)
-    np.save("data/PSD_1per1s/" + subname + ".npy", PSD_data)
+    np.save("./dataset/DE_1per1s/" + subname + ".npy", DE_data)
+    np.save("./dataset/PSD_1per1s/" + subname + ".npy", PSD_data)
 
     # break

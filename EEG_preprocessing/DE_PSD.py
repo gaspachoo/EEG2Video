@@ -26,7 +26,7 @@ def DE_PSD(data, fre, time_window):
     
     STFTN = 200
     fStart = [1, 4, 8, 14, 31]
-    fEnd = [4, 8, 14, 31, 99]
+    fEnd = [4, 8, 14, 31, 99] # bands : delta, theta, alpha, beta, gamma
     window = time_window
     fs = fre
 
@@ -46,7 +46,7 @@ def DE_PSD(data, fre, time_window):
     psd = np.zeros([n,len(fStart)])
     de = np.zeros([n,len(fStart)])
     #Hanning window
-    Hlength=window*fs
+    Hlength=int(window*fs) ##added int()
     #Hwindow=hanning(Hlength)
     Hwindow= np.array([0.5 - 0.5 * np.cos(2 * np.pi * n / (Hlength+1)) for n in range(1,Hlength+1)])
 
