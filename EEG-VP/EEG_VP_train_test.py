@@ -345,7 +345,7 @@ for subname in sub_list:
     print(save_results.shape)
 
     os.makedirs('./ClassificationResults/40c_top1', exist_ok=True)
-    np.save('./ClassificationResults/40c_top1/'+network_name+'_Predict_Label_' + subname + '.npy', save_results)
+    np.save('./ClassificationResults/40c_top1/'+network_name+'_Predict_Label_' + subname, save_results)
 
     # break
 

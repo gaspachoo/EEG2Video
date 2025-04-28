@@ -5,3 +5,4 @@ data/
 checkpoints/
 __pycache__/
 analyse_tree.py
+ClassificationResults/
