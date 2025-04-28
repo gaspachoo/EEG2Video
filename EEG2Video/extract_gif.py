@@ -2,6 +2,7 @@
 import cv2
 import imageio
 import numpy as np
+import os
 
 def get_source_info_opencv(source_name):
     return_value = 0  
@@ -17,9 +18,19 @@ def get_source_info_opencv(source_name):
         return_value = -1
     return return_value
 
-for video_id in range(4, 5):  
+video_names = [
+        "1st_10min.mp4",
+        "2nd_10min.mp4",
+        "3rd_10min.mp4",
+        "4th_10min.mp4",
+        "5th_10min.mp4",
+        "6th_10min.mp4",
+        "7th_10min.mp4",
+    ]
 
-    video_path = "data/Video/" + str(video_id) + "th_10min.mp4"
+for video_id in range(len(video_names)):  
+
+    video_path = "./data/Video/" + video_names[video_id]
       
     get_source_info_opencv(video_path)
     # 读取视频文件
@@ -39,18 +50,28 @@ for video_id in range(4, 5):
     while i < 12480:
         i += 1
         success, frame = videoCapture.read()
-        frame = frame[..., ::-1] 
-        if(is_video[i] == 0):
+        if not success:
+            break  # Stop if not more frames
+
+        frame = frame[..., ::-1]
+        if is_video[i] == 0:
             continue
+
         all_frame = [cv2.resize(frame, (512, 288), interpolation=cv2.INTER_LINEAR)]
-        while(i+1<12480 and is_video[i+1] == is_video[i]):
+        while i+1 < 12480 and is_video[i+1] == is_video[i]:
             i += 1
             success, frame = videoCapture.read()
-            frame = frame[..., ::-1] 
+            if not success:
+                break  # Check again if no more frames
+            frame = frame[..., ::-1]
             all_frame.append(cv2.resize(frame, (512, 288), interpolation=cv2.INTER_LINEAR))
+        
         gif_frame = []
         for j in range(0, 48, 8):
-            gif_frame.append(all_frame[j])    
+            gif_frame.append(all_frame[j])
+        
         k += 1
-        print("k = ", k, len(gif_frame))
-        imageio.mimsave('data/Video_Gif/Block' + str(video_id) + '/'+str(k)+'.gif', gif_frame, 'GIF', duration=0.33333)  
+        print("k =", k, len(gif_frame))
+        os.makedirs(f'./data/Video_Gif/Block{str(int(video_names[video_id][0])-1)}', exist_ok=True)
+        imageio.mimsave(f'./data/Video_Gif/Block{video_id}/{k}.gif', gif_frame, 'GIF', duration=0.33333)
+        
