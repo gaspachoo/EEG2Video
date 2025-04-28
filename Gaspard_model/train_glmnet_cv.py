@@ -38,11 +38,11 @@ class GLMNet(nn.Module):
 
 def parse_args():
     p=argparse.ArgumentParser(); home=os.environ["HOME"]
-    p.add_argument("--eeg_path",type=str,default=f"{home}/EEG2Video/dataset/EEG_500ms_sw/sub1_segmented.npz")
-    p.add_argument("--feat_path",type=str,default=f"{home}/EEG2Video/dataset/DE_500ms_sw/sub1_features.npz")
+    p.add_argument("--eeg_path",type=str,default=f"{home}/EEG2Video/data/EEG_500ms_sw/sub1_segmented.npz")
+    p.add_argument("--feat_path",type=str,default=f"{home}/EEG2Video/data/DE_500ms_sw/sub1_features.npz")
     p.add_argument("--save_dir",type=str,default=f"{home}/EEG2Video/Gaspard_model/checkpoints/cv_glmnet")
-    p.add_argument("--lr",type=float,default=1e-3)
-    p.add_argument("--n_epochs",type=int,default=100)
+    p.add_argument("--lr",type=float,default=1e-4)
+    p.add_argument("--n_epochs",type=int,default=60)
     p.add_argument("--save_every",type=int,default=20); p.add_argument("--no_early_stop",action="store_true")
     p.add_argument("--use_wandb",action="store_true"); return p.parse_args()
 

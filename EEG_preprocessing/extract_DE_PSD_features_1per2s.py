@@ -10,7 +10,7 @@ fre = 200
 
 for subname in range(1,21):
 
-    loaded_data = np.load('./dataset/EEG_1s/sub'+ str(subname) + '_segmented.npz')#/data/EEG2Video/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy
+    loaded_data = np.load('./data/EEG_1s/sub'+ str(subname) + '_segmented.npz')#/data/EEG2Video/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy
     # (7 * 40 * 5 * 62 * 2*fre)
 
     print("Successfully loaded .npy file.")
@@ -36,5 +36,5 @@ for subname in range(1,21):
         DE_data = np.concatenate((DE_data, de_block_data.reshape(1, 40, 5, 62, 5)))
         PSD_data = np.concatenate((PSD_data, psd_block_data.reshape(1, 40, 5, 62, 5)))
 
-    np.save("./dataset/DE_1per2s_sw/" + str(subname) +".npy", DE_data)
-    np.save("./dataset/PSD_1per2s_sw/" + str(subname) + ".npy", PSD_data)
+    np.save("./data/DE_1per2s_sw/" + str(subname) +".npy", DE_data)
+    np.save("./data/PSD_1per2s_sw/" + str(subname) + ".npy", PSD_data)

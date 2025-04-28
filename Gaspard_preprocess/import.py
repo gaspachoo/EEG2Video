@@ -18,7 +18,7 @@ def load_all_eeg_data_by_subject(data_dir):
             data[subject].append(eeg_array)
     return data
 
-data_dir = "./dataset/EEG"
+data_dir = "./data/EEG"
 eeg_data = load_all_eeg_data_by_subject(data_dir)
 
 # To access sub 1 data

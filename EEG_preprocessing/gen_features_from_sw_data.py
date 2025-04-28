@@ -3,9 +3,9 @@ from tqdm import tqdm
 from DE_PSD import DE_PSD
 
 fre = 200                                     # Hz
-input_folder  = './dataset/EEG_500ms_sw'   # peu importe le nom
-output_psd    = './dataset/PSD_500ms_sw'
-output_de     = './dataset/DE_500ms_sw'
+input_folder  = './data/EEG_500ms_sw'   # peu importe le nom
+output_psd    = './data/PSD_500ms_sw'
+output_de     = './data/DE_500ms_sw'
 os.makedirs(output_psd, exist_ok=True)
 os.makedirs(output_de,  exist_ok=True)
 

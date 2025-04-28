@@ -12,9 +12,9 @@ n_blocks = 7
 n_concepts = 40
 n_videos = 5
 
-input_folder = './dataset/EEG'
-label_file = './dataset/meta_info/All_video_label.npy'
-output_folder = './dataset/EEG_500ms_sw'
+input_folder = './data/EEG'
+label_file = './data/meta_info/All_video_label.npy'
+output_folder = './data/EEG_500ms_sw'
 os.makedirs(output_folder, exist_ok=True)
 
 all_labels = np.load(label_file)  # shape: (7, 40)

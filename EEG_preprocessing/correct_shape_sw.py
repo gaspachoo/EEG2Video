@@ -1,8 +1,8 @@
 import numpy as np
 import os
 
-input_folder = "./dataset/DE_1s_sw"
-output_folder = "./dataset/DE_1per1s"
+input_folder = "./data/DE_1s_sw"
+output_folder = "./data/DE_1per1s"
 os.makedirs(output_folder, exist_ok=True)
 
 for i in range(1, 21):  # subjects 1 to 20
