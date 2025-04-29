@@ -2,7 +2,6 @@ wandb/
 data/
 *.pt
 *.pth
-.gitconfig
 checkpoints/
 __pycache__/
 analyse_tree.py
