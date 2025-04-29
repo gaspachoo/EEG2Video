@@ -7,3 +7,4 @@ __pycache__/
 analyse_tree.py
 ClassificationResults/
 NeurIPS-2024-eeg2video-towards-decoding-dynamic-visual-perception-from-eeg-signals-Paper-Conference.pdf
+.env

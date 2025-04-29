@@ -6,7 +6,11 @@ import torchvision.transforms as T
 import imageio
 from PIL import Image
 from tqdm import tqdm
+import wandb
 import argparse
+
+with open(".env") as f: key = f.readline()
+wandb.login(key=key)
 
 def parse_args():
     parser = argparse.ArgumentParser()
