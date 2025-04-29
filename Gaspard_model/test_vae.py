@@ -9,13 +9,13 @@ from tqdm import tqdm
 import wandb
 import argparse
 
-with open(".env") as f: key = f.readline()
+with open("../.env") as f: key = f.readline()
 wandb.login(key=key)
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default="../data/Video_Gif", help="GIF dataset path")
-    parser.add_argument("--checkpoint", type=str, required=True, help="Path to .pth VAE checkpoint")
+    parser.add_argument("--checkpoint", type=str,default="./checkpoints/vae/vae_epoch30.pth", help="Path to .pth VAE checkpoint")
     parser.add_argument("--output_dir", type=str, default="./vae_reconstructions", help="Directory to save output GIFs")
     parser.add_argument("--max_samples", type=int, default=5, help="Number of GIFs to process")
     return parser.parse_args()
