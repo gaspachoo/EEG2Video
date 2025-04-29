@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 import argparse
 import wandb
-from models.encoders import MLPEncoder  # Doit utiliser la version avec BatchNorm et Dropout amélioré
+from Gaspard_model.models.models import MLPEncoder  # Doit utiliser la version avec BatchNorm et Dropout amélioré
 
 def parse_args():
     parser = argparse.ArgumentParser()

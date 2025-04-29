@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 import argparse
 import wandb
-from models.encoders import ShallowNetEncoder, MLPEncoder_feat
+from Gaspard_model.models.models import ShallowNetEncoder, MLPEncoder_feat
 
 class CombinedEEGDataset(Dataset):
     def __init__(self, eeg, features, labels, blocks):

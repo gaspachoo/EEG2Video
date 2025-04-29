@@ -59,7 +59,6 @@ def train_vae(args):
     if args.use_wandb:
         wandb.init(project="eeg2video-vae", config=vars(args))
 
-    # Dataset loading and splitting
     dataset = EEGGIFDataset(args.data_dir)
     indices = list(range(len(dataset)))
     train_idx, temp_idx = train_test_split(indices, test_size=0.2, random_state=42)
@@ -86,6 +85,9 @@ def train_vae(args):
         # Training phase
         vae.train()
         running_train_loss = 0.0
+        running_train_recon_loss = 0.0
+        running_train_kl_loss = 0.0
+
         for batch in tqdm(train_loader, desc=f"Epoch {epoch}/{args.epochs} - Train"):
             batch = batch.to(device)
             frames = batch.view(-1, 3, 288, 512)
@@ -96,27 +98,45 @@ def train_vae(args):
             optimizer.step()
 
             running_train_loss += loss.item()
+            running_train_recon_loss += recon_loss.item()
+            running_train_kl_loss += kl_loss.item()
 
         avg_train_loss = running_train_loss / len(train_loader)
+        avg_train_recon_loss = running_train_recon_loss / len(train_loader)
+        avg_train_kl_loss = running_train_kl_loss / len(train_loader)
+
         print(f"Epoch {epoch}: Train Loss = {avg_train_loss:.4f}")
 
         # Validation phase
         vae.eval()
         running_val_loss = 0.0
+        running_val_recon_loss = 0.0
+        running_val_kl_loss = 0.0
+
         with torch.no_grad():
             for batch in tqdm(val_loader, desc=f"Epoch {epoch}/{args.epochs} - Validation"):
                 batch = batch.to(device)
                 frames = batch.view(-1, 3, 288, 512)
-                loss, _, _ = compute_loss(vae, frames, beta)
+                loss, recon_loss, kl_loss = compute_loss(vae, frames, beta)
+
                 running_val_loss += loss.item()
+                running_val_recon_loss += recon_loss.item()
+                running_val_kl_loss += kl_loss.item()
 
         avg_val_loss = running_val_loss / len(val_loader)
+        avg_val_recon_loss = running_val_recon_loss / len(val_loader)
+        avg_val_kl_loss = running_val_kl_loss / len(val_loader)
+
         print(f"Epoch {epoch}: Val Loss = {avg_val_loss:.4f}")
 
         if args.use_wandb:
             wandb.log({
                 "train/loss": avg_train_loss,
+                "train/recon_loss": avg_train_recon_loss,
+                "train/kl_loss": avg_train_kl_loss,
                 "val/loss": avg_val_loss,
+                "val/recon_loss": avg_val_recon_loss,
+                "val/kl_loss": avg_val_kl_loss,
                 "epoch": epoch
             })
 
@@ -128,20 +148,31 @@ def train_vae(args):
     # Final testing phase
     vae.eval()
     running_test_loss = 0.0
+    running_test_recon_loss = 0.0
+    running_test_kl_loss = 0.0
+
     with torch.no_grad():
         for batch in tqdm(test_loader, desc="Testing"):
             batch = batch.to(device)
             frames = batch.view(-1, 3, 288, 512)
-            loss, _, _ = compute_loss(vae, frames, beta)
+            loss, recon_loss, kl_loss = compute_loss(vae, frames, beta)
+
             running_test_loss += loss.item()
+            running_test_recon_loss += recon_loss.item()
+            running_test_kl_loss += kl_loss.item()
 
     avg_test_loss = running_test_loss / len(test_loader)
+    avg_test_recon_loss = running_test_recon_loss / len(test_loader)
+    avg_test_kl_loss = running_test_kl_loss / len(test_loader)
+
     print(f"✅ Final Test Loss = {avg_test_loss:.4f}")
 
     if args.use_wandb:
         wandb.log({
             "test/loss": avg_test_loss,
-            "epoch": args.epochs + 1  # pour le différencier sur wandb
+            "test/recon_loss": avg_test_recon_loss,
+            "test/kl_loss": avg_test_kl_loss,
+            "epoch": args.epochs + 1  # différencier sur wandb
         })
 
 if __name__ == "__main__":

@@ -1,413 +1,240 @@
-"""
-Different EEG encoders for comparison
-
-SA GA
-
-shallownet, deepnet, eegnet, conformer, tsconv
-"""
-
-
-import os
-import argparse
-import math
-import glob
-import random
-import itertools
-import datetime
-import time
-import numpy as np
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.nn.init as init
-from torch import Tensor
-from torch.autograd import Variable
-from einops import rearrange
-from einops.layers.torch import Rearrange, Reduce
-from einops import rearrange
 
-class PatchEmbedding(nn.Module):
-    def __init__(self, emb_size=40):
-        # self.patch_size = patch_size
+
+class CLIP(nn.Module):
+    def __init__(self):
+        super(CLIP, self).__init__()
+        self.mlp = nn.Sequential(
+            nn.Linear(310, 10000),
+            nn.ReLU(),
+            nn.Linear(10000, 10000),
+            nn.ReLU(),
+            nn.Linear(10000, 10000),
+            nn.ReLU(),
+            nn.Linear(10000, 10000),
+            # nn.BatchNorm1d(50000),
+            nn.ReLU(),
+            # nn.Linear(10000, 10000),
+            # nn.ReLU(),
+            nn.Linear(10000, 77 * 768)
+        )
+
+    def forward(self, eeg):
+        eeg_embeddings = self.mlp(eeg)
+          # shape: (batch_size)
+        return eeg_embeddings
+    
+#GLMNet EEG encoder with global + local branches
+class GLMNetEncoder(nn.Module):
+    def __init__(self, input_type='frequency', time_len=128, local_indices=None):
+        """
+        input_type: 'frequency' (e.g. DE/PSD) or 'raw' (EEG signals)
+        time_len: number of time points (if using raw)
+        """
         super().__init__()
-        self.tsconv = nn.Sequential(
-            nn.Conv2d(1, 40, (1, 25), (1, 1)),
-            nn.AvgPool2d((1, 51), (1, 5)),
-            nn.BatchNorm2d(40),
-            nn.ELU(),
-            nn.Conv2d(40, 40, (63, 1), (1, 1)),
-            nn.BatchNorm2d(40),
-            nn.ELU(),
-            nn.Dropout(0.5),
-        )
-        self.deepnet = nn.Sequential(
-            nn.Conv2d(1, 25, (1, 10), (1, 1)),
-            nn.Conv2d(25, 25, (63, 1), (1, 1)),
-            nn.BatchNorm2d(25),
-            nn.ELU(),
-            nn.MaxPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
+        self.input_type = input_type
+        self.local_indices = local_indices
 
-            nn.Conv2d(25, 50, (1, 10), (1, 1)),
-            nn.BatchNorm2d(50),
-            nn.ELU(),
-            nn.MaxPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
+        if input_type == 'raw':
+            self.global_encoder = MLPEncoder(in_ch=62, time_len=time_len)
+            local_ch = len(local_indices) if local_indices else 62
+            self.local_encoder = ShallowNetEncoder(in_ch=local_ch, time_len=time_len)
+            self.global_dim = self.global_encoder.flattened_dim
+            self.local_dim = self.local_encoder.flattened_dim
 
-            nn.Conv2d(50, 100, (1, 10), (1, 1)),
-            nn.BatchNorm2d(100),
-            nn.ELU(),
-            nn.MaxPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
-
-            nn.Conv2d(100, 200, (1, 10), (1, 1)),
-            nn.BatchNorm2d(200),
-            nn.ELU(),
-            nn.MaxPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
-
-        )
-
-        self.eegnet = nn.Sequential(
-            nn.Conv2d(1, 8, (1, 64), (1, 1)),
-            nn.BatchNorm2d(8),
-            nn.Conv2d(8, 16, (63, 1), (1, 1)),
-            nn.BatchNorm2d(16),
-            nn.ELU(),
-            nn.AvgPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
-            nn.Conv2d(16, 16, (1, 16), (1, 1)),
-            nn.BatchNorm2d(16), 
-            nn.ELU(),
-            # nn.AvgPool2d((1, 2), (1, 2)),
-            nn.Dropout2d(0.5)
-        )
-
-        self.shallownet = nn.Sequential(
-            nn.Conv2d(1, 40, (1, 25), (1, 1)),
-            nn.Conv2d(40, 40, (63, 1), (1, 1)),
-            nn.BatchNorm2d(40),
-            nn.ELU(),
-            nn.AvgPool2d((1, 51), (1, 5)),
-            nn.Dropout(0.5),
-        )
-
-        self.projection = nn.Sequential(
-            nn.Conv2d(40, emb_size, (1, 1), stride=(1, 1)),  # 5 is better than 1
-            Rearrange('b e (h) (w) -> b (h w) e'),
-        )
-
-    def forward(self, x: Tensor) -> Tensor:
-        x = self.tsconv(x)
-        return x
-
-class shallownet(nn.Module):
-    def __init__(self, out_dim, C, T):
-        super(shallownet, self).__init__()
-        
-        self.net = nn.Sequential(
-            nn.Conv2d(1, 40, (1, 25), (1, 1)),
-            nn.Conv2d(40, 40, (C, 1), (1, 1)),
-            nn.BatchNorm2d(40),
-            nn.ELU(),
-            nn.AvgPool2d((1, 51), (1, 5)),
-            nn.Dropout(0.5),
-        )
-        self.out = nn.Linear(1040*(T//200), out_dim)
-    
-    def forward(self, x):               #input:(batch,1,C,T)
-        x = self.net(x)
-        x = x.view(x.size(0), -1)
-        x = self.out(x)
-        return x
-    
-class deepnet(nn.Module):
-    def __init__(self, out_dim, C, T):
-        super(deepnet, self).__init__()
-        
-        self.net = nn.Sequential(
-            nn.Conv2d(1, 25, (1, 10), (1, 1)),
-            nn.Conv2d(25, 25, (C, 1), (1, 1)),
-            nn.BatchNorm2d(25),
-            nn.ELU(),
-            nn.MaxPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
-
-            nn.Conv2d(25, 50, (1, 10), (1, 1)),
-            nn.BatchNorm2d(50),
-            nn.ELU(),
-            nn.MaxPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
-
-            nn.Conv2d(50, 100, (1, 10), (1, 1)),
-            nn.BatchNorm2d(100),
-            nn.ELU(),
-            nn.MaxPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
-
-            nn.Conv2d(100, 200, (1, 10), (1, 1)),
-            nn.BatchNorm2d(200),
-            nn.ELU(),
-            nn.MaxPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
-        )
-        self.out = nn.Linear(800*(T//200), out_dim)
-    
-    def forward(self, x):               #input:(batch,1,C,T)
-        x = self.net(x)
-        x = x.view(x.size(0), -1)
-        x = self.out(x)
-        return x
-    
-class eegnet(nn.Module):
-    def __init__(self, out_dim, C, T):
-        super(eegnet, self).__init__()
-        
-        self.net = nn.Sequential(
-            nn.Conv2d(1, 8, (1, 64), (1, 1)),
-            nn.BatchNorm2d(8),
-            nn.Conv2d(8, 16, (C, 1), (1, 1)),
-            nn.BatchNorm2d(16),
-            nn.ELU(),
-            nn.AvgPool2d((1, 2), (1, 2)),
-            nn.Dropout(0.5),
-            nn.Conv2d(16, 16, (1, 16), (1, 1)),
-            nn.BatchNorm2d(16), 
-            nn.ELU(),
-            nn.AvgPool2d((1, 2), (1, 2)),
-            nn.Dropout2d(0.5)
-        )
-        self.out = nn.Linear(416*(T//200), out_dim)
-    
-    def forward(self, x):               #input:(batch,1,C,T)
-        x = self.net(x)
-        x = x.view(x.size(0), -1)
-        x = self.out(x)
-        return x
-
-class tsconv(nn.Module):
-    def __init__(self, out_dim, C, T):
-        super(tsconv, self).__init__()
-        
-        self.net = nn.Sequential(
-            nn.Conv2d(1, 40, (1, 25), (1, 1)),
-            nn.AvgPool2d((1, 51), (1, 5)),
-            nn.BatchNorm2d(40),
-            nn.ELU(),
-            nn.Conv2d(40, 40, (C, 1), (1, 1)),
-            nn.BatchNorm2d(40),
-            nn.ELU(),
-            nn.Dropout(0.5),
-        )
-        self.out = nn.Linear(1040*(T//200), out_dim)
-    
-    def forward(self, x):               #input:(batch,1,C,T)
-        x = self.net(x)
-        x = x.view(x.size(0), -1)
-        x = self.out(x)
-        return x
-
-# Convolution module
-# use conv to capture local features, instead of postion embedding.
-class PatchEmbedding(nn.Module):
-    def __init__(self, emb_size=40):
-        # self.patch_size = patch_size
-        super().__init__()
-
-        self.shallownet = nn.Sequential(
-            nn.Conv2d(1, 40, (1, 25), (1, 1)),
-            nn.Conv2d(40, 40, (62, 1), (1, 1)),
-            nn.BatchNorm2d(40),
-            nn.ELU(),
-            nn.AvgPool2d((1, 75), (1, 15)),  # pooling acts as slicing to obtain 'patch' along the time dimension as in ViT
-            nn.Dropout(0.5),
-        )
-
-        self.projection = nn.Sequential(
-            nn.Conv2d(40, emb_size, (1, 1), stride=(1, 1)),  # transpose, conv could enhance fiting ability slightly
-            Rearrange('b e (h) (w) -> b (h w) e'),
-        )
-
-
-    def forward(self, x: Tensor) -> Tensor:
-        b, _, _, _ = x.shape
-        x = self.shallownet(x)
-        x = self.projection(x)
-        return x
-
-
-class MultiHeadAttention(nn.Module):
-    def __init__(self, emb_size, num_heads, dropout):
-        super().__init__()
-        self.emb_size = emb_size
-        self.num_heads = num_heads
-        self.keys = nn.Linear(emb_size, emb_size)
-        self.queries = nn.Linear(emb_size, emb_size)
-        self.values = nn.Linear(emb_size, emb_size)
-        self.att_drop = nn.Dropout(dropout)
-        self.projection = nn.Linear(emb_size, emb_size)
-
-    def forward(self, x: Tensor, mask: Tensor = None) -> Tensor:
-        queries = rearrange(self.queries(x), "b n (h d) -> b h n d", h=self.num_heads)
-        keys = rearrange(self.keys(x), "b n (h d) -> b h n d", h=self.num_heads)
-        values = rearrange(self.values(x), "b n (h d) -> b h n d", h=self.num_heads)
-        energy = torch.einsum('bhqd, bhkd -> bhqk', queries, keys)  
-        if mask is not None:
-            fill_value = torch.finfo(torch.float32).min
-            energy.mask_fill(~mask, fill_value)
-
-        scaling = self.emb_size ** (1 / 2)
-        att = F.softmax(energy / scaling, dim=-1)
-        att = self.att_drop(att)
-        out = torch.einsum('bhal, bhlv -> bhav ', att, values)
-        out = rearrange(out, "b h n d -> b n (h d)")
-        out = self.projection(out)
-        return out
-
-
-class ResidualAdd(nn.Module):
-    def __init__(self, fn):
-        super().__init__()
-        self.fn = fn
-
-    def forward(self, x, **kwargs):
-        res = x
-        x = self.fn(x, **kwargs)
-        x += res
-        return x
-
-
-class FeedForwardBlock(nn.Sequential):
-    def __init__(self, emb_size, expansion, drop_p):
-        super().__init__(
-            nn.Linear(emb_size, expansion * emb_size),
-            nn.GELU(),
-            nn.Dropout(drop_p),
-            nn.Linear(expansion * emb_size, emb_size),
-        )
-
-
-class GELU(nn.Module):
-    def forward(self, input: Tensor) -> Tensor:
-        return input*0.5*(1.0+torch.erf(input/math.sqrt(2.0)))
-
-
-class TransformerEncoderBlock(nn.Sequential):
-    def __init__(self,
-                 emb_size,
-                 num_heads=10,
-                 drop_p=0.5,
-                 forward_expansion=4,
-                 forward_drop_p=0.5):
-        super().__init__(
-            ResidualAdd(nn.Sequential(
-                nn.LayerNorm(emb_size),
-                MultiHeadAttention(emb_size, num_heads, drop_p),
-                nn.Dropout(drop_p)
-            )),
-            ResidualAdd(nn.Sequential(
-                nn.LayerNorm(emb_size),
-                FeedForwardBlock(
-                    emb_size, expansion=forward_expansion, drop_p=forward_drop_p),
-                nn.Dropout(drop_p)
+        elif input_type == 'frequency':
+            in_dim = 62 * 5  # e.g. 5 bands per channel
+            self.global_encoder = nn.Sequential(
+                nn.Linear(in_dim, 2048),
+                nn.ReLU(),
+                nn.Linear(2048, 2048),
+                nn.ReLU()
             )
-            ))
+            local_dim = len(local_indices) * 5 if local_indices else in_dim
+            self.local_encoder = nn.Sequential(
+                nn.Linear(local_dim, 2048),
+                nn.ReLU(),
+                nn.Linear(2048, 2048),
+                nn.ReLU()
+            )
+            self.global_dim = 2048
+            self.local_dim = 2048
+
+        else:
+            raise ValueError("input_type must be 'raw' or 'frequency'")
+
+        # Final projection to (77, 768)
+        self.projection = nn.Linear(self.global_dim + self.local_dim, 77 * 768)
+            
+    def forward(self, x):
+        if self.input_type == 'frequency':
+            # x: (B, 62*5)
+            global_feat = self.global_encoder(x)
+
+            if self.local_indices:
+                x_channels = x.view(x.shape[0], 62, -1)  # (B, 62, 5)
+                x_local = x_channels[:, self.local_indices, :].reshape(x.shape[0], -1)
+            else:
+                x_local = x
+
+            local_feat = self.local_encoder(x_local)
+
+        else:  # raw input
+            # x: (B, 62, T)
+            global_feat = self.global_encoder(x)
+
+            if self.local_indices:
+                x_local = x[:, self.local_indices, :]
+            else:
+                x_local = x
+
+            local_feat = self.local_encoder(x_local)
+
+        combined = torch.cat([global_feat, local_feat], dim=1)
+        out = self.projection(combined)
+        return out.view(-1, 77, 768)
+    
+    def freeze_parts(self, freeze_global=True, freeze_local=False, freeze_projection=False):
+        for param in self.global_encoder.parameters():
+            param.requires_grad = not freeze_global
+        for param in self.local_encoder.parameters():
+            param.requires_grad = not freeze_local
+        for param in self.projection.parameters():
+            param.requires_grad = not freeze_projection
 
 
-class TransformerEncoder(nn.Sequential):
-    def __init__(self, depth, emb_size):
-        super().__init__(*[TransformerEncoderBlock(emb_size) for _ in range(depth)])
 
-
-class ClassificationHead(nn.Sequential):
-    def __init__(self, emb_size, out_dim):
+class MLPEncoder(nn.Module):
+    def __init__(self, input_dim=62*5, num_classes=40):
         super().__init__()
-        
-        # global average pooling
-        self.clshead = nn.Sequential(
-            Reduce('b n e -> b e', reduction='mean'),
-            nn.LayerNorm(emb_size),
-            nn.Linear(emb_size, out_dim)
-        )
-        self.fc = nn.Sequential(
-            nn.Linear(280, out_dim),
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Linear(128, num_classes)
         )
 
     def forward(self, x):
-        x = x.contiguous().view(x.size(0), -1)
-        out = self.fc(x)
-        return out
+        return self.net(x.view(x.size(0), -1))
 
-
-class conformer(nn.Sequential):
-    def __init__(self, emb_size=40, depth=3, out_dim=4, **kwargs):
-        super().__init__(
-            PatchEmbedding(emb_size),
-            TransformerEncoder(depth, emb_size),
-            # nn.Linear(280, out_dim)
-            ClassificationHead(emb_size, out_dim)
-        )
-
-class glfnet(nn.Module):
-    def __init__(self, out_dim, emb_dim, C, T):
-        super(glfnet, self).__init__()
-        
-        self.globalnet = shallownet(emb_dim, C, T)
-        
-        self.occipital_index = list(range(50, 62))
-        self.occipital_localnet = shallownet(emb_dim, 12, T)
-        
-        self.out = nn.Linear(emb_dim*2, out_dim)
-        
-    
-    def forward(self, x):               #input:(batch,1,C,T)
-        global_feature = self.globalnet(x)
-        global_feature = global_feature.view(x.size(0), -1)
-        # global_feature = self.out(global_feature)
-        occipital_x = x[:, :, self.occipital_index, :]
-        # print("occipital_x.shape = ", occipital_x.shape)
-        occipital_feature = self.occipital_localnet(occipital_x)
-        # print("occipital_feature.shape = ", occipital_feature.shape)
-        out = self.out(torch.cat((global_feature, occipital_feature), 1))
-        return out
-
-class mlpnet(nn.Module):
-    def __init__(self, out_dim, input_dim):
-        super(mlpnet, self).__init__()
-        
+class ShallowNetEncoder(nn.Module):
+    def __init__(self, in_ch=62, time_len=200, dropout=0.6):
+        super().__init__()
         self.net = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(input_dim, 512),
-            nn.GELU(),
-            nn.Linear(512, 256),
-            nn.GELU(),
-            nn.Linear(256, out_dim)
-        )
-        
-    def forward(self, x):               #input:(batch,C,5)
-        out = self.net(x)
-        return out
+            # 1. Temporal convolution (like original ShallowNet)
+            nn.Conv2d(1, 32, kernel_size=(1, 13), padding=(0, 6)),
+            nn.BatchNorm2d(32),
+            nn.ELU(),
 
-class glfnet_mlp(nn.Module):
-    def __init__(self, out_dim, emb_dim, input_dim):
-        super(glfnet_mlp, self).__init__()
-        
-        self.globalnet = mlpnet(emb_dim, input_dim)
-        
-        self.occipital_index = list(range(50, 62))
-        self.occipital_localnet = mlpnet(emb_dim, 12*5)
-        
-        self.out = nn.Linear(emb_dim*2, out_dim)
-        
+            # 2. Spatial convolution across channels
+            nn.Conv2d(32, 64, kernel_size=(in_ch, 1)),
+            nn.BatchNorm2d(64),
+            nn.ELU(),
+
+            # 3. Temporal compression
+            nn.AvgPool2d(kernel_size=(1, 5), stride=(1, 2)),
+
+            # 4. Dropout
+            nn.Dropout(dropout),
+
+            nn.Flatten()
+        )
+
+    def forward(self, x):  # x: (B, C, T)
+        x = x.unsqueeze(1)  # → (B, 1, C, T)
+        return self.net(x)
+
+
+class MLPEncoder_feat(nn.Module):
+    """
+    Remove last layer
+    """
+    def __init__(self, input_dim=62*5, feat_dim=128):
+        super().__init__()
+        self.feature_extractor = nn.Sequential(
+            nn.Linear(input_dim, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(256, feat_dim),
+            nn.BatchNorm1d(feat_dim),
+            nn.ReLU()
+        )
+        self.output_dim = feat_dim  # 128
+
+    def forward(self, x):
+        return self.feature_extractor(x.view(x.size(0), -1))
     
-    def forward(self, x):               #input:(batch,C,5)
-        global_feature = self.globalnet(x)
-        # global_feature = global_feature.view(x.size(0), -1)
-        # global_feature = self.out(global_feature)
-        occipital_x = x[:, self.occipital_index, :]
-        # print("occipital_x.shape = ", occipital_x.shape)
-        occipital_feature = self.occipital_localnet(occipital_x)
-        # print("occipital_feature.shape = ", occipital_feature.shape)
-        out = self.out(torch.cat((global_feature, occipital_feature), 1))
+    
+class Seq2SeqTransformer(nn.Module):
+    def __init__(self, 
+                 num_encoder_layers=2, 
+                 num_decoder_layers=4, 
+                 emb_size=512, 
+                 nhead=8, 
+                 src_seq_len=7, 
+                 tgt_seq_len=6, 
+                 dim_feedforward=2048, 
+                 dropout=0.1):
+        super().__init__()
+        
+        self.src_seq_len = src_seq_len
+        self.tgt_seq_len = tgt_seq_len
+        self.emb_size = emb_size
+        
+        # Positional encoding
+        self.src_pos_emb = nn.Parameter(torch.randn(1, src_seq_len, emb_size))
+        self.tgt_pos_emb = nn.Parameter(torch.randn(1, tgt_seq_len, emb_size))
+        
+        # Transformer core
+        self.transformer = nn.Transformer(
+            d_model=emb_size,
+            nhead=nhead,
+            num_encoder_layers=num_encoder_layers,
+            num_decoder_layers=num_decoder_layers,
+            dim_feedforward=dim_feedforward,
+            dropout=dropout,
+            batch_first=True  # Important : input (batch, seq, feature)
+        )
+
+        # Projection head
+        self.output_proj = nn.Linear(emb_size, 256)  # from emb_size (512) to latent_dim (256)
+
+    def forward(self, src):
+        """
+        Args:
+            src: Tensor of shape (batch_size, 7, 512)
+        Returns:
+            out: Tensor of shape (batch_size, 6, 256)
+        """
+        batch_size = src.size(0)
+        
+        # Add position encoding to src
+        src = src + self.src_pos_emb  # (batch_size, 7, 512)
+        
+        # Prepare target (tgt) tokens as zeros initially
+        tgt = torch.zeros(batch_size, self.tgt_seq_len, self.emb_size, device=src.device)
+        tgt = tgt + self.tgt_pos_emb  # (batch_size, 6, 512)
+
+        # Transformer forward
+        memory = self.transformer.encoder(src)  # Encode EEG
+        output = self.transformer.decoder(tgt, memory)  # Decode into video latents
+        
+        # Project output to latent space
+        out = self.output_proj(output)  # (batch_size, 6, 256)
+        
         return out
