@@ -40,7 +40,7 @@ def parse_args():
     p=argparse.ArgumentParser(); home=os.environ["HOME"]
     p.add_argument("--eeg_path",type=str,default=f"{home}/EEG2Video/data/EEG_500ms_sw/sub1_segmented.npz")
     p.add_argument("--feat_path",type=str,default=f"{home}/EEG2Video/data/DE_500ms_sw/sub1_features.npz")
-    p.add_argument("--save_dir",type=str,default=f"{home}/EEG2Video/Gaspard_model/checkpoints/cv_glmnet")
+    p.add_argument("--save_dir",type=str,default=f"{home}/EEG2Video_model/checkpoints/cv_glmnet")
     p.add_argument("--lr",type=float,default=1e-4)
     p.add_argument("--n_epochs",type=int,default=60)
     p.add_argument("--save_every",type=int,default=20); p.add_argument("--no_early_stop",action="store_true")
@@ -72,11 +72,11 @@ def train_glmnet(a):
         dl_te=DataLoader(Subset(data,te),batch_size=256,shuffle=False,num_workers=4,pin_memory=True)
 
         g=ShallowNetEncoder(62,eeg.shape[-1]).to(dev)
-        g.load_state_dict(torch.load(os.path.join(os.environ["HOME"],"EEG2Video/Gaspard_model/checkpoints/cv_shallownet",f"best_fold{fold}.pth"),map_location=dev)["encoder"])
+        g.load_state_dict(torch.load(os.path.join(os.environ["HOME"],"EEG2Video_model/checkpoints/cv_shallownet",f"best_fold{fold}.pth"),map_location=dev)["encoder"])
         with torch.no_grad(): g.output_dim=g(torch.randn(2,62,eeg.shape[-1],device=dev)).shape[1]
 
         l=MLPEncoder_feat(input_dim=feats.shape[1] * feats.shape[2]).to(dev)
-        l.load_state_dict(torch.load(os.path.join(os.environ["HOME"],"EEG2Video/Gaspard_model/checkpoints/cv_mlp_DE",f"best_fold{fold}.pt"),map_location=dev),strict=False)
+        l.load_state_dict(torch.load(os.path.join(os.environ["HOME"],"EEG2Video_model/checkpoints/cv_mlp_DE",f"best_fold{fold}.pt"),map_location=dev),strict=False)
         with torch.no_grad(): l.output_dim = l(torch.randn(2, feats.shape[1] * feats.shape[2]).to(dev)).shape[1]
 
         model=GLMNet(g,l).to(dev)

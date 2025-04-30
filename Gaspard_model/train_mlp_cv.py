@@ -12,7 +12,7 @@ from Gaspard_model.models.models import MLPEncoder  # Doit utiliser la version a
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--npz_path", type=str, default=os.path.join(os.environ["HOME"], "EEG2Video/data/DE_500ms_sw/sub1_features.npz"))
-    parser.add_argument("--save_dir", type=str, default=os.path.join(os.environ["HOME"], "EEG2Video/Gaspard_model/checkpoints/cv_mlp_DE"))
+    parser.add_argument("--save_dir", type=str, default=os.path.join(os.environ["HOME"], "EEG2Video_model/checkpoints/cv_mlp_DE"))
     parser.add_argument("--n_epochs", type=int, default=100)
     parser.add_argument("--save_every", type=int, default=20)
     parser.add_argument("--no_early_stop", action="store_true")

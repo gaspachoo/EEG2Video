@@ -49,6 +49,6 @@ def train_model(data_dir, save_path, epochs=50, batch_size=64, lr=5e-4):
 # Exemple d'appel
 if __name__ == "__main__":
     train_model(
-        data_dir=os.path.expanduser("~/Gaspard/EEG2Video/data/EEG_Latent_pairs"),
-        save_path=os.path.expanduser("~/Gaspard/EEG2Video/Gaspard_model/checkpoints/seq2seq.pt")
+        data_dir=os.path.expanduser("~/EEG2Video/data/EEG_Latent_pairs"),
+        save_path=os.path.expanduser("~/EEG2Video_model/checkpoints/seq2seq.pt")
     )

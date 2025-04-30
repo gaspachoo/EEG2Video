@@ -12,11 +12,11 @@ from models.models import ShallowNetEncoder, MLPEncoder_feat, GLMNetFeatureExtra
 def parse_args():
     parser = argparse.ArgumentParser()
     home=os.environ["HOME"]
-    parser.add_argument("--eeg_raw_dir", type=str,default=f"{home}/Gaspard/EEG2Video/data/EEG_500ms_sw", help="Path to EEG raw segmented .npy files (7, 62, T)")
-    parser.add_argument("--de_feat_dir", type=str,default=f"{home}/Gaspard/EEG2Video/data/DE_500ms_sw", help="Path to DE features .npy files (7, 62, 5)")
-    parser.add_argument("--output_dir", type=str, default=f"{home}/Gaspard/EEG2Video/data/EEG_embeddings", help="Where to save EEG embeddings (7, 4096)")
-    parser.add_argument("--g_ckpt", type=str, default=f"{home}/Gaspard/EEG2Video/Gaspard_model/checkpoints/cv_shallownet/best_fold0.pth", help="Path to ShallowNet checkpoint")
-    parser.add_argument("--l_ckpt", type=str, default=f"{home}/Gaspard/EEG2Video/Gaspard_model/checkpoints/cv_mlp_DE/best_fold0.pt", help="Path to MLP checkpoint")
+    parser.add_argument("--eeg_raw_dir", type=str,default=f"{home}/EEG2Video/data/EEG_500ms_sw", help="Path to EEG raw segmented .npy files (7, 62, T)")
+    parser.add_argument("--de_feat_dir", type=str,default=f"{home}/EEG2Video/data/DE_500ms_sw", help="Path to DE features .npy files (7, 62, 5)")
+    parser.add_argument("--output_dir", type=str, default=f"{home}/EEG2Video/data/EEG_embeddings", help="Where to save EEG embeddings (7, 4096)")
+    parser.add_argument("--g_ckpt", type=str, default=f"{home}/EEG2Video_model/checkpoints/cv_shallownet/best_fold0.pth", help="Path to ShallowNet checkpoint")
+    parser.add_argument("--l_ckpt", type=str, default=f"{home}/EEG2Video_model/checkpoints/cv_mlp_DE/best_fold0.pt", help="Path to MLP checkpoint")
     return parser.parse_args()
 
 def main(args):

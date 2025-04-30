@@ -24,14 +24,14 @@ def extract_video_latent(gif_path, vae, transform):
     return z.cpu().numpy()
 
 def main():
-    root = os.environ["HOME"] + "/Gaspard/EEG2Video"
+    root = os.environ["HOME"] + "/EEG2Video"
     eeg_dir = f"{root}/data/EEG_500ms_sw/"
     feat_dir = f"{root}/data/DE_500ms_sw/"
     video_root = f"{root}/data/Video_gifs/"
     output_dir = f"{root}/data/EEG_Latent_pairs/"
-    g_ckpt = f"{root}/Gaspard_model/checkpoints/cv_shallownet/best_fold0.pth"
-    l_ckpt = f"{root}/Gaspard_model/checkpoints/cv_mlp_DE/best_fold0.pt"
-    vae_ckpt = f"{root}/Gaspard_model/checkpoints/vae/vae_epoch30.pth"
+    g_ckpt = f"{root}_model/checkpoints/cv_shallownet/best_fold0.pth"
+    l_ckpt = f"{root}_model/checkpoints/cv_mlp_DE/best_fold0.pt"
+    vae_ckpt = f"{root}_model/checkpoints/vae/vae_epoch30.pth"
 
     os.makedirs(output_dir, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
