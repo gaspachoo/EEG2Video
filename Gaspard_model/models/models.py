@@ -157,7 +157,7 @@ class MLPEncoder_feat(nn.Module):
         return self.feature_extractor(x.view(x.size(0), -1))
     
     
-class Seq2SeqTransformer(nn.Module):
+class Seq2SeqTransformer_beta(nn.Module):
     def __init__(self, 
                  num_encoder_layers=2, 
                  num_decoder_layers=4, 
@@ -227,3 +227,43 @@ class GLMNetFeatureExtractor(nn.Module):
         de_feat = self.l(xf.view(xf.size(0), -1))  # DE features → local embedding
         concat = torch.cat([eeg_feat, de_feat], dim=1)  # (batch, 4096)
         return concat
+    
+class Seq2SeqTransformer(nn.Module):
+    def __init__(self, eeg_dim=512, latent_dim=256, num_eeg_tokens=7, num_video_tokens=6):
+        super().__init__()
+        self.eeg_dim = eeg_dim
+        self.latent_dim = latent_dim
+
+        self.pos_enc = PositionalEncoding(eeg_dim)
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=eeg_dim, nhead=8, dim_feedforward=1024, dropout=0.1)
+        self.encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=2)
+
+        self.decoder_layer = nn.TransformerDecoderLayer(d_model=latent_dim, nhead=8, dim_feedforward=1024, dropout=0.1)
+        self.decoder = nn.TransformerDecoder(self.decoder_layer, num_layers=4)
+
+        self.latent_query = nn.Parameter(torch.randn(num_video_tokens, latent_dim))  # (6, 256)
+        self.eeg_to_latent = nn.Linear(eeg_dim, latent_dim)
+
+    def forward(self, eeg):  # eeg: (B, 7, 512)
+        eeg = self.pos_enc(eeg)                    # Add position
+        eeg = eeg.transpose(0, 1)                  # (7, B, 512)
+        memory = self.encoder(eeg)                 # (7, B, 512)
+        memory = self.eeg_to_latent(memory)        # (7, B, 256)
+
+        tgt = self.latent_query.unsqueeze(1).expand(-1, eeg.size(1), -1)  # (6, B, 256)
+        output = self.decoder(tgt, memory)        # (6, B, 256)
+        return output.transpose(0, 1)             # (B, 6, 256)
+    
+    
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, max_len=500):
+        super().__init__()
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2) * (-np.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        self.pe = pe.unsqueeze(0)  # (1, max_len, d_model)
+
+    def forward(self, x):
+        return x + self.pe[:, :x.size(1)].to(x.device)

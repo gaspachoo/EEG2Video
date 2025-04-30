@@ -1,131 +1,54 @@
 import os
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset, DataLoader
 import numpy as np
 from tqdm import tqdm
-import argparse
-import wandb
-from Gaspard_model.models.models import Seq2SeqTransformer
+from models.models import Seq2SeqTransformer
 
-with open("../.env") as f: key = f.readline()
-wandb.login(key=key)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--eeg_dir", type=str, required=True, help="Path to EEG embeddings directory")
-    parser.add_argument("--latent_dir", type=str, required=True, help="Path to VAE latents directory")
-    parser.add_argument("--save_dir", type=str, default="./checkpoints/seq2seq", help="Directory to save model checkpoints")
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--epochs", type=int, default=200)
-    parser.add_argument("--lr", type=float, default=5e-4)
-    parser.add_argument("--use_wandb", action="store_true")
-    return parser.parse_args()
-
-
-class EEGVideoLatentDataset(Dataset):
-    def __init__(self, eeg_dir, latent_dir, split='train'):
-        """
-        Args:
-            eeg_dir: Directory containing EEG .npy files
-            latent_dir: Directory containing VAE latent .npy files
-            split: 'train' or 'test'
-        """
-        self.eeg_files = sorted([os.path.join(eeg_dir, f) for f in os.listdir(eeg_dir) if f.endswith('.npy')])
-        self.latent_files = sorted([os.path.join(latent_dir, f) for f in os.listdir(latent_dir) if f.endswith('.npy')])
-
-        # Simple split based on naming (adapt if needed)
-        if split == 'train':
-            self.eeg_files = self.eeg_files[:-1]
-            self.latent_files = self.latent_files[:-1]
-        elif split == 'test':
-            self.eeg_files = self.eeg_files[-1:]
-            self.latent_files = self.latent_files[-1:]
-        
-        assert len(self.eeg_files) == len(self.latent_files), "Mismatch EEG/latent files!"
+# === Dataset ===
+class EEGVideoDataset(Dataset):
+    def __init__(self, data_dir):
+        self.files = sorted([os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith(".npz")])
 
     def __len__(self):
-        return len(self.eeg_files)
+        return len(self.files)
 
     def __getitem__(self, idx):
-        eeg = np.load(self.eeg_files[idx])  # Shape (7, 512)
-        latent = np.load(self.latent_files[idx])  # Shape (6, 256)
-        
-        eeg = torch.tensor(eeg, dtype=torch.float32)
-        latent = torch.tensor(latent, dtype=torch.float32)
-        
-        return eeg, latent
+        data = np.load(self.files[idx])
+        eeg = data['eeg']    # (7, 512)
+        z0 = data['z0']      # (6, 256)
+        return torch.tensor(eeg, dtype=torch.float32), torch.tensor(z0, dtype=torch.float32)
 
+# === Entraînement ===
+def train_model(data_dir, save_path, epochs=50, batch_size=64, lr=5e-4):
+    dataset = EEGVideoDataset(data_dir)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
-def train_seq2seq(args):
-    if args.use_wandb:
-        wandb.init(project="eeg2video-seq2seq", config=vars(args))
+    model = Seq2SeqTransformer().cuda()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    loss_fn = nn.MSELoss()
 
-    os.makedirs(args.save_dir, exist_ok=True)
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
-
-    # Dataset and Dataloader
-    train_dataset = EEGVideoLatentDataset(args.eeg_dir, args.latent_dir, split='train')
-    test_dataset = EEGVideoLatentDataset(args.eeg_dir, args.latent_dir, split='test')
-
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
-
-    # Model
-    model = Seq2SeqTransformer().to(device)
-
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    criterion = nn.MSELoss()
-
-    for epoch in range(1, args.epochs + 1):
-        model.train()
-        running_train_loss = 0.0
-
-        for eeg, latents in tqdm(train_loader, desc=f"Epoch {epoch}/{args.epochs} - Train"):
-            eeg, latents = eeg.to(device), latents.to(device)
-
+    model.train()
+    for epoch in range(epochs):
+        epoch_loss = 0
+        for eeg, z0 in tqdm(loader, desc=f"Epoch {epoch+1}/{epochs}"):
+            eeg, z0 = eeg.cuda(), z0.cuda()
+            pred = model(eeg)  # (B, 6, 256)
+            loss = loss_fn(pred, z0)
             optimizer.zero_grad()
-            output = model(eeg)  # (batch_size, 6, 256)
-            loss = criterion(output, latents)
-
             loss.backward()
             optimizer.step()
+            epoch_loss += loss.item()
 
-            running_train_loss += loss.item()
+        print(f"Epoch {epoch+1}: Loss = {epoch_loss/len(loader):.6f}")
 
-        avg_train_loss = running_train_loss / len(train_loader)
-        print(f"Epoch {epoch}: Train Loss = {avg_train_loss:.4f}")
+    torch.save(model.state_dict(), save_path)
+    print("✅ Modèle Seq2Seq sauvegardé :", save_path)
 
-        # Test phase
-        model.eval()
-        running_test_loss = 0.0
-        with torch.no_grad():
-            for eeg, latents in tqdm(test_loader, desc=f"Epoch {epoch}/{args.epochs} - Test"):
-                eeg, latents = eeg.to(device), latents.to(device)
-
-                output = model(eeg)
-                loss = criterion(output, latents)
-                running_test_loss += loss.item()
-
-        avg_test_loss = running_test_loss / len(test_loader)
-        print(f"Epoch {epoch}: Test Loss = {avg_test_loss:.4f}")
-
-        if args.use_wandb:
-            wandb.log({
-                "train/loss": avg_train_loss,
-                "test/loss": avg_test_loss,
-                "epoch": epoch
-            })
-
-        # Save checkpoint
-        checkpoint_path = os.path.join(args.save_dir, f"seq2seq_epoch{epoch}.pth")
-        torch.save(model.state_dict(), checkpoint_path)
-        print(f"✅ Saved checkpoint: {checkpoint_path}")
-
+# Exemple d'appel
 if __name__ == "__main__":
-    args = parse_args()
-    train_seq2seq(args)
+    train_model(
+        data_dir=os.path.expanduser("~/Gaspard/EEG2Video/data/EEG_Latent_pairs"),
+        save_path=os.path.expanduser("~/Gaspard/EEG2Video/Gaspard_model/checkpoints/seq2seq.pt")
+    )
