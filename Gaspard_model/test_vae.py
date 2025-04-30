@@ -9,9 +9,6 @@ from tqdm import tqdm
 import wandb
 import argparse
 
-with open("../.env") as f: key = f.readline()
-wandb.login(key=key)
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default="../data/Video_Gif", help="GIF dataset path")

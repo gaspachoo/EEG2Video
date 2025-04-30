@@ -9,6 +9,22 @@ import argparse
 import wandb
 from Gaspard_model.models.models import Seq2SeqTransformer
 
+with open("../.env") as f: key = f.readline()
+wandb.login(key=key)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--eeg_dir", type=str, required=True, help="Path to EEG embeddings directory")
+    parser.add_argument("--latent_dir", type=str, required=True, help="Path to VAE latents directory")
+    parser.add_argument("--save_dir", type=str, default="./checkpoints/seq2seq", help="Directory to save model checkpoints")
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--epochs", type=int, default=200)
+    parser.add_argument("--lr", type=float, default=5e-4)
+    parser.add_argument("--use_wandb", action="store_true")
+    return parser.parse_args()
+
+
 class EEGVideoLatentDataset(Dataset):
     def __init__(self, eeg_dir, latent_dir, split='train'):
         """
@@ -42,16 +58,6 @@ class EEGVideoLatentDataset(Dataset):
         
         return eeg, latent
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--eeg_dir", type=str, required=True, help="Path to EEG embeddings directory")
-    parser.add_argument("--latent_dir", type=str, required=True, help="Path to VAE latents directory")
-    parser.add_argument("--save_dir", type=str, default="./checkpoints/seq2seq", help="Directory to save model checkpoints")
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--epochs", type=int, default=50)
-    parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--use_wandb", action="store_true")
-    return parser.parse_args()
 
 def train_seq2seq(args):
     if args.use_wandb:

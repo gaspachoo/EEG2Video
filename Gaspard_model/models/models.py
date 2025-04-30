@@ -3,29 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class CLIP(nn.Module):
-    def __init__(self):
-        super(CLIP, self).__init__()
-        self.mlp = nn.Sequential(
-            nn.Linear(310, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            # nn.BatchNorm1d(50000),
-            nn.ReLU(),
-            # nn.Linear(10000, 10000),
-            # nn.ReLU(),
-            nn.Linear(10000, 77 * 768)
-        )
-
-    def forward(self, eeg):
-        eeg_embeddings = self.mlp(eeg)
-          # shape: (batch_size)
-        return eeg_embeddings
-    
 #GLMNet EEG encoder with global + local branches
 class GLMNetEncoder(nn.Module):
     def __init__(self, input_type='frequency', time_len=128, local_indices=None):
@@ -238,3 +215,15 @@ class Seq2SeqTransformer(nn.Module):
         out = self.output_proj(output)  # (batch_size, 6, 256)
         
         return out
+
+class GLMNetFeatureExtractor(nn.Module):
+    def __init__(self, g_enc, l_enc):
+        super().__init__()
+        self.g = g_enc
+        self.l = l_enc
+
+    def forward(self, xr, xf):
+        eeg_feat = self.g(xr)  # EEG raw → global embedding
+        de_feat = self.l(xf.view(xf.size(0), -1))  # DE features → local embedding
+        concat = torch.cat([eeg_feat, de_feat], dim=1)  # (batch, 4096)
+        return concat
