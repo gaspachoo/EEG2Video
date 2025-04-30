@@ -15,7 +15,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     home=os.environ["HOME"]
     parser.add_argument("--npz_path", type=str, required=True)
-    parser.add_argument("--save_dir",type=str,default=f"{home}/EEG2Video_model/checkpoints/comparison")
+    parser.add_argument("--save_dir",type=str,default=f"{home}/EEG2Video/Gaspard_model/checkpoints/comparison")
     parser.add_argument("--n_epochs", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--model_name", type=str, required=True,

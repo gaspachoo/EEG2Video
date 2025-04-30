@@ -12,7 +12,7 @@ def parse_args():
     home = os.environ["HOME"]
     parser.add_argument("--input_dir", type=str, default=f"{home}/EEG2Video/data/Video_gifs", help="Path to video clips as .gif")
     parser.add_argument("--output_dir", type=str, default=f"{home}/EEG2Video/data/Video_latents", help="Output .npy latents (6, 256)")
-    parser.add_argument("--checkpoint", type=str,default=f"{home}/EEG2Video_model/checkpoints/vae/vae_epoch30.pth", help="Path to trained VAE checkpoint .pth")
+    parser.add_argument("--checkpoint", type=str,default=f"{home}/EEG2Video/Gaspard_model/checkpoints/vae/vae_epoch30.pth", help="Path to trained VAE checkpoint .pth")
     return parser.parse_args()
 
 def main(args):

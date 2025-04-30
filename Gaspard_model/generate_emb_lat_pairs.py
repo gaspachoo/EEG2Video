@@ -29,13 +29,13 @@ def main():
     feat_dir = f"{root}/data/DE_500ms_sw/"
     video_root = f"{root}/data/Video_gifs/"
     output_dir = f"{root}/data/EEG_Latent_pairs/"
-    g_ckpt = f"{root}_model/checkpoints/cv_shallownet/best_fold0.pth"
-    l_ckpt = f"{root}_model/checkpoints/cv_mlp_DE/best_fold0.pt"
-    vae_ckpt = f"{root}_model/checkpoints/vae/vae_epoch30.pth"
+    g_ckpt = f"{root}/Gaspard_model/checkpoints/cv_shallownet/best_fold0.pth"
+    l_ckpt = f"{root}/Gaspard_model/checkpoints/cv_mlp_DE/best_fold0.pt"
+    vae_ckpt = f"{root}/Gaspard_model/checkpoints/vae/vae_epoch30.pth"
 
     os.makedirs(output_dir, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    print(f"Using device: {device}")
     # Load models
     g = ShallowNetEncoder(62, time_len=100).to(device)
     g.load_state_dict(torch.load(g_ckpt, map_location=device)["encoder"])
@@ -58,8 +58,28 @@ def main():
         eeg_npz = np.load(os.path.join(eeg_dir, subj_file))
         feat_npz = np.load(os.path.join(feat_dir, subj_file.replace("segmented", "features")))
 
-        eeg_data = eeg_npz["eeg"]     # (9800, 62, 100)
-        feat_data = feat_npz["de"]    # (9800, 62, 5)
+        eeg = eeg_data[index]   # (62, 100)
+        de = feat_data[index]   # (62, 5)
+
+        # Sliding window: 7 segments de 200 ms avec 50% overlap sur 100 points (=> chaque segment ≈ 14 pas)
+        segments = []
+        for start in range(0, 100 - 28 + 1, 12):  # 12 = 50% de 25; 28 ≈ 200ms à 128Hz
+            eeg_seg = eeg[:, start:start+28]  # (62, 28)
+            if eeg_seg.shape[1] != 28:
+                continue
+            eeg_seg = torch.tensor(eeg_seg[np.newaxis], dtype=torch.float32).to(device)
+            de_seg = torch.tensor(de[np.newaxis], dtype=torch.float32).to(device)  # reuse de for all
+
+            with torch.no_grad():
+                emb = GLMNetFeatureExtractor(g, l)(eeg_seg, de_seg)  # (1, 512)
+            segments.append(emb.squeeze(0).cpu().numpy())
+
+        if len(segments) != 7:
+            print(f"❌ Not enough segments in {save_name}, got {len(segments)}")
+            continue
+
+        eeg_embedding = np.stack(segments, axis=0)  # (7, 512)
+
 
         for block in tqdm(range(7), leave=False, desc=f"📁 Blocks ({subj_name})"):
             video_dir = os.path.join(video_root, f"Block{block}")
@@ -82,7 +102,8 @@ def main():
                     z0 = extract_video_latent(gif_path, vae, transform)
 
                     save_name = f"{subj_name}_b{block}_c{concept}_r{rep}.npz"
-                    np.savez(os.path.join(output_dir, save_name), eeg=eeg_embedding.squeeze(0), z0=z0)
+                    np.savez(os.path.join(output_dir, save_name), eeg=eeg_embedding, z0=z0)
+
 
 if __name__ == "__main__":
     main()

@@ -15,8 +15,11 @@ class EEGVideoDataset(Dataset):
         return len(self.files)
 
     def __getitem__(self, idx):
+        
         data = np.load(self.files[idx])
         eeg = data['eeg']    # (7, 512)
+        print("EEG shape:", eeg.shape)  # <- doit être (7, 512)
+
         z0 = data['z0']      # (6, 256)
         return torch.tensor(eeg, dtype=torch.float32), torch.tensor(z0, dtype=torch.float32)
 
@@ -50,5 +53,5 @@ def train_model(data_dir, save_path, epochs=50, batch_size=64, lr=5e-4):
 if __name__ == "__main__":
     train_model(
         data_dir=os.path.expanduser("~/EEG2Video/data/EEG_Latent_pairs"),
-        save_path=os.path.expanduser("~/EEG2Video_model/checkpoints/seq2seq.pt")
+        save_path=os.path.expanduser("~/EEG2Video/Gaspard_model/checkpoints/seq2seq.pt")
     )
