@@ -35,15 +35,15 @@ class GLMNet(nn.Module):
 
 # ------------------------------ utils -------------------------------------
 def parse_args():
-    root = os.environ["HOME"] + "/EEG2Video"
+    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     p = argparse.ArgumentParser()
-    p.add_argument("--raw_dir",  default = f"{root}/data/EEG/", help="directory with *_raw.npy files") 
-    p.add_argument("--feat_dir", default=f"{root}/data/DE_500ms_sw/", help="directory with *_de.npy files")
+    p.add_argument("--raw_dir",  default = f"{root}/data/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
+    p.add_argument("--feat_dir", default=f"{root}/data/DE_1per1s/", help="directory with .npy files")
     p.add_argument("--label_dir", default=f"{root}/data/meta_info/All_video_label.npy", help="Label file")
     p.add_argument("--save_dir", default=f"{root}/Gaspard_model/checkpoints/cv_glmnetv2/")
     p.add_argument("--epochs",   type=int, default=50)
     p.add_argument("--bs",       type=int, default=128)
-    p.add_argument("--lr",       type=float, default=1e-3)
+    p.add_argument("--lr",       type=float, default=1e-4)
     p.add_argument("--use_wandb", action="store_true")
     return p.parse_args()
 
@@ -63,108 +63,105 @@ def reshape_labels(labels: np.ndarray) -> np.ndarray:
     labels = np.repeat(labels, 5, axis=2)       # (7,40,5,1)
     labels = np.repeat(labels, 2, axis=3)       # (7,40,5,2)
     assert labels.shape == (7,40,5,2), "Label shape must be (7,40,5,2) after expansion"
-    return labels
+    return labels -1 # 0-39 labels
+
 
 def main():
     args = parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
 
-    filenames = sorted([f for f in os.listdir(args.raw_dir) if f.endswith(".npy")])
-    if not filenames:
-        raise FileNotFoundError("No .npy files found in " + args.raw_dir)
+    # Sélection d’un seul sujet
+    filename = "sub1.npy"  # ou args.subj_name
+    subj_name = filename.replace(".npy", "")
 
-    os.makedirs(args.save_dir, exist_ok=True)
+    raw2s = np.load(os.path.join(args.raw_dir, filename))  # (7,40,5,62,400)
+    feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,62,5)
+    labels = np.load(args.label_dir)                       # (7,40)
+    labels = reshape_labels(labels)                        # (7,40,5,2)
 
-    acc_subjects = []
-    for filename in tqdm(filenames,desc="Raw files"):
-        subj_name = filename.replace(".npy", "")
-        raw_npy = np.load(os.path.join(args.raw_dir, filename))
-        raw_npy = split_raw_2s_to_1s(raw_npy)  # (7,40,5,2,62,400) → (7,40,5,2,62,200)
-        feat_npy = np.load(os.path.join(args.feat_dir, filename))
-        label_npy = np.load(args.label_dir)
-        label_npy = reshape_labels(label_npy)  # (7,40,5,2)
+    raw1s = split_raw_2s_to_1s(raw2s)                      # (7,40,5,2,62,200)
 
-        # ---------- reshape with N=7*40*5*2 ----------
-        raw_npy = raw_npy.reshape(-1, 62, 200)  # N×62×200
-        feat_np = feat_npy.reshape(-1, 62, 5)   # N×62×5  (already split)
-        labels = label_npy.reshape(-1)        # N
+    acc_folds = []
 
-        assert raw_npy.shape[0] == feat_np.shape[0] == labels.shape[0]
+    fold_n=0
+    for test_block in tqdm(range(7),desc=f"Training on fold {fold_n}"):
+        fold_n+=1
+        val_block = (test_block - 1) % 7
+        train_blocks = [i for i in range(7) if i not in [test_block, val_block]]
 
-        # tensors
-        X_raw = torch.tensor(raw_npy, dtype=torch.float32)  # (M,62,200)
-        X_feat = torch.tensor(feat_np, dtype=torch.float32) # (M,62,5)
-        y = torch.tensor(labels, dtype=torch.long)
+        def get_data(block_ids):
+            x_raw = raw1s[block_ids].reshape(-1, 62, 200)
+            x_feat = feat[block_ids].reshape(-1, 62, 5)
+            y = labels[block_ids].reshape(-1)
+            return x_raw, x_feat, y
 
-        # 80/10/10 split
-        M = len(y); print(M)
-        idx = np.arange(M); np.random.shuffle(idx)
-        tr, va = int(0.8 * M), int(0.9 * M)
-        ds_train = TensorDataset(X_raw[idx[:tr]], X_feat[idx[:tr]], y[idx[:tr]])
-        ds_val = TensorDataset(X_raw[idx[tr:va]], X_feat[idx[tr:va]], y[idx[tr:va]])
-        ds_test = TensorDataset(X_raw[idx[va:]], X_feat[idx[va:]], y[idx[va:]])
+        X_train, F_train, y_train = get_data(train_blocks)
+        X_val, F_val, y_val = get_data([val_block])
+        X_test, F_test, y_test = get_data([test_block])
+
+        # Conversion en tenseurs
+        ds_train = TensorDataset(torch.tensor(X_train,dtype=torch.float32).unsqueeze(1), torch.tensor(F_train,dtype=torch.float32), torch.tensor(y_train))
+        ds_val   = TensorDataset(torch.tensor(X_val,dtype=torch.float32).unsqueeze(1), torch.tensor(F_val,dtype=torch.float32), torch.tensor(y_val))
+        ds_test  = TensorDataset(torch.tensor(X_test,dtype=torch.float32).unsqueeze(1), torch.tensor(F_test,dtype=torch.float32), torch.tensor(y_test))
 
         dl_train = DataLoader(ds_train, args.bs, shuffle=True)
-        dl_val = DataLoader(ds_val, args.bs)
-        dl_test = DataLoader(ds_test, args.bs)
+        dl_val   = DataLoader(ds_val, args.bs)
+        dl_test  = DataLoader(ds_test, args.bs)
 
+        # Initialisation modèle
+        model = GLMNet(out_dim=40).to(device)
+        opt = optim.AdamW(model.parameters(), lr=args.lr)
         criterion = nn.CrossEntropyLoss()
 
-        net = GLMNet(out_dim=40).to(device)
-        opt = optim.AdamW(net.parameters(), lr=args.lr)
-
+        # W&B
         if args.use_wandb:
-            wandb.init(project=PROJECT_NAME, name=subj_name, config=vars(args))
-            wandb.watch(net, log="gradients", log_freq=100)
+            wandb.init(project=PROJECT_NAME, name=f"{subj_name}_fold{test_block}", config=vars(args))
+            wandb.watch(model, log="all")
 
+        # Entraînement
         best_val = 0.0
         for ep in range(1, args.epochs + 1):
-            # --- train ---
-            net.train(); tl = ta = n = 0
-            for xb_raw, xb_feat, yb in dl_train:
-                xb_raw, xb_feat, yb = xb_raw.to(device), xb_feat.to(device), yb.to(device)
-                opt.zero_grad(); pred = net(xb_raw, xb_feat)
+            model.train(); tl = ta = 0
+            for xb, xf, yb in dl_train:
+                xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
+                opt.zero_grad(); pred = model(xb, xf)
                 loss = criterion(pred, yb); loss.backward(); opt.step()
-                tl += loss.item() * len(yb); ta += (pred.argmax(1) == yb).sum().item(); n += len(yb)
-            train_loss, train_acc = tl / n, ta / n
+                tl += loss.item() * len(yb); ta += (pred.argmax(1) == yb).sum().item()
+            train_acc = ta / len(ds_train)
 
-            # --- val ---
-            net.eval(); vl = va = nv = 0
+            # Validation
+            model.eval(); va = 0
             with torch.no_grad():
-                for xb_raw, xb_feat, yb in dl_val:
-                    xb_raw, xb_feat, yb = xb_raw.to(device), xb_feat.to(device), yb.to(device)
-                    pred = net(xb_raw, xb_feat)
-                    vl += criterion(pred, yb).item() * len(yb); va += (pred.argmax(1) == yb).sum().item(); nv += len(yb)
-            val_loss, val_acc = vl / nv, va / nv
-
-            if args.use_wandb and wandb is not None:
-                wandb.log({"epoch": ep,
-                           "train/loss": train_loss, "train/acc": train_acc,
-                           "val/loss": val_loss,     "val/acc": val_acc})
+                for xb, xf, yb in dl_val:
+                    xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
+                    pred = model(xb, xf); va += (pred.argmax(1) == yb).sum().item()
+            val_acc = va / len(ds_val)
 
             if val_acc > best_val:
                 best_val = val_acc
-                torch.save(net.state_dict(), os.path.join(args.save_dir, f"{subj_name}_best.pt"))
+                torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_fold{test_block}_best.pt")
 
             if ep % 5 == 0:
-                print(f"[{subj_name}] Ep{ep:03d} train_acc={train_acc:.3f} val_acc={val_acc:.3f}")
+                print(f"[{subj_name}-Fold{test_block}] Ep{ep:03d} train_acc={train_acc:.3f} val_acc={val_acc:.3f}")
 
-        # ---- test ----
-        net.load_state_dict(torch.load(os.path.join(args.save_dir, f"{subj_name}_best.pt")))
-        net.eval(); ta = ntest = 0
+            if args.use_wandb:
+                wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc})
+
+        # Test
+        model.load_state_dict(torch.load(f"{args.save_dir}/{subj_name}_fold{test_block}_best.pt"))
+        model.eval(); test_acc = 0
         with torch.no_grad():
-            for xb_raw, xb_feat, yb in dl_test:
-                xb_raw, xb_feat, yb = xb_raw.to(device), xb_feat.to(device), yb.to(device)
-                pred = net(xb_raw, xb_feat)
-                ta += (pred.argmax(1) == yb).sum().item(); ntest += len(yb)
-        test_acc = ta / ntest
-        acc_subjects.append(test_acc)
-        print(f"[{subj_name}] BEST test_acc={test_acc:.3f}")
-        if args.use_wandb :
-            wandb.log({"test/acc": test_acc}); wandb.finish()
+            for xb, xf, yb in dl_test:
+                xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
+                pred = model(xb, xf); test_acc += (pred.argmax(1) == yb).sum().item()
+        test_acc /= len(ds_test)
+        acc_folds.append(test_acc)
+        print(f"[{subj_name}-Fold{test_block}] BEST test_acc={test_acc:.3f}")
+        if args.use_wandb: wandb.log({"test/acc": test_acc}); wandb.finish()
 
-    print("\nOverall mean±std test acc:", np.mean(acc_subjects), "±", np.std(acc_subjects))
+    print(f"Subject {subj_name}: mean±std test acc = {np.mean(acc_folds):.3f} ± {np.std(acc_folds):.3f}")
 
 if __name__ == "__main__":
     main()
+

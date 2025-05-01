@@ -13,8 +13,10 @@ pandas==2.2.3
 Pillow==11.2.1
 scikit_learn==1.6.1
 scipy==1.15.2
-torch==1.13.1+cu117
-torchmetrics==0.10.3
-torchvision==0.14.1+cu117
+#torch==1.13.1+cu117
+#torchmetrics==0.10.3
+#torchvision==0.14.1+cu117
 tqdm==4.67.1
 xformers==0.0.30
+wandb
+einops==0.4.1
