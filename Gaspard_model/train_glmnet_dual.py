@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from models.models_paper import shallownet, mlpnet  # <- adjust if package path differs
 from tqdm import tqdm
 import  wandb
+
 # -------- W&B -------------------------------------------------------------
 PROJECT_NAME = "eeg2video-GLMNetv2"  # <‑‑ change if you need another project
 
