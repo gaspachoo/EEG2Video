@@ -162,7 +162,7 @@ def main():
         test_acc = ta / ntest
         acc_subjects.append(test_acc)
         print(f"[{subj_name}] BEST test_acc={test_acc:.3f}")
-        if args.use_wandb and wandb is not None:
+        if args.use_wandb :
             wandb.log{"test/acc": test_acc}; wandb.finish()
 
     print("\nOverall mean±std test acc:", np.mean(acc_subjects), "±", np.std(acc_subjects))
