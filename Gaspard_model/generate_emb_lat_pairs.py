@@ -31,7 +31,6 @@ def main():
     output_dir = f"{root}/data/EEG_Latent_pairs/"
     g_ckpt = f"{root}/Gaspard_model/checkpoints/cv_shallownet/best_fold0.pth"
     l_ckpt = f"{root}/Gaspard_model/checkpoints/cv_mlp_DE/best_fold0.pt"
-    vae_ckpt = f"{root}/Gaspard_model/checkpoints/vae/vae_epoch30.pth"
 
     os.makedirs(output_dir, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -46,7 +45,6 @@ def main():
     l.eval()
 
     vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(device)
-    vae.load_state_dict(torch.load(vae_ckpt, map_location=device))
     vae.eval()
 
     transform = transforms.ToTensor()
@@ -59,30 +57,51 @@ def main():
         feat_npz = np.load(os.path.join(feat_dir, subj_file.replace("segmented", "features")))
 
         eeg_data = eeg_npz["eeg"]     # (9800, 62, 100)
+        print("EEG shape:", eeg_data.shape)  # <- must be (9800, 62, 100)
         feat_data = feat_npz["de"]    # (9800, 62, 5)
+        print("DE shape:", feat_data.shape)
+
+        assert eeg_data.shape[0] % 7 == 0
 
         for block in tqdm(range(7), leave=False, desc=f"📁 Blocks ({subj_name})"):
             video_dir = os.path.join(video_root, f"Block{block}")
             for concept in range(40):
                 for rep in range(5):
-                    index = block * 40 * 5 + concept * 5 + rep
-                    eeg = eeg_data[index]
-                    de = feat_data[index]
+                    eeg_segments = []
+                    for window in range(7):
+                        idx = ((block * 40 * 5 + concept * 5 + rep) * 7) + window
+                        eeg = eeg_data[idx]  # (62, 100)
+                        de = feat_data[idx]  # (62, 5)
+                        
+                        print(f"EEG shape: {eeg.shape}")  # <- must be (62, 100)
+                        print(f"DE shape: {de.shape}")
+                        
+                        eeg_tensor = torch.tensor(eeg[np.newaxis], dtype=torch.float32).to(device)
+                        de_tensor = torch.tensor(de[np.newaxis], dtype=torch.float32).to(device)
+                        with torch.no_grad():
+                            emb = GLMNetFeatureExtractor(g, l)(eeg_tensor, de_tensor)
+                        eeg_segments.append(emb.squeeze(0).cpu().numpy())
 
-                    assert eeg.shape == (62, 100), f"eeg shape incorrect: {eeg.shape}"
-                    assert de.shape == (62, 5), f"de shape incorrect: {de.shape}"
+                    if len(eeg_segments) != 7:
+                        print(f"❌ Skipped: not enough EEG segments for b{block}, c{concept}, r{rep}")
+                        continue
 
-                    gif_index = concept * 5 + rep + 1  # <-- +1: vérifier que les gifs sont bien numérotés 1 à 200
+                    eeg_embedding = np.stack(eeg_segments, axis=0)  # (7, 512)
+
+                    gif_index = concept * 5 + rep + 1
                     gif_path = os.path.join(video_dir, f"{gif_index}.gif")
                     if not os.path.exists(gif_path):
                         print(f"❌ Missing video: {gif_path}")
                         continue
 
-                    eeg_embedding = extract_eeg_embedding(eeg[np.newaxis], de[np.newaxis], g, l)
-                    z0 = extract_video_latent(gif_path, vae, transform)
+                    z0 = extract_video_latent(gif_path, vae, transform)  # (6, 256)
+                    print(f"eeg_embedding.shape = {np.array(eeg_segments).shape}")
+                    print(f"z0.shape = {z0.shape}")
+                    assert eeg_embedding.shape == (7, 512)
+                    assert z0.shape == (6, 256)
 
                     save_name = f"{subj_name}_b{block}_c{concept}_r{rep}.npz"
-                    np.savez(os.path.join(output_dir, save_name), eeg=eeg_embedding.squeeze(0), z0=z0)
+                    np.savez(os.path.join(output_dir, save_name), eeg=eeg_embedding, z0=z0)
 
 if __name__ == "__main__":
     main()

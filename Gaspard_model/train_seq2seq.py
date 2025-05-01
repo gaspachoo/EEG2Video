@@ -18,9 +18,10 @@ class EEGVideoDataset(Dataset):
         
         data = np.load(self.files[idx])
         eeg = data['eeg']    # (7, 512)
-        print("EEG shape:", eeg.shape)  # <- doit être (7, 512)
+        print("EEG shape:", eeg.shape)  # <- must be (7, 512)
 
         z0 = data['z0']      # (6, 256)
+        print("z0 shape:", z0.shape)  # <- must be (6, 256)
         return torch.tensor(eeg, dtype=torch.float32), torch.tensor(z0, dtype=torch.float32)
 
 # === Entraînement ===

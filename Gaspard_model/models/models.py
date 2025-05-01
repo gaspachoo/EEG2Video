@@ -217,16 +217,18 @@ class Seq2SeqTransformer_beta(nn.Module):
         return out
 
 class GLMNetFeatureExtractor(nn.Module):
-    def __init__(self, g_enc, l_enc):
+    def __init__(self, g_enc, l_enc, output_dim=512):
         super().__init__()
         self.g = g_enc
         self.l = l_enc
+        self.project = nn.Linear(g_enc.flattened_dim + l_enc.output_dim, output_dim)
 
     def forward(self, xr, xf):
-        eeg_feat = self.g(xr)  # EEG raw → global embedding
-        de_feat = self.l(xf.view(xf.size(0), -1))  # DE features → local embedding
+        eeg_feat = self.g(xr)
+        de_feat = self.l(xf.view(xf.size(0), -1))
         concat = torch.cat([eeg_feat, de_feat], dim=1)  # (batch, 4096)
-        return concat
+        return self.project(concat)  # (batch, 512)
+
     
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, eeg_dim=512, latent_dim=256, num_eeg_tokens=7, num_video_tokens=6):
