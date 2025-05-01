@@ -1,19 +1,18 @@
-from __future__ import annotations
-
-import os, time, argparse, random
+#from __future__ import annotations
+import os, time, argparse
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from sklearn.utils.class_weight import compute_class_weight
+from models.models_paper import shallownet, mlpnet  # <- adjust if package path differs
 from tqdm import tqdm
 import  wandb
 # -------- W&B -------------------------------------------------------------
 PROJECT_NAME = "eeg2video-GLMNetv2"  # <‑‑ change if you need another project
 
 # -------- Model parts (reuse existing codebase) ---------------------------
-from models.models import shallownet, mlpnet  # <- adjust if package path differs
+
 
 OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
 RAW_T = 200 # time points in raw EEG, 1 second at 200Hz
@@ -71,18 +70,18 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
 
-    raw_files = sorted([f for f in os.listdir(args.raw_dir) if f.endswith(".npy")])
-    if not raw_files:
+    filenames = sorted([f for f in os.listdir(args.raw_dir) if f.endswith(".npy")])
+    if not filenames:
         raise FileNotFoundError("No .npy files found in " + args.raw_dir)
 
     os.makedirs(args.save_dir, exist_ok=True)
 
     acc_subjects = []
-    for raw_file in tqdm(raw_files,desc="Raw files"):
-        subj_name = raw_file.replace(".npy", "")
-        raw_npy = np.load(os.path.join(args.raw_dir, subj_name))
+    for filename in tqdm(filenames,desc="Raw files"):
+        subj_name = filename.replace(".npy", "")
+        raw_npy = np.load(os.path.join(args.raw_dir, filename))
         raw_npy = split_raw_2s_to_1s(raw_npy)  # (7,40,5,2,62,400) → (7,40,5,2,62,200)
-        feat_npy = np.load(os.path.join(args.feat_dir, subj_name))
+        feat_npy = np.load(os.path.join(args.feat_dir, filename))
         label_npy = np.load(args.label_dir)
         label_npy = reshape_labels(label_npy)  # (7,40,5,2)
 
@@ -163,7 +162,7 @@ def main():
         acc_subjects.append(test_acc)
         print(f"[{subj_name}] BEST test_acc={test_acc:.3f}")
         if args.use_wandb :
-            wandb.log{"test/acc": test_acc}; wandb.finish()
+            wandb.log({"test/acc": test_acc}); wandb.finish()
 
     print("\nOverall mean±std test acc:", np.mean(acc_subjects), "±", np.std(acc_subjects))
 
