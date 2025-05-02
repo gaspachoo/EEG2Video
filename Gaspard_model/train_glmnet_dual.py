@@ -36,7 +36,7 @@ class GLMNet(nn.Module):
 
 # ------------------------------ utils -------------------------------------
 def parse_args():
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/Documents/School/Centrale Med/2A/SSE/EEG2Video"
+    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video" #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     p = argparse.ArgumentParser()
     p.add_argument("--raw_dir",  default = f"{root}/data/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
     p.add_argument("--feat_dir", default=f"{root}/data/DE_1per1s/", help="directory with .npy files")
