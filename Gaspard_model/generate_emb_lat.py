@@ -7,7 +7,7 @@ from torchvision import transforms
 from diffusers.models import AutoencoderKL
 from train_glmnet_dual import GLMNet, OCCIPITAL_IDX, split_raw_2s_to_1s
 
-# === Settings ===
+# === Parameters ===
 emb_dim = 256 # be careful, embedding dimension/2 here
 save_root = os.path.expanduser("~/EEG2Video")
 raw_path = f"{save_root}/data/Segmented_Rawf_200Hz_2s/sub3.npy"
@@ -18,7 +18,7 @@ ckpt_dir = f"{save_root}/Gaspard_model/checkpoints/cv_glmnetv2/"
 os.makedirs(output_dir, exist_ok=True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+print(f"Using device: {device}")
 # === Load blocks models ===
 models = []
 for fold in range(7):
@@ -38,30 +38,29 @@ raw = np.load(raw_path)     # (7, 40, 5, 62, 400)
 feat = np.load(feat_path)   # (7, 40, 5, 62, 5)
 raw1s = split_raw_2s_to_1s(raw)  # (7, 40, 5, 2, 62, 200)
 
-# === Generate pairs EEG - z0 ===
+
+# === Generate EEG embeddings + video latents ===
 for block in range(7):
     model = models[block]
     video_dir = os.path.join(video_root, f"Block{block}")
 
-    for tqdm(concept in range(40), desc=f"Block {block}", total=40):
+    for concept in tqdm(range(40), desc=f"Block {block}"):
         for rep in range(5):
-            for w in range(2):  # 2 windows per block
-                eeg_segments = []
-                for seg in range(7):  # sliding windows 7 x 200
-                    eeg = raw1s[block, concept, rep, w]  # (62, 200)
-                    de = feat[block, concept, rep,w]       # (62, 5)
+            for w in range(2):  # Two 1-second windows per video
+                eeg = raw1s[block, concept, rep, w]        # shape: (62, 200)
+                de = feat[block, concept, rep, w]          # shape: (62, 5)
 
-                    eeg_tensor = torch.tensor(eeg, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(device)
-                    de_tensor = torch.tensor(de[OCCIPITAL_IDX], dtype=torch.float32).unsqueeze(0).to(device)
+                # Format EEG and DE features as model inputs
+                eeg_tensor = torch.tensor(eeg, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(device)  # (1, 1, 62, 200)
+                de_tensor = torch.tensor(de[OCCIPITAL_IDX], dtype=torch.float32).unsqueeze(0).to(device)   # (1, 12, 5)
 
-                    with torch.no_grad():
-                        g = model.raw_global(eeg_tensor)  # (1, 256)
-                        l = model.freq_local(de_tensor)   # (1, 256)
-                        emb = torch.cat([g, l], dim=1).squeeze(0).cpu().numpy()  # (512,)
-                        eeg_segments.append(emb)
+                # Compute EEG embedding (concatenated global + local features)
+                with torch.no_grad():
+                    g = model.raw_global(eeg_tensor)  # (1, 256)
+                    l = model.freq_local(de_tensor)   # (1, 256)
+                    emb = torch.cat([g, l], dim=1).squeeze(0).cpu().numpy()  # (512,)
 
-                eeg_embedding = np.stack(eeg_segments, axis=0)  # (7, 512)
-
+                # Load corresponding video and extract latent for 6 frames
                 gif_index = concept * 5 + rep + 1
                 gif_path = os.path.join(video_dir, f"{gif_index}.gif")
                 if not os.path.exists(gif_path):
@@ -69,14 +68,25 @@ for block in range(7):
                     continue
 
                 frames = imageio.mimread(gif_path)
-                frames = [transform(f) for f in frames[w*3:w*3+6]]  # select frames 0-5 or 3-8
+                #print(f"Loaded {len(frames)} frames from {gif_path}")
+                if len(frames) != 6:
+                    print(f"⚠️ GIF {gif_path} has {len(frames)} frames, expected 6.")
+                    continue
+                frames = [transform(f) for f in frames]  # use all 6 frames from the GIF
                 frames = torch.stack(frames).to(device)
+                #print("frames tensor shape:", frames.shape)  # (6, 3, 288, 512) expected
                 with torch.no_grad():
-                    z = vae.encode(frames).latent_dist.mean.reshape(6, -1)
+                    z_latents = vae.encode(frames).latent_dist.mean
+                    #print("z_latents shape:", z_latents.shape)  # should be (6, C, H, W)
+                    z = z_latents.flatten(1)  # flatten (C, H, W) to a single vector → (6, 9216)
+                z0 = z.cpu().numpy()  # (6, 9216)
 
-                z0 = z.cpu().numpy()  # (6, 256)
+                assert emb.shape == (512,), f"Invalid emb shape: {emb.shape}"
+                assert z0.shape[0] == 6, f"Invalid z0 shape: {z0.shape}"
 
+                # ⚠️ downstream models may project z0 from 9216 to 256 if needed
                 save_name = f"sub3_b{block}_c{concept}_r{rep}_w{w}.npz"
-                np.savez(os.path.join(output_dir, save_name), eeg=eeg_embedding, z0=z0)
+                np.savez(os.path.join(output_dir, save_name), eeg=emb[np.newaxis, :], z0=z0)
 
-print("✅ Fini. Fichiers EEG - latents enregistrés avec w0 et w1.")
+
+print("Done!")

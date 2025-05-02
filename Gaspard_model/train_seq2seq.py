@@ -1,58 +1,52 @@
 import os
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-import numpy as np
+from torch.utils.data import DataLoader
+from eeg2video_dataset import EEG2VideoDataset
+from models.my_autoregressive_transformer import myTransformer
 from tqdm import tqdm
-from models.models import Seq2SeqTransformer
 
-# === Dataset ===
-class EEGVideoDataset(Dataset):
-    def __init__(self, data_dir):
-        self.files = sorted([os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith(".npz")])
+# === Config ===
+data_dir = os.path.expanduser("~/EEG2Video/data/Pairs_latents_embeddings/")
+batch_size = 32
+lr = 5e-4
+n_epochs = 100
+save_path = os.path.expanduser("~/EEG2Video/Gaspard_model/checkpoints/seq2seq/")
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def __len__(self):
-        return len(self.files)
+# === Load Dataset ===
+dataset = EEG2VideoDataset(data_dir)
+dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-    def __getitem__(self, idx):
-        
-        data = np.load(self.files[idx])
-        eeg = data['eeg']    # (7, 512)
-        print("EEG shape:", eeg.shape)  # <- must be (7, 512)
+# === Model ===
+model = myTransformer(d_model=512).to(device)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+criterion = nn.MSELoss()
 
-        z0 = data['z0']      # (6, 256)
-        print("z0 shape:", z0.shape)  # <- must be (6, 256)
-        return torch.tensor(eeg, dtype=torch.float32), torch.tensor(z0, dtype=torch.float32)
-
-# === Entraînement ===
-def train_model(data_dir, save_path, epochs=50, batch_size=64, lr=5e-4):
-    dataset = EEGVideoDataset(data_dir)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-
-    model = Seq2SeqTransformer().cuda()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    loss_fn = nn.MSELoss()
-
+# === Training loop ===
+for epoch in range(n_epochs):
     model.train()
-    for epoch in range(epochs):
-        epoch_loss = 0
-        for eeg, z0 in tqdm(loader, desc=f"Epoch {epoch+1}/{epochs}"):
-            eeg, z0 = eeg.cuda(), z0.cuda()
-            pred = model(eeg)  # (B, 6, 256)
-            loss = loss_fn(pred, z0)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            epoch_loss += loss.item()
+    total_loss = 0
+    for eeg, z0 in tqdm(dataloader, desc=f"Epoch {epoch+1}/{n_epochs}"):
+        eeg = eeg.to(device)           # (B, 2, 512)
+        z0 = z0.to(device)             # (B, 6, 9216)
 
-        print(f"Epoch {epoch+1}: Loss = {epoch_loss/len(loader):.6f}")
+        # Create padded tgt with 1 empty step (start token)
+        b, t, dim = z0.shape
+        z0_pad = torch.zeros((b, 1, dim), device=device)
+        tgt = torch.cat([z0_pad, z0], dim=1)[:, :-1, :]  # input to decoder
 
-    torch.save(model.state_dict(), save_path)
-    print("✅ Modèle Seq2Seq sauvegardé :", save_path)
+        optimizer.zero_grad()
+        _, pred = model(eeg, tgt)  # output: (B, 6, 9216)
+        loss = criterion(pred, z0)
+        loss.backward()
+        optimizer.step()
 
-# Exemple d'appel
-if __name__ == "__main__":
-    train_model(
-        data_dir=os.path.expanduser("~/EEG2Video/data/EEG_Latent_pairs"),
-        save_path=os.path.expanduser("~/EEG2Video/Gaspard_model/checkpoints/seq2seq.pt")
-    )
+        total_loss += loss.item()
+
+    print(f"Epoch {epoch+1}, Loss: {total_loss / len(dataloader):.4f}")
+
+# === Save final model ===
+torch.save(model.state_dict(), save_path+"seq2seq.pt")
+print(f"✅ Model saved to {save_path}")
