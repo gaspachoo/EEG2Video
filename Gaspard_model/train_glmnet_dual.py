@@ -1,4 +1,3 @@
-#from __future__ import annotations
 import os, time, argparse
 import numpy as np
 import torch
@@ -9,6 +8,8 @@ from models.models_paper import shallownet, mlpnet  # <- adjust if package path 
 from tqdm import tqdm
 import  wandb
 from sklearn.preprocessing import StandardScaler
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 
 # -------- W&B -------------------------------------------------------------
 PROJECT_NAME = "eeg2video-GLMNetv2"  # <‑‑ change if you need another project
@@ -22,7 +23,7 @@ RAW_T = 200 # time points in raw EEG, 1 second at 200Hz
 # ------------------------------ model -------------------------------------
 class GLMNet(nn.Module):
     """ShallowNet (raw) + MLP (freq) → concat → FC"""
-    def __init__(self, out_dim: int = 40, emb_dim: int = 128):
+    def __init__(self, out_dim: int = 40, emb_dim: int = 256): ### Use required embedding dim/2 here
         super().__init__()
         self.raw_global  = shallownet(emb_dim, 62, 200)  # (B,1,62,200)
         self.freq_local  = mlpnet(emb_dim, len(OCCIPITAL_IDX) * 5)  # (B,12,5)
@@ -95,7 +96,9 @@ def main():
     args = parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
-
+    
+    os.makedirs(args.save_dir, exist_ok=True)
+    
     # Sélection d’un seul sujet
     filename = "sub3.npy"  # ou args.subj_name
     subj_name = filename.replace(".npy", "")
@@ -111,7 +114,6 @@ def main():
 
 
     for test_block in range(7):
-        print(f"\n🔁 Fold {test_block}")
         val_block = (test_block - 1) % 7
         train_blocks = [i for i in range(7) if i not in [test_block, val_block]]
 
@@ -138,7 +140,8 @@ def main():
 
         # Initialisation modèle
         model = GLMNet(out_dim=40).to(device)
-        opt = optim.AdamW(model.parameters(), lr=args.lr)
+        opt = optim.Adam(model.parameters(), lr=args.lr)
+        scheduler = ReduceLROnPlateau(opt, mode='max', factor=0.8, patience=10, verbose=True)
         criterion = nn.CrossEntropyLoss()
 
         # W&B
@@ -151,7 +154,7 @@ def main():
         for ep in tqdm(range(1, args.epochs + 1), desc=f"Fold {test_block}"):
 
             model.train(); tl = ta = 0
-            for xb, xf, yb in dl_train:
+            for xb, xf, yb in tqdm(dl_train, desc=f"Epoch {ep}/{args.epochs}", leave=False):
                 xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
                 opt.zero_grad(); pred = model(xb, xf)
                 loss = criterion(pred, yb); loss.backward(); opt.step()
@@ -165,16 +168,14 @@ def main():
                     xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
                     pred = model(xb, xf); va += (pred.argmax(1) == yb).sum().item()
             val_acc = va / len(ds_val)
+            scheduler.step(train_acc)
 
             if val_acc > best_val:
                 best_val = val_acc
                 torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_fold{test_block}_best.pt")
 
-            #if ep % 5 == 0:
-            #   print(f"[{subj_name}-Fold{test_block}] Ep{ep:03d} train_acc={train_acc:.3f} val_acc={val_acc:.3f}")
-
             if args.use_wandb:
-                wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc})
+                wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc, "train/loss": tl / len(dl_train), "val/loss": loss.item()})
 
         # Test
         model.load_state_dict(torch.load(f"{args.save_dir}/{subj_name}_fold{test_block}_best.pt"))
