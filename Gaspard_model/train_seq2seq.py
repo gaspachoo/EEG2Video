@@ -2,7 +2,7 @@ import os
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from eeg2video_dataset import EEG2VideoDataset
+from Gaspard_model.old.eeg2video_dataset import EEG2VideoDataset
 from models.my_autoregressive_transformer import myTransformer
 from tqdm import tqdm
 

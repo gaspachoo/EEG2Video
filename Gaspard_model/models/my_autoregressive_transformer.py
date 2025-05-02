@@ -276,12 +276,14 @@ GT_label = np.array([[23, 22, 9, 6, 18, 14, 5, 36, 25, 19, 28, 35, 3, 16, 24, 40
                      ])
 
 if __name__ == "__main__":
-    eegdata = np.load('../../../data/Segmented_Rawf_200Hz_2s/sub1.npy')
+    save_root = os.path.expanduser("~/EEG2Video")
+
+    eegdata = np.load(os.path.join(save_root,"data/Segmented_Rawf_200Hz_2s/sub1.npy"))
 
     # use VAE model to get the latent
-    latent_data = np.load('1200_latent.npy')
+    latent_data = np.load(f"{save_root}/data/1200_latent.npy")
     latent_data = torch.from_numpy(latent_data)
-    test_latent = torch.load('40classes_latents.pt') 
+    test_latent = torch.load(f"{save_root}/data/40classes_latents.pt")
     # print(latent_data)
 
     print(eegdata.shape)
