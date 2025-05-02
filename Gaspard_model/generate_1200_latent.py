@@ -41,7 +41,7 @@ for block in tqdm(range(6),desc="Generating Latents"):  # Blocks 0–5 for train
             all_latents.append(z_latents.cpu().numpy())
 
 # === Final assembly ===
-latents_np = np.stack(all_latents, axis=0).reshape(40, 5, 6, 4, 36, 64).transpose(0, 1, 3, 2, 4, 5)  # (1200, 6, 4, 36, 64) -> shape: (40, 5, 4, 6, 36, 64)
+latents_np = np.stack(all_latents, axis=0).reshape(40, 5, 6, 4, 36, 64) # (40, 5, 6, 4, 36, 64)
 
 np.save(out_path, latents_np)
 print(f"✅ Saved latents to {out_path} with shape {latents_np.shape}")
