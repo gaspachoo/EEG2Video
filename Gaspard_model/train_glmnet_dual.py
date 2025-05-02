@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from models.models_paper import shallownet, mlpnet  # <- adjust if package path differs
 from tqdm import tqdm
 import  wandb
+from sklearn.preprocessing import StandardScaler
 
 # -------- W&B -------------------------------------------------------------
 PROJECT_NAME = "eeg2video-GLMNetv2"  # <‑‑ change if you need another project
@@ -67,13 +68,36 @@ def reshape_labels(labels: np.ndarray) -> np.ndarray:
     return labels -1 # 0-39 labels
 
 
+
+def standard_scale_features(X_train, X_val, X_test):
+    # X: (N, features...)
+    # Flatten to 2D if needed
+    orig_shape = X_train.shape[1:]
+    X_train_2d = X_train.reshape(len(X_train), -1)
+    X_val_2d = X_val.reshape(len(X_val), -1)
+    X_test_2d = X_test.reshape(len(X_test), -1)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train_2d)
+    X_val_scaled = scaler.transform(X_val_2d)
+    X_test_scaled = scaler.transform(X_test_2d)
+    
+    # Reshape back
+    X_train_scaled = X_train_scaled.reshape((len(X_train),) + orig_shape)
+    X_val_scaled = X_val_scaled.reshape((len(X_val),) + orig_shape)
+    X_test_scaled = X_test_scaled.reshape((len(X_test),) + orig_shape)
+    
+    return X_train_scaled, X_val_scaled, X_test_scaled
+
+
+# ------------------------------ main -------------------------------------
 def main():
     args = parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
 
     # Sélection d’un seul sujet
-    filename = "sub1.npy"  # ou args.subj_name
+    filename = "sub3.npy"  # ou args.subj_name
     subj_name = filename.replace(".npy", "")
 
     raw2s = np.load(os.path.join(args.raw_dir, filename))  # (7,40,5,62,400)
@@ -85,9 +109,9 @@ def main():
 
     acc_folds = []
 
-    fold_n=0
-    for test_block in tqdm(range(7),desc=f"Training on fold {fold_n}"):
-        fold_n+=1
+
+    for test_block in range(7):
+        print(f"\n🔁 Fold {test_block}")
         val_block = (test_block - 1) % 7
         train_blocks = [i for i in range(7) if i not in [test_block, val_block]]
 
@@ -100,11 +124,13 @@ def main():
         X_train, F_train, y_train = get_data(train_blocks)
         X_val, F_val, y_val = get_data([val_block])
         X_test, F_test, y_test = get_data([test_block])
+        F_train_scaled, F_val_scaled, F_test_scaled = standard_scale_features(F_train, F_val, F_test)
+
 
         # Conversion en tenseurs
-        ds_train = TensorDataset(torch.tensor(X_train,dtype=torch.float32).unsqueeze(1), torch.tensor(F_train,dtype=torch.float32), torch.tensor(y_train))
-        ds_val   = TensorDataset(torch.tensor(X_val,dtype=torch.float32).unsqueeze(1), torch.tensor(F_val,dtype=torch.float32), torch.tensor(y_val))
-        ds_test  = TensorDataset(torch.tensor(X_test,dtype=torch.float32).unsqueeze(1), torch.tensor(F_test,dtype=torch.float32), torch.tensor(y_test))
+        ds_train = TensorDataset(torch.tensor(X_train,dtype=torch.float32).unsqueeze(1), torch.tensor(F_train_scaled,dtype=torch.float32), torch.tensor(y_train))
+        ds_val   = TensorDataset(torch.tensor(X_val,dtype=torch.float32).unsqueeze(1), torch.tensor(F_val_scaled,dtype=torch.float32), torch.tensor(y_val))
+        ds_test  = TensorDataset(torch.tensor(X_test,dtype=torch.float32).unsqueeze(1), torch.tensor(F_test_scaled,dtype=torch.float32), torch.tensor(y_test))
 
         dl_train = DataLoader(ds_train, args.bs, shuffle=True)
         dl_val   = DataLoader(ds_val, args.bs)
@@ -122,7 +148,8 @@ def main():
 
         # Entraînement
         best_val = 0.0
-        for ep in range(1, args.epochs + 1):
+        for ep in tqdm(range(1, args.epochs + 1), desc=f"Fold {test_block}"):
+
             model.train(); tl = ta = 0
             for xb, xf, yb in dl_train:
                 xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
@@ -143,8 +170,8 @@ def main():
                 best_val = val_acc
                 torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_fold{test_block}_best.pt")
 
-            if ep % 5 == 0:
-                print(f"[{subj_name}-Fold{test_block}] Ep{ep:03d} train_acc={train_acc:.3f} val_acc={val_acc:.3f}")
+            #if ep % 5 == 0:
+            #   print(f"[{subj_name}-Fold{test_block}] Ep{ep:03d} train_acc={train_acc:.3f} val_acc={val_acc:.3f}")
 
             if args.use_wandb:
                 wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc})
