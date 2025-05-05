@@ -1,92 +1,54 @@
 import os
-import numpy as np
 import torch
-import imageio
-from tqdm import tqdm
-from torchvision import transforms
-from diffusers.models import AutoencoderKL
-from train_glmnet_dual import GLMNet, OCCIPITAL_IDX, split_raw_2s_to_1s
+import numpy as np
+from train_glmnet_dual import GLMNet, OCCIPITAL_IDX, RAW_T, split_raw_2s_to_1s,standard_scale_features
+import argparse
 
-# === Parameters ===
-emb_dim = 256 # be careful, embedding dimension/2 here
-save_root = os.path.expanduser("~/EEG2Video")
-raw_path = f"{save_root}/data/Segmented_Rawf_200Hz_2s/sub3.npy"
-feat_path = f"{save_root}/data/DE_1per1s/sub3.npy"
-video_root = f"{save_root}/data/Video_gifs/"
-output_dir = f"{save_root}/data/Pairs_latents_embeddings/"
-ckpt_dir = f"{save_root}/Gaspard_model/checkpoints/cv_glmnetv2/"
-os.makedirs(output_dir, exist_ok=True)
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
-# === Load blocks models ===
-models = []
-for fold in range(7):
-    model = GLMNet(out_dim=40, emb_dim=emb_dim).to(device)
-    ckpt_path = os.path.join(ckpt_dir, f"sub3_fold{fold}_best.pt")
-    model.load_state_dict(torch.load(ckpt_path, map_location=device))
+def load_glmnet_from_checkpoint(checkpoint_path, device='cuda'):
+    model = GLMNet(out_dim=40).to(device)
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint)
     model.eval()
-    models.append(model)
+    return model
 
-# === Load VAE Stable Diffusion ===
-vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(device)
-vae.eval()
-transform = transforms.ToTensor()
+def generate_all_embeddings(raw_dir, feat_dir, checkpoint_path, output_dir, device='cuda'):
+    os.makedirs(output_dir, exist_ok=True)
+    model = load_glmnet_from_checkpoint(checkpoint_path, device)
 
-# === EEG Data ===
-raw = np.load(raw_path)     # (7, 40, 5, 62, 400)
-feat = np.load(feat_path)   # (7, 40, 5, 62, 5)
-raw1s = split_raw_2s_to_1s(raw)  # (7, 40, 5, 2, 62, 200)
+    for fname in os.listdir(raw_dir):
+        if not fname.endswith(".npy") : continue 
+        if fname != 'sub3.npy': continue ## edit this if you want to process all files
+        print(f"Processing {fname}...")
+        subj = fname.replace(".npy", "")
+        raw2s = np.load(os.path.join(raw_dir, fname))  # (7,40,5,62,400)
+        feat = np.load(os.path.join(feat_dir, fname))  # (7,40,5,62,5)
 
+        raw1s = split_raw_2s_to_1s(raw2s)  # (7,40,5,2,62,200)
+        raw = raw1s.reshape(-1, 62, 200)  # (N, 62, 200)
+        feat = feat.reshape(-1, 62, 5)    # (N, 62, 5)
+        feat_scaled = standard_scale_features(feat)
 
-# === Generate EEG embeddings + video latents ===
-for block in range(7):
-    model = models[block]
-    video_dir = os.path.join(video_root, f"Block{block}")
+        with torch.no_grad():
+            z_all = []
+            for i in range(len(raw)):
+                x_raw = torch.tensor(raw[i], dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(device)  # (1,1,62,200)
+                x_feat = torch.tensor(feat_scaled[i], dtype=torch.float32).unsqueeze(0).to(device)  # (1,62,5)
+                z = model.raw_global(x_raw)
+                l = model.freq_local(x_feat[:, OCCIPITAL_IDX, :])
+                z_cat = torch.cat([z, l], dim=1)  # (1, 512)
+                z_all.append(z_cat.squeeze(0).cpu().numpy())
+            z_all = np.stack(z_all)
+            np.save(os.path.join(output_dir, f"{subj}.npy"), z_all)
+            print(f"Saved: {subj}.npy")
 
-    for concept in tqdm(range(40), desc=f"Block {block}"):
-        for rep in range(5):
-            for w in range(2):  # Two 1-second windows per video
-                eeg = raw1s[block, concept, rep, w]        # shape: (62, 200)
-                de = feat[block, concept, rep, w]          # shape: (62, 5)
+if __name__ == "__main__":
 
-                # Format EEG and DE features as model inputs
-                eeg_tensor = torch.tensor(eeg, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(device)  # (1, 1, 62, 200)
-                de_tensor = torch.tensor(de[OCCIPITAL_IDX], dtype=torch.float32).unsqueeze(0).to(device)   # (1, 12, 5)
+    parser = argparse.ArgumentParser()
+    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video" #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
+    parser.add_argument("--raw_dir",  default = f"{root}/data/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
+    parser.add_argument("--feat_dir", default=f"{root}/data/DE_1per1s/", help="directory with .npy files")
+    parser.add_argument("--checkpoint_path", default=f"{root}/Gaspard_model/checkpoints/cv_glmnetv2/sub3_fold0_best.pt", help="checkpoint path")
+    parser.add_argument('--output_dir', default=f"{root}/data/EEG_embeddings/", help="Where to save EEG embeddings")
+    args = parser.parse_args()
 
-                # Compute EEG embedding (concatenated global + local features)
-                with torch.no_grad():
-                    g = model.raw_global(eeg_tensor)  # (1, 256)
-                    l = model.freq_local(de_tensor)   # (1, 256)
-                    emb = torch.cat([g, l], dim=1).squeeze(0).cpu().numpy()  # (512,)
-
-                # Load corresponding video and extract latent for 6 frames
-                gif_index = concept * 5 + rep + 1
-                gif_path = os.path.join(video_dir, f"{gif_index}.gif")
-                if not os.path.exists(gif_path):
-                    print(f"❌ Missing video: {gif_path}")
-                    continue
-
-                frames = imageio.mimread(gif_path)
-                #print(f"Loaded {len(frames)} frames from {gif_path}")
-                if len(frames) != 6:
-                    print(f"⚠️ GIF {gif_path} has {len(frames)} frames, expected 6.")
-                    continue
-                frames = [transform(f) for f in frames]  # use all 6 frames from the GIF
-                frames = torch.stack(frames).to(device)
-                #print("frames tensor shape:", frames.shape)  # (6, 3, 288, 512) expected
-                with torch.no_grad():
-                    z_latents = vae.encode(frames).latent_dist.mean
-                    #print("z_latents shape:", z_latents.shape)  # should be (6, C, H, W)
-                    z = z_latents.flatten(1)  # flatten (C, H, W) to a single vector → (6, 9216)
-                z0 = z.cpu().numpy()  # (6, 9216)
-
-                assert emb.shape == (512,), f"Invalid emb shape: {emb.shape}"
-                assert z0.shape[0] == 6, f"Invalid z0 shape: {z0.shape}"
-
-                # ⚠️ downstream models may project z0 from 9216 to 256 if needed
-                save_name = f"sub3_b{block}_c{concept}_r{rep}_w{w}.npz"
-                np.savez(os.path.join(output_dir, save_name), eeg=emb[np.newaxis, :], z0=z0)
-
-
-print("Done!")
+    generate_all_embeddings(args.raw_dir, args.feat_dir, args.checkpoint_path, args.output_dir)

@@ -70,25 +70,17 @@ def reshape_labels(labels: np.ndarray) -> np.ndarray:
 
 
 
-def standard_scale_features(X_train, X_val, X_test):
+def standard_scale_features(X):
     # X: (N, features...)
     # Flatten to 2D if needed
-    orig_shape = X_train.shape[1:]
-    X_train_2d = X_train.reshape(len(X_train), -1)
-    X_val_2d = X_val.reshape(len(X_val), -1)
-    X_test_2d = X_test.reshape(len(X_test), -1)
-
+    orig_shape = X.shape[1:]
+    X_2d = X.reshape(len(X), -1)
     scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train_2d)
-    X_val_scaled = scaler.transform(X_val_2d)
-    X_test_scaled = scaler.transform(X_test_2d)
-    
+    X_scaled = scaler.fit_transform(X_2d)
+        
     # Reshape back
-    X_train_scaled = X_train_scaled.reshape((len(X_train),) + orig_shape)
-    X_val_scaled = X_val_scaled.reshape((len(X_val),) + orig_shape)
-    X_test_scaled = X_test_scaled.reshape((len(X_test),) + orig_shape)
-    
-    return X_train_scaled, X_val_scaled, X_test_scaled
+    X_scaled = X_scaled.reshape((len(X),) + orig_shape)
+    return X_scaled
 
 
 # ------------------------------ main -------------------------------------
@@ -126,7 +118,7 @@ def main():
         X_train, F_train, y_train = get_data(train_blocks)
         X_val, F_val, y_val = get_data([val_block])
         X_test, F_test, y_test = get_data([test_block])
-        F_train_scaled, F_val_scaled, F_test_scaled = standard_scale_features(F_train, F_val, F_test)
+        F_train_scaled, F_val_scaled, F_test_scaled = standard_scale_features(F_train), standard_scale_features(F_val), standard_scale_features(F_test)
 
 
         # Conversion en tenseurs
