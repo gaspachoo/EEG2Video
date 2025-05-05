@@ -4,28 +4,11 @@ import math
 import os
 import torch
 import numpy as np
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, random_split
 from tqdm import tqdm
 import wandb
 import torch.nn.functional as F
-
-class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, dropout=0.1, max_len=500):
-        super().__init__()
-        self.dropout = nn.Dropout(p=dropout)
-
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2) * -(math.log(10000.0) / d_model))
-        pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0)  # (1, max_len, d_model)
-        self.register_buffer('pe', pe)
-
-    def forward(self, x):
-        x = x + self.pe[:, :x.size(1)].detach()
-        return self.dropout(x)
-
+from models.my_autoregressive_transformer import PositionalEncoding
 
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, d_model=512, nhead=8, num_encoder_layers=2, num_decoder_layers=4,
@@ -75,7 +58,8 @@ def parse_args():
     return parser.parse_args()
 
 def prepare_data(sub_emb, video_dir, block_id):
-    z_hat = np.load(sub_emb)  # (7, 40, 5, 2, 512)
+    z_hat = np.load(sub_emb)  # (7*40*5*2, 512)
+
     #print(f"Loaded EEG: {sub_emb}, shape={z_hat.shape}")
     z_hat = z_hat.reshape(7, 40, 5, 2, 512)
     z_hat = z_hat[..., 0, :].transpose(1,2,0,3)  # Keep only first 1s EEG → shape: (7, 40, 5, 512) -> transpose to (40, 5, 7, 512)
@@ -109,21 +93,29 @@ def train_seq2seq(args):
     
     for block_id in tqdm(range(7),desc="Loading blocks"):
         dataset = prepare_data(args.sub_emb, args.video_dir, block_id=block_id)
-        dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
-        
+
+        # Split
+        val_size = int(0.2 * len(dataset))
+        train_size = len(dataset) - val_size
+        train_set, val_set = random_split(dataset, [train_size, val_size], generator=torch.Generator().manual_seed(42))
+        train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
+        val_loader = DataLoader(val_set, batch_size=args.batch_size)
+     
         model = Seq2SeqTransformer().to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         criterion = nn.MSELoss()
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs * len(dataloader))
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs * len(train_loader))
 
         if args.use_wandb:
             wandb.init(project="eeg2video-Seq2Seq", name=f"Seq2Seq_{block_id}", config=vars(args))
             wandb.watch(model, log="all")
 
         for epoch in tqdm(range(1, args.epochs + 1),desc=f"Epochs for block {block_id}"):
+            # Training
             model.train()
-            running_loss = 0
-            for src, tgt in dataloader:
+            train_loss = 0
+            train_cos = 0
+            for src, tgt in train_loader:
                 src, tgt = src.to(device), tgt.to(device)
                 optimizer.zero_grad()
                 out = model(src, tgt)
@@ -131,13 +123,38 @@ def train_seq2seq(args):
                 loss.backward()
                 optimizer.step()
                 scheduler.step()
-                cos_sim = cosine_similarity(out, tgt)
-                running_loss += loss.item()
+                train_loss += loss.item()
+                train_cos += F.cosine_similarity(out, tgt, dim=-1).mean().item()
+                
+            
+            train_loss /= len(train_loader)
+            train_cos /= len(train_loader)
 
-            avg_loss = running_loss / len(dataloader)
+            # Validation
+            model.eval()
+            val_loss = 0
+            val_cos = 0
+            with torch.no_grad():
+                for src, tgt in val_loader:
+                    src, tgt = src.to(device), tgt.to(device)
+                    out = model(src, tgt)
+                    val_loss += criterion(out, tgt).item()
+                    val_cos += F.cosine_similarity(out, tgt, dim=-1).mean().item()
+
+            val_loss /= len(val_loader)
+            val_cos /= len(val_loader)
+
+            #print(f"Epoch {epoch} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f} - Val Cos: {val_cos:.4f}")
             if args.use_wandb:
-                wandb.log({"lr": optimizer.param_groups[0]['lr']})
-                wandb.log({"epoch": epoch, "train_loss": avg_loss, "cosine_similarity": cos_sim})
+                wandb.log({
+                    "epoch": epoch,
+                    "train_loss": train_loss,
+                    "val_loss": val_loss,
+                    "cosine_similarity": train_cos,
+                    "val_cosine_similarity": val_cos,
+                    "lr": optimizer.param_groups[0]['lr']
+                })
+
             
         wandb.finish()
         
