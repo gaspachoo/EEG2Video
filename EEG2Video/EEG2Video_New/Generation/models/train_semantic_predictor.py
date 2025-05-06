@@ -6,6 +6,7 @@ from sklearn import preprocessing
 import torch.nn.functional as F
 from tqdm import tqdm
 from einops import rearrange
+import os
 
 
 class CLIP(nn.Module):
@@ -46,7 +47,7 @@ class Dataset():
         scaler = preprocessing.StandardScaler().fit(eeg)
         eeg = scaler.transform(eeg)
 
-        self.eeg = eeg
+        self.eeg = eeg        
         self.text = text
         self.len = eeg.shape[0]
 
@@ -76,8 +77,9 @@ GT_label = np.array([[23, 22, 9, 6, 18,       14, 5, 36, 25, 19,      28, 35, 3,
 # chosed_label = [1, 10, 12, 16, 19, 23, 25, 31, 34, 39]
 chosed_label = [i for i in range(1, 41)]              # set subset for training semantic predictor
 if __name__ == '__main__':
-    eeg_data_path = "sub1.npy"   #[7,40,5,2,62,5]                     # your own data path for eeg data
-    text_embedding_path = "text_embedding.npy"        # your own data path for text embedding
+    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video" #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
+    eeg_data_path = f"{root}/data/DE_1per1s/sub3.npy"   #[7,40,5,2,62,5]                     # your own data path for eeg data
+    text_embedding_path = f"{root}/data/Text_embeddings/text_embeddings.npy"        # your own data path for text embedding
     eegdata = np.load(eeg_data_path)
     text_embedding = np.load(text_embedding_path)     
     print(eegdata.shape)
@@ -95,18 +97,19 @@ if __name__ == '__main__':
 
     print("after arrange EEG.shape = ", EEG.shape)
         
-    print(EEG)
     print("text_embedding.shape = ", text_embedding.shape)
+    
 
     Text = []
     for i in range(6):
         # Text.append(text_embedding[:30,...])
-        Text.append(text_embedding[:150,...]) ## ? 没懂
+        #Text.append(text_embedding[:150,...]) ## ? 没懂
+        Text.append(text_embedding[i*200:(i+1)*200,...]) # [1000,77,768]  
     Text = np.concatenate(Text)
 
-    print("Text.shape = ", Text.shape)#[6*150,77,68]
-
+    print("Text.shape = ", Text.shape)
     Text = torch.from_numpy(Text)
+
     Text = torch.reshape(Text, (Text.shape[0], Text.shape[1]*Text.shape[2]))
     EEG = torch.mean(EEG, dim=1).resize(EEG.shape[0], 310)
     
@@ -116,7 +119,7 @@ if __name__ == '__main__':
 
     model = CLIP()
     model_file = '/home/EEG2Video/Tune-A-Video/tuneavideo/models/semantic_predictor.pt'
-    model.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage)['state_dict'])
+    #model.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage)['state_dict'])
     model.cuda()
 
     dataset = Dataset(EEG, Text)

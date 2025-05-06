@@ -1,4 +1,5 @@
-pretrained_model_path: "Zhoutianyi/huggingface/stable-diffusion-v1-4"
+#pretrained_model_path: "Zhoutianyi/huggingface/stable-diffusion-v1-4"
+pretrained_model_path: "CompVis/stable-diffusion-v1-4"
 output_dir: "./outputs/40_classes_200_epoch/"
 
 train_data:

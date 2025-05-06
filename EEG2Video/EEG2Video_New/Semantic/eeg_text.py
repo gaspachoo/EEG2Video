@@ -168,8 +168,8 @@ if __name__ == '__main__':
 
     model_dict = model.state_dict()
     
-    path = f'../checkpoints/Semantic/{current_time}/'
+    path = f'../checkpoints/Semantic/'
     os.makedirs(path,exist_ok=True)
-    torch.save({'state_dict': model_dict}, f'../checkpoints/Semantic/{current_time}/eeg2text_40_classes.pt')
+    torch.save({'state_dict': model_dict}, f'../checkpoints/Semantic/eeg2text_40_classes.pt')
     
 
