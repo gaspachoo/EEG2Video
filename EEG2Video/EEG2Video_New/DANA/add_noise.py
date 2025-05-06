@@ -100,8 +100,11 @@ GT_label = np.array([[23, 22, 9, 6, 18,       14, 5, 36, 25, 19,      28, 35, 3,
 from einops import rearrange
 chosed_label = [i for i in range(1,41)]
 if __name__ == '__main__':
-    latents = np.load('../Seq2Seq/latent_out_40_classes_test.npy')
-    opt = np.load('classification_optical_flow_score.npy')#[200,]
+    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+    latents = np.load('../Seq2Seq/latent_out_block7_40_classes.npy')
+    #opt = np.load('classification_optical_flow_score.npy')#[200,]
+    opt = np.load(f'{root}/data/meta_info/All_video_optical_flow_score.npy')[6,:] #[200,]
+    
     print(opt.shape)
     labels = np.where(opt >= 1.799, 1, 0)
     label = rearrange(labels,'(a b)  -> a b',a=40)
@@ -127,3 +130,4 @@ if __name__ == '__main__':
             save_data = torch.cat((save_data, out), dim=0)
     
     torch.save(save_data, f'40_classes_latent_add_noise.pt')
+    print("Data saved successfully!")
