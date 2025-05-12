@@ -27,6 +27,7 @@ class CLIP(nn.Module):
         )
 
     def forward(self, eeg):
+        
         eeg_embeddings = self.mlp(eeg)
           # shape: (batch_size)
         return eeg_embeddings
@@ -105,7 +106,8 @@ def get_time():
     return formatted_time
 
 if __name__ == '__main__':
-    eegdata = np.load('../data/SEED-DV/DE_1per2s/sub1.npy')
+    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+    eegdata = np.load(f'{root}/data/DE_1per2s/sub1.npy')
     
     print(eegdata.shape)
     EEG = []
@@ -123,7 +125,7 @@ if __name__ == '__main__':
     eeg = rearrange(eeg, 'a b c e f -> (a b c) (e f)')
     Text = []
     for i in range(6):
-        text_embedding = torch.load(f'../text_embeds/block{i}.pt')
+        text_embedding = torch.load(f'{root}/data/Text_embeddings/block{i}.pt')
         text = rearrange(text_embedding,'(a b) c d -> a b c d',a=40)
         indices = [list(GT_label[0]).index(element) for element in chosed_label]
         text = text[indices,:][:,::5].repeat_interleave(5, dim=1)

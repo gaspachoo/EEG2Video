@@ -5,99 +5,148 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 from sklearn.preprocessing import StandardScaler
 import wandb
-from transformers import CLIPTokenizer
 
-class SemanticPredictor(nn.Module):
-    def __init__(self, input_dim=310, output_dim=77 * 768):
-        super().__init__()
-        self.model = nn.Sequential(
-            nn.Linear(input_dim, 1024),
+def seed_everything(seed=42):
+    import random
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+class CLIP(nn.Module):
+    def __init__(self):
+        super(CLIP, self).__init__()
+        self.mlp = nn.Sequential(
+            nn.Linear(310, 10000),
             nn.ReLU(),
-            nn.Linear(1024, 2048),
+            nn.Linear(10000, 10000),
             nn.ReLU(),
-            nn.Linear(2048, output_dim)
+            nn.Linear(10000, 10000),
+            nn.ReLU(),
+            nn.Linear(10000, 10000),
+            nn.ReLU(),
+            nn.Linear(10000, 77 * 768)
         )
 
-    def forward(self, x):
-        return self.model(x)
+    def forward(self, eeg):
+        return self.mlp(eeg)
 
 class EEGTextDataset(Dataset):
-    def __init__(self, eeg_file, text_file):
-        eeg = np.load(eeg_file)  # (7, 40, 5, 62, 5)
-        text = np.load(text_file)  # (7, 40, 5, 77, 768)
+    def __init__(self, eeg_file, text_dir):
+        # Load EEG features for a single subject
+        eeg = np.load(eeg_file)
+        # Expect shape (blocks, concepts, trials, channels, windows)
+        if eeg.ndim == 5:
+            b, c, t, ch, w = eeg.shape
+            # reshape to (samples, channels, windows)
+            eeg_flat = eeg.reshape(b * c * t, ch, w)
+        elif eeg.ndim == 3:
+            b, ch, w = eeg.shape
+            eeg_flat = eeg.reshape(b, ch, w)
+        else:
+            raise ValueError(f"Unexpected EEG array dims: {eeg.shape}")
+        # flatten channels × windows into 310-dimensional vectors
+        eeg_vecs = eeg_flat.reshape(eeg_flat.shape[0], -1)  # (samples, 310)
 
-        eeg = eeg[..., 0, :]  # Take only the first 1-second window → (7, 40, 5, 62, 5) → (7, 40, 5, 62)
-        eeg = eeg.reshape(-1, 62, 5).mean(axis=2)  # (1400, 62)
-        self.eeg = eeg.reshape(len(eeg), -1)  # (1400, 310)
-        self.text = text[..., 0, :, :]  # (7, 40, 5, 77, 768) → (7, 40, 5, 77, 768) if needed, placeholder for proper selection
-        self.text = self.text.reshape(len(eeg), 77 * 768)  # (1400, 59016)
+        # Load all CLIP text embeddings (.pt) by block
+        text_list = []
+        for fname in sorted(os.listdir(text_dir)):
+            if fname.endswith('.pt'):
+                tensor = torch.load(os.path.join(text_dir, fname))  # (200, seq_len, dim)
+                emb = tensor.reshape(tensor.shape[0], -1).cpu().numpy()  # (200, 77*768)
+                text_list.append(emb)
+        text_all = np.vstack(text_list)  # (blocks*200, 77*768)
 
+        # Align lengths
+        n_eeg, n_text = eeg_vecs.shape[0], text_all.shape[0]
+        if n_eeg != n_text:
+            min_n = min(n_eeg, n_text)
+            print(f"Warning: EEG samples={n_eeg} vs TEXT samples={n_text}. Trimming to {min_n}.")
+            eeg_vecs = eeg_vecs[:min_n]
+            text_all = text_all[:min_n]
+
+        # Standardize EEG features
         scaler = StandardScaler()
-        self.eeg = scaler.fit_transform(self.eeg).astype(np.float32)
-        self.text = self.text.astype(np.float32)
+        eeg_std = scaler.fit_transform(eeg_vecs.astype(np.float32))
+
+        self.eeg = torch.from_numpy(eeg_std)
+        self.text = torch.from_numpy(text_all.astype(np.float32))
 
     def __len__(self):
-        return len(self.eeg)
+        return self.eeg.size(0)
 
     def __getitem__(self, idx):
         return self.eeg[idx], self.text[idx]
-
 def train():
+    seed_everything(114514)
     import argparse
     parser = argparse.ArgumentParser()
     root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
-    parser.add_argument('--eeg_file', type=str, default=f"{root}/data/EEG_embeddings/sub3.npy")
-    parser.add_argument('--text_file', type=str, default=f"{root}/data/Text_embeddings/block0_embeddings.npy")
-    parser.add_argument('--save_path', type=str, default=f"{root}/Gaspard_model/checkpoints/semantic_predictor.pth")
-    parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--lr', type=float, default=1e-4)
+    parser.add_argument('--eeg_file', type=str, default=f"{root}/data/DE_1per2s/sub1.npy")
+    parser.add_argument('--text_dir', type=str, default=f"{root}/data/Text_embeddings")
+    parser.add_argument('--save_path', type=str, default=f"{root}/Gaspard_model/checkpoints/semantic")
+    parser.add_argument('--epochs', type=int, default=200)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--lr', type=float, default=5e-4)
     parser.add_argument('--use_wandb', action='store_true')
     args = parser.parse_args()
 
-    dataset = EEGTextDataset(args.eeg_file, args.text_file)
-    val_size = int(0.1 * len(dataset))
-    train_size = len(dataset) - val_size
-    train_set, val_set = random_split(dataset, [train_size, val_size])
-
-    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
-    val_loader = DataLoader(val_set, batch_size=args.batch_size)
-
-    model = SemanticPredictor().cuda()
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    criterion = nn.MSELoss()
-
+    # Initialize Weights & Biases if requested
     if args.use_wandb:
-        wandb.init(project="eeg2video-semantic", config=vars(args))
+        wandb.init(project="eeg2video-semantic", name = 'semantic predictor', config=vars(args))
+
+    dataset = EEGTextDataset(args.eeg_file, args.text_dir)
+    train_size = int(0.8 * len(dataset))
+    val_size = len(dataset) - train_size
+    train_ds, val_ds = random_split(dataset, [train_size, val_size])
+    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=args.batch_size)
+
+    model = CLIP().cuda()
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    # Cosine annealing scheduler over epochs
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs*(len(train_loader)+len(val_loader)))
+    criterion = nn.MSELoss()
 
     for epoch in range(1, args.epochs + 1):
         model.train()
-        train_loss = 0
-        for x, y in train_loader:
-            x, y = x.cuda(), y.cuda()
+        train_loss = 0.0
+        for eeg_vec, text_emb in train_loader:
+            eeg_vec = eeg_vec.cuda()
+            text_emb = text_emb.cuda()
             optimizer.zero_grad()
-            out = model(x)
-            loss = criterion(out, y)
+            pred = model(eeg_vec)
+            loss = criterion(pred, text_emb)
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
         train_loss /= len(train_loader)
 
+        scheduler.step()
+
         model.eval()
-        val_loss = 0
+        val_loss = 0.0
         with torch.no_grad():
-            for x, y in val_loader:
-                x, y = x.cuda(), y.cuda()
-                out = model(x)
-                val_loss += criterion(out, y).item()
+            for eeg_vec, text_emb in val_loader:
+                eeg_vec = eeg_vec.cuda()
+                text_emb = text_emb.cuda()
+                val_loss += criterion(model(eeg_vec), text_emb).item()
         val_loss /= len(val_loader)
 
-        print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
+        # Logging
+        print(f"Epoch {epoch:03d}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}, lr={scheduler.get_last_lr()[0]:.6f}")
         if args.use_wandb:
-            wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
+            wandb.log({
+                "epoch": epoch,
+                "train_loss": train_loss,
+                "val_loss": val_loss,
+                "lr": scheduler.get_last_lr()[0]
+            })
+        
+    os.makedirs(args.save_path, exist_ok=True)
+    torch.save(model.state_dict(), os.path.join(args.save_path, 'eeg2text_clip.pt'))
+    print(f"Model saved to {args.save_path}/eeg2text_clip.pt")
 
-    torch.save(model.state_dict(), args.save_path)
-    print(f"Model saved to {args.save_path}")
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     train()

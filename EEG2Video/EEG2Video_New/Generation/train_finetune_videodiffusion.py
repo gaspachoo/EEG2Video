@@ -191,6 +191,8 @@ def main(
     video_ind = selected_indices
     for ind in video_ind:
         file = video_path + '/' + str(ind+1) + '.mp4'
+        print(file.shape)  # (6, 3, H, W)
+
         #file = video_path + '/' + str(ind+1) + '.gif'
         video_files.append(file)
         

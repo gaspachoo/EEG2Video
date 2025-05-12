@@ -39,11 +39,12 @@ def seed_everything(seed=0, cudnn_deterministic=True):
         print('Note: not using cudnn.deterministic')
 seed_everything(114514)
 
-eeg = torch.load('',map_location='cpu')
+root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+eeg = torch.load(f'{root}/data/EEG/sub1.npy',map_location='cpu')
 
 negative = eeg.mean(dim=0)
 
-pretrained_model_path = "Zhoutianyi/huggingface/stable-diffusion-v1-4"
+pretrained_model_path = "CompVis/stable-diffusion-v1-4" #"Zhoutianyi/huggingface/stable-diffusion-v1-4"
 my_model_path = "outputs/40_classes_200_epoch"
 
 unet = UNet3DConditionModel.from_pretrained(my_model_path, subfolder='unet', torch_dtype=torch.float16).to(device)

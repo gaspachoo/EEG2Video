@@ -1,6 +1,7 @@
 import numpy as np
 from DE_PSD import DE_PSD
 from tqdm import tqdm
+import os
 
 # Extract DE or PSD features with a 2-second window, that is, for each 2-second EEG segment, we extract a DE or PSD feature.
 # Input the shape of (7 * 40 * 5 * 62 * 2s*fre), meaning 7 blocks, 40 concepts, 5 video clips, 62 channels, and 2s*fre time-points.
@@ -9,8 +10,8 @@ from tqdm import tqdm
 fre = 200
 
 for subname in range(1,21):
-
-    loaded_data = np.load('./data/EEG_1s/sub'+ str(subname) + '_segmented.npz')#/data/EEG2Video/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy
+    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+    loaded_data = np.load(f'{root}/data/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy')
     # (7 * 40 * 5 * 62 * 2*fre)
 
     print("Successfully loaded .npy file.")
@@ -36,5 +37,8 @@ for subname in range(1,21):
         DE_data = np.concatenate((DE_data, de_block_data.reshape(1, 40, 5, 62, 5)))
         PSD_data = np.concatenate((PSD_data, psd_block_data.reshape(1, 40, 5, 62, 5)))
 
-    np.save("./data/DE_1per2s_sw/" + str(subname) +".npy", DE_data)
-    np.save("./data/PSD_1per2s_sw/" + str(subname) + ".npy", PSD_data)
+
+    os.makedirs(f"{root}/data/DE_1per2s", exist_ok=True)
+    os.makedirs(f"{root}/data/PSD_1per2s", exist_ok=True)
+    np.save(f"{root}/data/DE_1per2s/sub" + str(subname) +".npy", DE_data)
+    np.save(f"{root}/data/PSD_1per2s/sub" + str(subname) + ".npy", PSD_data)

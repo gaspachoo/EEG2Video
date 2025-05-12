@@ -12,3 +12,4 @@ venv/
 latent_out_block7_40_classes.npy
 outputs/
 40_classes_latent_add_noise.pt
+stable-diffusion-v1-4/ 

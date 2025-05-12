@@ -1,7 +1,5 @@
 import numpy as np 
 
-
-
 '''
 Description: 
 Author: Zhou Tianyi
