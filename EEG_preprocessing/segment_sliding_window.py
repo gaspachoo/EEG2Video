@@ -1,64 +1,49 @@
-import numpy as np
 import os
-from tqdm import tqdm
+import numpy as np
+from numpy.lib.stride_tricks import sliding_window_view
 
-fre = 200
-samples_per_concept = 5 * 2 * fre  # 5 videos of 2s
-samples_hint = 3 * fre             # 3 seconds of hint
-window_size = int(fre*0.5)               # 0.5 sec
-step_size = int(fre*0.25)              # 0.25 sec
+root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+# Dossiers d'entrée et de sortie
+INPUT_DIR = f'{root}/data/Segmented_Rawf_200Hz_2s'
 
-n_blocks = 7
-n_concepts = 40
-n_videos = 5
 
-input_folder = './data/EEG'
-label_file = './data/meta_info/All_video_label.npy'
-output_folder = './data/EEG_500ms_sw'
-os.makedirs(output_folder, exist_ok=True)
+# Paramètres de découpage
+FS = 200                  # fréquence d'échantillonnage (Hz)
+WIN_S = 0.5               # fenêtre (secondes)
+STEP_S = 0.25             # recouvrement (secondes)
+WIN_T = int(FS * WIN_S)   # points temporels par fenêtre (100)
+STEP_T = int(FS * STEP_S) # pas entre fenêtres (50)
 
-all_labels = np.load(label_file)  # shape: (7, 40)
+OUTPUT_DIR = f'{root}/data/Segmented_{int(1000*WIN_S)}ms_sw'
 
-for subj in range(1, 21):
-    input_path = os.path.join(input_folder, f'sub{subj}.npy')
-    eeg = np.load(input_path)  # shape: (7, 62, 104000)
-    print(f"\n🧠 Processing subject {subj} - shape {eeg.shape}")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    segments = []
-    labels = []
-    blocks = []
+for fname in os.listdir(INPUT_DIR):
+    if not fname.endswith('.npy'):
+        continue
 
-    for block in range(n_blocks):
-        eeg_block = eeg[block]  # (62, 104000)
-        block_labels = all_labels[block]  # (40,)
+    path_in = os.path.join(INPUT_DIR, fname)
+    data = np.load(path_in)  # shape: (7, 40, 5, 62, 400)
 
-        for concept in range(n_concepts):
-            start = concept * (samples_hint + samples_per_concept)
-            if start + samples_hint + n_videos * 2 * fre > eeg_block.shape[1]:
-                print(f"⚠️ Skip: Block {block}, Concept {concept} - not enough space for 5 videos")
-                break
+    # Vérification de la forme
+    if data.ndim != 5 or data.shape[-1] != 2 * FS:
+        print(f"Skipping {fname}: unexpected shape {data.shape}")
+        continue
 
-            for vid in range(n_videos):
-                seg_start = start + samples_hint + vid * 2 * fre
-                seg_end = seg_start + 2 * fre  # 2s
+    # Sliding window le long de l'axe temporel (-1)
+    windows = sliding_window_view(data, window_shape=WIN_T, axis=-1)
+    # windows.shape -> (7, 40, 5, 62, 301, 100)
 
-                eeg_vid = eeg_block[:, seg_start:seg_end]  # (62, 400)
-                if eeg_vid.shape[1] < 2 * fre:
-                    print(f"⚠️ Skip: Block {block}, Concept {concept}, Vid {vid} - too short")
-                    continue
+    # Sous-échantillonner selon le pas STEP_T pour obtenir 7 fenêtres
+    windows = windows[..., ::STEP_T, :]
+    # windows.shape -> (7, 40, 5, 62, 7, 100)
 
-                for win_start in range(0, eeg_vid.shape[1] - window_size + 1, step_size):
-                    segment = eeg_vid[:, win_start:win_start + window_size]  # (62, window_size)
-                    segments.append(segment)
-                    labels.append(block_labels[concept]-1)
-                    blocks.append(block)
+    # Réorganiser pour avoir (7, 40, 5, 7, 62, 100)
+    windows = windows.transpose(0, 1, 2, 4, 3, 5)
 
-    segments = np.stack(segments)  # (N, 62, window_size)
-    labels = np.array(labels)      # (N,)
-    blocks = np.array(blocks)      # (N,)
+    # Enregistrement
+    out_path = os.path.join(OUTPUT_DIR, fname)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    np.save(out_path, windows)
 
-    output_path = os.path.join(output_folder, f"sub{subj}_segmented.npz")
-    np.savez(output_path, eeg=segments.astype(np.float32),
-             labels=labels.astype(np.int64),
-             blocks=blocks.astype(np.int64))
-    print(f"✅ Saved sub{subj} with shape {segments.shape} to {output_folder}")
+    print(f"Saved segmented windows for {fname} -> {windows.shape}")

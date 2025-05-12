@@ -26,7 +26,7 @@ class GLMNet(nn.Module):
     def __init__(self, out_dim: int = 40, emb_dim: int = 256): ### Use required embedding dim/2 here
         super().__init__()
         self.raw_global  = shallownet(emb_dim, 62, 200)  # (B,1,62,200)
-        self.freq_local  = mlpnet(emb_dim, len(OCCIPITAL_IDX) * 5)  # (B,12,5)
+        self.freq_local  = mlpnet(emb_dim, len(OCCIPITAL_IDX) * 5)  # (B,1,len(occipital*5)
         self.fc = nn.Sequential(
             nn.Linear(emb_dim * 2, emb_dim), nn.GELU(), nn.Linear(emb_dim, out_dim)
         )

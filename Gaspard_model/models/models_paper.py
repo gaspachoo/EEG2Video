@@ -111,7 +111,8 @@ class shallownet(nn.Module):
             nn.Conv2d(40, 40, (C, 1), (1, 1)),
             nn.BatchNorm2d(40),
             nn.ELU(),
-            nn.AvgPool2d((1, 51), (1, 5)),
+            #nn.AvgPool2d((1, 51), (1, 5)),
+            nn.AdaptiveAvgPool2d((1, 26)),
             nn.Dropout(0.5),
         )
         self.out = nn.Linear(1040*(T//200), out_dim)
