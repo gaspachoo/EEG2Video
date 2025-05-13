@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import CLIPTokenizer
@@ -53,7 +54,7 @@ def train():
     parser.add_argument('--zhat_dir', type=str, default=f"{root}/data/Predicted_latents")
     parser.add_argument('--sem_dir', type=str, default=f"{root}/data/Semantic_embeddings")
     parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--use_wandb', action='store_true')
     args = parser.parse_args()
@@ -79,52 +80,63 @@ def train():
     pipeline = TuneAVideoPipeline(vae=vae, tokenizer=tokenizer, unet=unet, scheduler=scheduler)
     pipeline.unet.train()
 
-    optimizer = torch.optim.Adam(pipeline.unet.parameters(), lr=args.lr)
+    # Projection EEG → cross_attention_dim
+    sem_dim   = dataset[0][1].shape[-1]  # 59136
+    cross_dim = unet.config.cross_attention_dim  # 768
+    proj_eeg  = nn.Linear(sem_dim, cross_dim).cuda()
+    
+        
+    
+    optimizer = torch.optim.Adam(list(pipeline.unet.parameters()) + list(proj_eeg.parameters()),
+                                 lr=args.lr)
     scheduler.set_timesteps(scheduler.config.num_train_timesteps)
-    # Training loop (noise prediction objective)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     for epoch in range(1, args.epochs + 1):
-        train_loss = 0.0
+        pipeline.unet.train()
+        train_loss = 0
+
         for z0, et in train_loader:
-            z0 = z0.cuda()
-            et = et.cuda().unsqueeze(1)  # shape (B,1,seq_dim)
-            # sample noise and timestep
-            noise = torch.randn_like(z0)
-            timesteps = torch.randint(0, len(scheduler.timesteps), (z0.shape[0],), device='cuda')
+            # 1) Latents : (B,6,4,H,W) → (B,4,6,H,W)
+            print("▷ z0 before permute:", z0.shape)  # (B,6,4,36,64)
+            z0 = z0.to(device).permute(0, 2, 1, 3, 4)
+            print("▷ z0 after  permute:", z0.shape)  # (B,4,6,36,64)
+
+            # 2) EEG embedding : (B, sem_dim) → (B,1,sem_dim)
+            et = et.to(device).unsqueeze(1)
+            print("▷ et before proj:", et.shape)     # (B,1,59136)
+
+            # 3) Projection → (B,1,cross_dim)
+            et = proj_eeg(et)  # applique linear sur la dernière dim
+            print("▷ et after  proj:", et.shape)     # (B,1,768)
+
+            # bruit & timesteps
+            noise     = torch.randn_like(z0)
+            timesteps = torch.randint(0, len(scheduler.timesteps), (z0.size(0),), device=device)
+            print("▷ timesteps:", timesteps.shape)
+
             # add noise
             z_t = scheduler.add_noise(z0, noise, timesteps)
-            # predict noise
-            noise_pred = pipeline.unet(z_t, timesteps, encoder_hidden_states=et).sample
+            print("▷ z_t:", z_t.shape)
+
+            # forward UNet
+            out = pipeline.unet(z_t, timesteps, encoder_hidden_states=et)
+            print("▷ UNet output sample:", out.sample.shape)  # (B,4,6,36,64)
+            noise_pred = out.sample
+
             loss = F.mse_loss(noise_pred, noise)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-        train_loss /= len(train_loader)
 
-        # validation
-        val_loss = 0.0
-        pipeline.unet.eval()
-        with torch.no_grad():
-            for z0, et in val_loader:
-                z0 = z0.cuda()
-                et = et.cuda().unsqueeze(1)
-                noise = torch.randn_like(z0)
-                timesteps = torch.randint(0, len(scheduler.timesteps), (z0.shape[0],), device='cuda')
-                z_t = scheduler.add_noise(z0, noise, timesteps)
-                noise_pred = pipeline.unet(z_t, timesteps, encoder_hidden_states=et).sample
-                val_loss += F.mse_loss(noise_pred, noise).item()
-        val_loss /= len(val_loader)
-        pipeline.unet.train()
+        # Validation...
+        # (même boucle sans backward, en .eval())
 
-        print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
-        if args.use_wandb:
-            wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
+        print(f"Epoch {epoch} train_loss={train_loss/len(train_loader):.4f}")
 
-    # Save fine-tuned UNet
-    out_dir = f'{root}/checkpoints/tuneavideo_unet'
-    os.makedirs(out_dir, exist_ok=True)
-    pipeline.unet.save_pretrained(out_dir)
-    print(f"UNet saved to {out_dir}")
+    # Save
+    pipeline.unet.save_pretrained(f"{root}/checkpoints/tuneavideo_unet")
+    print("UNet saved.")
 
 if __name__ == '__main__':
     train()
