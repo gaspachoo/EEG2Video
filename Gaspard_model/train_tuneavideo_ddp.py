@@ -16,6 +16,8 @@ from torch.cuda.amp import autocast, GradScaler
 import wandb
 from tqdm import tqdm
 
+os.environ["PYTORCH_CUDA_ALLOC_conf"] = "max_split_size_mb:15"
+
 
 class EEGVideoDataset(Dataset):
     def __init__(self, zhat_dir: str, sem_dir: str):
@@ -58,7 +60,7 @@ class TuneAVideoTrainer:
 
         self.train_loader = DataLoader(
             train_ds, batch_size=args.batch_size,
-            sampler=train_sampler, pin_memory=True
+            sampler=train_sampler, pin_memory=True,shuffle=False
         )
         self.val_loader = DataLoader(
             val_ds, batch_size=args.batch_size,
@@ -68,8 +70,8 @@ class TuneAVideoTrainer:
         root = args.root
         self.vae = AutoencoderKL.from_pretrained(
             'CompVis/stable-diffusion-v1-4', subfolder='vae'
-        ).to(self.device)
-        self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
+        ).to("cpu")
+        self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch32')
         self.unet = UNet3DConditionModel.from_pretrained_2d(
             f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4",
             subfolder='unet'
@@ -167,6 +169,7 @@ class TuneAVideoTrainer:
                     encoder_hidden_states=et
                 )
                 total_loss += F.mse_loss(out.sample, noise).item()
+        
         return total_loss / len(self.val_loader)
 
     def _save_checkpoint(self, epoch: int):
@@ -181,7 +184,9 @@ class TuneAVideoTrainer:
     def train(self):
         for epoch in range(1, self.args.epochs + 1):
             tr_loss = self._train_epoch(epoch)
+            torch.cuda.empty_cache()
             val_loss = self._validate_epoch()
+            torch.cuda.empty_cache()
             if self.rank == 0:
                 print(
                     f"Epoch {epoch}: train_loss={tr_loss:.4f}, val_loss={val_loss:.4f}"
