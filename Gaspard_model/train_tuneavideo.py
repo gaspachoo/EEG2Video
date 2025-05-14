@@ -61,10 +61,10 @@ def train():
     vae = AutoencoderKL.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='vae').to(device)
     vae.requires_grad_(False)
 
-    tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-large-patch14')
-    text_encoder = CLIPTextModel.from_pretrained('openai/clip-vit-large-patch14').to(device)
+    tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
+    text_encoder = CLIPTextModel.from_pretrained('openai/clip-vit-base-patch16').to(device)
 
-    unet = UNet3DConditionModel.from_pretrained_2d(f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4", subfolder="unet").cuda()
+    unet = UNet3DConditionModel.from_pretrained_2d(f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4", subfolder="unet").to(device)
     unet.enable_gradient_checkpointing()
     try:
         unet.enable_xformers_memory_efficient_attention()
