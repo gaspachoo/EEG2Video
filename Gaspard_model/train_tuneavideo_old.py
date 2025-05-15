@@ -42,8 +42,8 @@ class EEGVideoDataset(Dataset):
     
     def __getitem__(self, idx):
         # z0 : (6,4,36,64), e_t : (77*768,)
-        z0 = torch.from_numpy(self.z_hat[idx]).float()
-        et = torch.from_numpy(self.e_t[idx]).float()
+        z0 = torch.tensor(self.z_hat[idx]).float()
+        et = torch.tensor(self.e_t[idx]).float()
         return z0, et
 
 

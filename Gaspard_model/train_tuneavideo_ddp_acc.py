@@ -20,7 +20,7 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:24"
 
 
 class EEGVideoDataset(Dataset):
-    def __init__(self, zhat_dir: str, sem_dir: str):
+    def __init__(self, zhat_dir: str, sem_dir: str, max_samples: int = None):
         z_blocks, e_blocks = [], []
         for fname in sorted(os.listdir(zhat_dir)):
             if fname.endswith('.npy'):
@@ -33,13 +33,21 @@ class EEGVideoDataset(Dataset):
         assert self.z_hat.shape[0] == self.e_t.shape[0], (
             f"Mismatch: {self.z_hat.shape[0]} vs {self.e_t.shape[0]}"
         )
+        
+        # si on veut limiter la taille
+        if max_samples is not None and max_samples < len(self.z_hat):
+            # on tire aléatoirement max_samples indices
+            idxs = np.random.choice(len(self.z_hat), max_samples, replace=False)
+            self.z_hat = self.z_hat[idxs]
+            self.e_t   = self.e_t[idxs]
 
     def __len__(self):
         return len(self.z_hat)
 
     def __getitem__(self, idx):
-        z0 = torch.from_numpy(self.z_hat[idx]).float()
-        et = torch.from_numpy(self.e_t[idx]).float()
+        z0 = torch.tensor(self.z_hat[idx]).float()
+        et = torch.tensor(self.e_t[idx]).float()
+
         return z0, et
 
 
@@ -50,7 +58,7 @@ class TuneAVideoTrainer:
         self.world_size = world_size
         self.device = torch.device(f'cuda:{local_rank}')
 
-        dataset = EEGVideoDataset(args.zhat_dir, args.sem_dir)
+        dataset = EEGVideoDataset(args.zhat_dir, args.sem_dir, max_samples=args.max_samples)
         n_train = int(0.8 * len(dataset))
         n_val = len(dataset) - n_train
         train_ds, val_ds = random_split(dataset, [n_train, n_val])
@@ -242,6 +250,7 @@ if __name__ == '__main__':
     root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
     parser.add_argument('--zhat_dir',   type=str, default=f"{root}/data/Predicted_latents")
     parser.add_argument('--sem_dir',    type=str, default=f"{root}/data/Semantic_embeddings")
+    parser.add_argument('--max_samples', type=int, default=None)
     parser.add_argument('--epochs',     type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--lr',         type=float, default=1e-4)
