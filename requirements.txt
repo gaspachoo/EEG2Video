@@ -2,12 +2,12 @@ accelerate==0.15.0
 bitsandbytes==0.35.0
 decord==0.6.0
 diffusers==0.11.1
-einops==0.8.1
+#einops==0.8.1
 imageio==2.37.0
-matplotlib==3.10.1
-numpy==2.2.5
+#matplotlib==3.10.1
+#numpy==2.2.5
 omegaconf==2.3.0
-opencv_python==4.11.0.86
+#opencv_python==4.11.0.86
 packaging==25.0
 pandas==2.2.3
 Pillow==11.2.1
@@ -21,3 +21,5 @@ xformers==0.0.16
 wandb
 einops==0.4.1
 huggingface_hub==0.12.1
+transformers==4.25.1
+tokenizers==0.13.3
