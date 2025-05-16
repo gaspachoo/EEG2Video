@@ -6,7 +6,7 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import CLIPTokenizer
 from diffusers import AutoencoderKL, PNDMScheduler, BitsAndBytesConfig
-from diffusers.models.unets.unet_3d_condition import UNet3DConditionModel
+from diffusers.models import UNet2DConditionModel
 
 from accelerate import Accelerator
 import wandb
@@ -75,18 +75,18 @@ class TuneAVideoTrainer:
         self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
 
         # Load UNet with bitsandbytes quant + fp16 dtype and offload
-        self.unet = UNet3DConditionModel.from_pretrained(
+        self.unet = UNet2DConditionModel.from_pretrained(
             "CompVis/stable-diffusion-v1-4",
             subfolder="unet",
             torch_dtype=torch.float16,
             quantization_config=quant_config
-        ).to(self.device)
+        )
         
 
         # Scheduler on CPU
         self.scheduler = PNDMScheduler.from_pretrained(
             'CompVis/stable-diffusion-v1-4', subfolder='scheduler'
-        ).to('cpu')
+        )
 
         # Semantic projection on device (float32 to avoid dtype mismatches)
         sem_dim = dataset[0][1].shape[-1]
@@ -128,6 +128,7 @@ class TuneAVideoTrainer:
             z0 = z0.to(self.device).permute(0,2,1,3,4)
             et = et.to(self.device).unsqueeze(1)
 
+            print("z0.shape : ",z0.shape, "et.shape : ", et.shape)
             noise = torch.randn_like(z0)
             timesteps = torch.randint(
                 0, len(self.scheduler.timesteps), (z0.size(0),), device=self.device

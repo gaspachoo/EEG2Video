@@ -159,10 +159,14 @@ class TuneAVideoTrainer:
                     z_t, timesteps,
                     encoder_hidden_states=et
                 )
+                print(f"[Ep{epoch}][Rank{self.rank}] Après forward — Allocated: "
+                f"{torch.cuda.memory_allocated()/1e9:.2f} GB, Reserved: {torch.cuda.memory_reserved()/1e9:.2f} GB")
                 loss = F.mse_loss(out.sample, noise)
             self.scaler.scale(loss).backward()
             self.scaler.step(self.optimizer)
             self.scaler.update()
+            print(f"[Ep{epoch}][Rank{self.rank}] Après backward — Allocated: "
+            f"{torch.cuda.memory_allocated()/1e9:.2f} GB, Reserved: {torch.cuda.memory_reserved()/1e9:.2f} GB")
 
             total_loss += loss.item()
             del z0, et, noise, timesteps, z_t, out, loss
