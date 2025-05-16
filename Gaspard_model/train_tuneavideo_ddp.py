@@ -16,6 +16,7 @@ from torch.cuda.amp import autocast, GradScaler
 import wandb
 from tqdm import tqdm
 
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:24"
 
 class EEGVideoDataset(Dataset):
     def __init__(self, zhat_dir: str, sem_dir: str):
@@ -90,6 +91,7 @@ class TuneAVideoTrainer:
         cross_dim = self.unet.config.cross_attention_dim
         self.proj_eeg = nn.Linear(sem_dim, cross_dim).to(self.device)
 
+        
         self.pipeline.unet = DDP(
             self.pipeline.unet, device_ids=[local_rank], output_device=local_rank
         )
@@ -143,6 +145,10 @@ class TuneAVideoTrainer:
             self.scaler.update()
 
             total_loss += loss.item()
+            del z0, et, noise, timesteps, z_t, out, loss
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
+            
         return total_loss / len(self.train_loader)
 
     def _validate_epoch(self):
@@ -167,6 +173,9 @@ class TuneAVideoTrainer:
                     encoder_hidden_states=et
                 )
                 total_loss += F.mse_loss(out.sample, noise).item()
+                del z0, et, noise, timesteps, z_t, out
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
         return total_loss / len(self.val_loader)
 
     def _save_checkpoint(self, epoch: int):
