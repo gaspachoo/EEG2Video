@@ -10,17 +10,19 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from transformers import CLIPTokenizer
 from diffusers import AutoencoderKL, PNDMScheduler
 import torch.multiprocessing as mp
-from models.unet import UNet3DConditionModel
+from diffusers import UNet3DConditionModel, BitsAndBytesConfig, pipeline_utils
 from pipelines.pipeline_tuneeeg2video import TuneAVideoPipeline
 from torch.cuda.amp import autocast, GradScaler
 import wandb
 from tqdm import tqdm
 
+# Quantize to 8-bit
+quant_config = BitsAndBytesConfig(load_in_8bit=True)
+
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:24"
 
-
 class EEGVideoDataset(Dataset):
-    def __init__(self, zhat_dir: str, sem_dir: str, max_samples: int = None):
+    def __init__(self, zhat_dir: str, sem_dir: str):
         z_blocks, e_blocks = [], []
         for fname in sorted(os.listdir(zhat_dir)):
             if fname.endswith('.npy'):
@@ -33,21 +35,13 @@ class EEGVideoDataset(Dataset):
         assert self.z_hat.shape[0] == self.e_t.shape[0], (
             f"Mismatch: {self.z_hat.shape[0]} vs {self.e_t.shape[0]}"
         )
-        
-        # si on veut limiter la taille
-        if max_samples is not None and max_samples < len(self.z_hat):
-            # on tire aléatoirement max_samples indices
-            idxs = np.random.choice(len(self.z_hat), max_samples, replace=False)
-            self.z_hat = self.z_hat[idxs]
-            self.e_t   = self.e_t[idxs]
 
     def __len__(self):
         return len(self.z_hat)
 
     def __getitem__(self, idx):
-        z0 = torch.tensor(self.z_hat[idx]).float()
-        et = torch.tensor(self.e_t[idx]).float()
-
+        z0 = torch.from_numpy(self.z_hat[idx]).float()
+        et = torch.from_numpy(self.e_t[idx]).float()
         return z0, et
 
 
@@ -58,7 +52,7 @@ class TuneAVideoTrainer:
         self.world_size = world_size
         self.device = torch.device(f'cuda:{local_rank}')
 
-        dataset = EEGVideoDataset(args.zhat_dir, args.sem_dir, max_samples=args.max_samples)
+        dataset = EEGVideoDataset(args.zhat_dir, args.sem_dir)
         n_train = int(0.8 * len(dataset))
         n_val = len(dataset) - n_train
         train_ds, val_ds = random_split(dataset, [n_train, n_val])
@@ -68,7 +62,7 @@ class TuneAVideoTrainer:
 
         self.train_loader = DataLoader(
             train_ds, batch_size=args.batch_size,
-            sampler=train_sampler, pin_memory=True, shuffle=False
+            sampler=train_sampler, pin_memory=True
         )
         self.val_loader = DataLoader(
             val_ds, batch_size=args.batch_size,
@@ -78,11 +72,16 @@ class TuneAVideoTrainer:
         root = args.root
         self.vae = AutoencoderKL.from_pretrained(
             'CompVis/stable-diffusion-v1-4', subfolder='vae'
-        ).to("cpu")
-        self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch32')
-        self.unet = UNet3DConditionModel.from_pretrained_2d(
-            f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4",
-            subfolder='unet'
+        ).to("cpu").eval()
+        for p in self.vae.parameters():
+            p.requires_grad_(False)
+        self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
+        self.unet = UNet3DConditionModel.from_pretrained(
+            "CompVis/stable-diffusion-v1-4",    # ou votre repo Hugging Face
+            subfolder="unet",                   # si c’est un sous-dossier
+            torch_dtype=torch.float16,          # mixte FP16 + int8
+            quantization_config=quant_config,   # active bitsandbytes
+            device_map={f"": local_rank}        # ou "auto" si vous voulez
         ).to(self.device)
         self.scheduler = PNDMScheduler.from_pretrained(
             'CompVis/stable-diffusion-v1-4', subfolder='scheduler'
@@ -100,9 +99,15 @@ class TuneAVideoTrainer:
         cross_dim = self.unet.config.cross_attention_dim
         self.proj_eeg = nn.Linear(sem_dim, cross_dim).to(self.device)
 
+        pipeline_utils.get_accelerate_model_args().enable_model_cpu_offload()
+        
         self.pipeline.unet = DDP(
-            self.pipeline.unet, device_ids=[local_rank], output_device=local_rank
-        )
+             self.pipeline.unet,
+             device_ids=[local_rank],
+             output_device=local_rank,
+             gradient_as_bucket_view=True,   # saves one copy of grads
+             bucket_cap_mb = 100             # split big buckets
+            )
         self.proj_eeg = DDP(
             self.proj_eeg, device_ids=[local_rank], output_device=local_rank
         )
@@ -118,9 +123,7 @@ class TuneAVideoTrainer:
         if args.use_wandb and rank == 0:
             wandb.init(project='eeg2video-tuneavideo', config=vars(args))
 
-        # Setup mixed precision
-        self.use_amp = args.mixed_precision
-        self.scaler = GradScaler() if self.use_amp else None
+        self.scaler = GradScaler()
         self.args = args
         self.train_sampler = train_sampler
 
@@ -143,35 +146,28 @@ class TuneAVideoTrainer:
             )
             z_t = self.scheduler.add_noise(z0, noise, timesteps)
 
-            self.optimizer.zero_grad()
-            if self.use_amp:
-                with autocast():
-                    out = self.pipeline.unet(
-                        z_t, timesteps,
-                        encoder_hidden_states=et
-                    )
-                    loss = F.mse_loss(out.sample, noise)
-                self.scaler.scale(loss).backward()
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
-            else:
+            self.optimizer.zero_grad(set_to_none=True)
+            with autocast():
                 out = self.pipeline.unet(
                     z_t, timesteps,
                     encoder_hidden_states=et
                 )
                 loss = F.mse_loss(out.sample, noise)
-                loss.backward()
-                self.optimizer.step()
+            self.scaler.scale(loss).backward()
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
 
             total_loss += loss.item()
+            del z0, et, noise, timesteps, z_t, out, loss
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
+            
         return total_loss / len(self.train_loader)
 
     def _validate_epoch(self):
         self.pipeline.unet.eval()
         total_loss = 0.0
-        with torch.no_grad():
-            if self.use_amp:
-                autocast_ctx = autocast()
+        with torch.no_grad(), autocast():
             for z0, et in tqdm(
                 self.val_loader,
                 desc=f"Rank {self.rank} | Validation"
@@ -185,19 +181,14 @@ class TuneAVideoTrainer:
                     (z0.size(0),), device=self.device
                 )
                 z_t = self.scheduler.add_noise(z0, noise, timesteps)
-                if self.use_amp:
-                    with autocast_ctx:
-                        out = self.pipeline.unet(
-                            z_t, timesteps,
-                            encoder_hidden_states=et
-                        )
-                        total_loss += F.mse_loss(out.sample, noise).item()
-                else:
-                    out = self.pipeline.unet(
-                        z_t, timesteps,
-                        encoder_hidden_states=et
-                    )
-                    total_loss += F.mse_loss(out.sample, noise).item()
+                out = self.pipeline.unet(
+                    z_t, timesteps,
+                    encoder_hidden_states=et
+                )
+                total_loss += F.mse_loss(out.sample, noise).item()
+                del z0, et, noise, timesteps, z_t, out
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
         return total_loss / len(self.val_loader)
 
     def _save_checkpoint(self, epoch: int):
@@ -212,9 +203,7 @@ class TuneAVideoTrainer:
     def train(self):
         for epoch in range(1, self.args.epochs + 1):
             tr_loss = self._train_epoch(epoch)
-            torch.cuda.empty_cache()
             val_loss = self._validate_epoch()
-            torch.cuda.empty_cache()
             if self.rank == 0:
                 print(
                     f"Epoch {epoch}: train_loss={tr_loss:.4f}, val_loss={val_loss:.4f}"
@@ -250,14 +239,12 @@ if __name__ == '__main__':
     root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
     parser.add_argument('--zhat_dir',   type=str, default=f"{root}/data/Predicted_latents")
     parser.add_argument('--sem_dir',    type=str, default=f"{root}/data/Semantic_embeddings")
-    parser.add_argument('--max_samples', type=int, default=None)
     parser.add_argument('--epochs',     type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--lr',         type=float, default=1e-4)
     parser.add_argument('--use_wandb',  action='store_true')
     parser.add_argument('--save_every', type=int, default=10)
     parser.add_argument('--root',       type=str, default=root)
-    parser.add_argument('--mixed_precision', action='store_true', help='Enable AMP mixed precision training')
     args = parser.parse_args()
 
     world_size = torch.cuda.device_count()

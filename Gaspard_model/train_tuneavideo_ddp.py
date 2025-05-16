@@ -69,7 +69,9 @@ class TuneAVideoTrainer:
         root = args.root
         self.vae = AutoencoderKL.from_pretrained(
             'CompVis/stable-diffusion-v1-4', subfolder='vae'
-        ).to(self.device)
+        ).to("cpu").eval()
+        for p in self.vae.parameters():
+            p.requires_grad_(False)
         self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
         self.unet = UNet3DConditionModel.from_pretrained_2d(
             f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4",
@@ -93,8 +95,12 @@ class TuneAVideoTrainer:
 
         
         self.pipeline.unet = DDP(
-            self.pipeline.unet, device_ids=[local_rank], output_device=local_rank
-        )
+             self.pipeline.unet,
+             device_ids=[local_rank],
+             output_device=local_rank,
+             gradient_as_bucket_view=True,   # saves one copy of grads
+             bucket_cap_mb = 100             # split big buckets
+            )
         self.proj_eeg = DDP(
             self.proj_eeg, device_ids=[local_rank], output_device=local_rank
         )
@@ -133,7 +139,7 @@ class TuneAVideoTrainer:
             )
             z_t = self.scheduler.add_noise(z0, noise, timesteps)
 
-            self.optimizer.zero_grad()
+            self.optimizer.zero_grad(set_to_none=True)
             with autocast():
                 out = self.pipeline.unet(
                     z_t, timesteps,
