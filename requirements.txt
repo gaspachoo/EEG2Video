@@ -1,7 +1,8 @@
 accelerate==0.15.0
 bitsandbytes==0.35.0
 decord==0.6.0
-diffusers==0.11.1
+diffusers[torch]==0.11.1
+triton
 #einops==0.8.1
 imageio==2.37.0
 #matplotlib==3.10.1
