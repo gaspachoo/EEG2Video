@@ -19,7 +19,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 
 from diffusers.configuration_utils import FrozenDict
 from diffusers.models import AutoencoderKL
-from diffusers.pipeline_utils import DiffusionPipeline
+from diffusers import DiffusionPipeline
 from diffusers.schedulers import (
     DDIMScheduler,
     DPMSolverMultistepScheduler,
@@ -32,7 +32,7 @@ from diffusers.utils import deprecate, logging, BaseOutput
 
 from einops import rearrange
 
-from models.unet import UNet3DConditionModel
+from diffusers import UNet3DConditionModel 
 
 torch.cuda.set_device(0)
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
