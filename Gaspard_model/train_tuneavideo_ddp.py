@@ -73,16 +73,24 @@ class TuneAVideoTrainer:
         for p in self.vae.parameters():
             p.requires_grad_(False)
         self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
-        
-        print("Allocated before unet load:", torch.cuda.memory_allocated() / 1e9, "GB")
-        print("Reserved before unet load: ", torch.cuda.memory_reserved()  / 1e9, "GB")
         self.unet = UNet3DConditionModel.from_pretrained_2d(
             f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4",
             subfolder='unet'
         ).to(self.device)
         
-        print("Allocated after unet load:", torch.cuda.memory_allocated() / 1e9, "GB")
-        print("Reserved after unet load: ", torch.cuda.memory_reserved()  / 1e9, "GB")
+        # --- freeze logic ---
+        # Freeze entire VAE
+        self.vae.requires_grad_(False)
+        # Freeze entire UNet, then unfreeze only the designated attention sub-modules
+        self.unet.requires_grad_(False)
+        trainable_modules = ("attn1.to_q", "attn2.to_q", "attn_temp")
+        for name, module in self.unet.named_modules():
+            if any(name.endswith(m) for m in trainable_modules):
+                for p in module.parameters():
+                    p.requires_grad = True
+        # ---------------------
+
+        
         self.scheduler = PNDMScheduler.from_pretrained(
             'CompVis/stable-diffusion-v1-4', subfolder='scheduler'
         )
@@ -97,12 +105,8 @@ class TuneAVideoTrainer:
 
         sem_dim = dataset[0][1].shape[-1]
         cross_dim = self.unet.config.cross_attention_dim
-        
-        print("Allocated before proj load:", torch.cuda.memory_allocated() / 1e9, "GB")
-        print("Reserved before proj load: ", torch.cuda.memory_reserved()  / 1e9, "GB")
+
         self.proj_eeg = nn.Linear(sem_dim, cross_dim).to(self.device)
-        print("Allocated after proj load:", torch.cuda.memory_allocated() / 1e9, "GB")
-        print("Reserved after proj load: ", torch.cuda.memory_reserved()  / 1e9, "GB")
         
         self.pipeline.unet = DDP(
              self.pipeline.unet,
@@ -138,14 +142,11 @@ class TuneAVideoTrainer:
             self.train_loader,
             desc=f"Rank {self.rank} | Train Epoch {epoch}/{self.args.epochs}"
         ):
-            print("Allocated before train data load:", torch.cuda.memory_allocated() / 1e9, "GB")
-            print("Reserver before train data load: ", torch.cuda.memory_reserved()  / 1e9, "GB")
+
             z0 = z0.to(self.device).permute(0,2,1,3,4)
             et = et.to(self.device).unsqueeze(1)
             et = self.proj_eeg(et)
             
-            print("Allocated after train data load:", torch.cuda.memory_allocated() / 1e9, "GB")
-            print("Reserved after train data load: ", torch.cuda.memory_reserved()  / 1e9, "GB")
             noise = torch.randn_like(z0, device=self.device)
             timesteps = torch.randint(
                 0, len(self.scheduler.timesteps),
@@ -183,12 +184,8 @@ class TuneAVideoTrainer:
                 self.val_loader,
                 desc=f"Rank {self.rank} | Validation"
             ):
-                print("Allocated before val data load:", torch.cuda.memory_allocated() / 1e9, "GB")
-                print("Reserved before val data load: ", torch.cuda.memory_reserved()  / 1e9, "GB")
                 z0 = z0.to(self.device).permute(0,2,1,3,4)
                 et = et.to(self.device).unsqueeze(1)
-                print("Allocated after val data load:", torch.cuda.memory_allocated() / 1e9, "GB")
-                print("Reserved after val data load: ", torch.cuda.memory_reserved()  / 1e9, "GB")
                 
                 et = self.proj_eeg(et)
                 noise = torch.randn_like(z0, device=self.device)
