@@ -1,160 +1,177 @@
 import os
-# Reduce CUDA allocation fragmentation
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:24"
-
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader, random_split
-from transformers import CLIPTokenizer, CLIPTextModel
+import torch.nn as nn
+import numpy as np
+from torch.utils.data import Dataset, DataLoader, random_split
+from transformers import CLIPTokenizer
 from diffusers import AutoencoderKL, PNDMScheduler
 from models.unet import UNet3DConditionModel
-from pipelines.pipeline_tuneavideo import TuneAVideoPipeline
-from torch.cuda.amp import autocast, GradScaler
+from pipelines.pipeline_tuneeeg2video import TuneAVideoPipeline
+from torch.cuda.amp import autocast
+import wandb
+from tqdm import tqdm
+import argparse
 
-# Disable TF32 to improve FP16 stability
-torch.backends.cuda.matmul.allow_tf32 = False
+os.environ["PYTORCH_CUDA_ALLOC_conf"] = "max_split_size_mb:24"
 
-# ---------------- Dataset ----------------
-class EEGVideoDataset(torch.utils.data.Dataset):
+class EEGVideoDataset(Dataset):
     def __init__(self, zhat_dir: str, sem_dir: str):
-        import numpy as np
-        z_blocks, e_blocks = [], []
+        z_blocks = []
         for fname in sorted(os.listdir(zhat_dir)):
-            if fname.endswith('.npy'):
-                z_blocks.append(np.load(os.path.join(zhat_dir, fname)))
-        for fname in sorted(os.listdir(sem_dir)):
-            if fname.endswith('.npy'):
-                e_blocks.append(np.load(os.path.join(sem_dir, fname)))
+            if not fname.endswith('.npy'): continue
+            z_blocks.append(np.load(os.path.join(zhat_dir, fname)))
         self.z_hat = np.concatenate(z_blocks, axis=0)
-        self.e_t   = np.concatenate(e_blocks, axis=0)
-        assert self.z_hat.shape[0] == self.e_t.shape[0]
-    def __len__(self): return self.z_hat.shape[0]
+
+        e_blocks = []
+        for fname in sorted(os.listdir(sem_dir)):
+            if not fname.endswith('.npy'): continue
+            e_blocks.append(np.load(os.path.join(sem_dir, fname)))
+        self.e_t = np.concatenate(e_blocks, axis=0)
+
+        assert self.z_hat.shape[0] == self.e_t.shape[0], \
+            f"Got {self.z_hat.shape[0]} ẑ vs {self.e_t.shape[0]} eₜ samples"
+
+    def __len__(self):
+        return self.z_hat.shape[0]
+
     def __getitem__(self, idx):
-        z0 = torch.from_numpy(self.z_hat[idx]).float()
-        et = torch.from_numpy(self.e_t[idx]).float()
+        z0 = torch.tensor(self.z_hat[idx]).float()
+        et = torch.tensor(self.e_t[idx]).float()
         return z0, et
 
-# ---------------- Training Script ----------------
-def train():
-    import argparse
-    parser = argparse.ArgumentParser()
-    root = os.path.expanduser('~/EEG2Video')
-    parser.add_argument('--zhat_dir',   type=str, default=f"{root}/data/Predicted_latents")
-    parser.add_argument('--sem_dir',    type=str, default=f"{root}/data/Semantic_embeddings")
-    parser.add_argument('--epochs',     type=int, default=50)
-    parser.add_argument('--batch_size', type=int, default=1)
-    parser.add_argument('--lr',         type=float, default=1e-4)
-    parser.add_argument('--accum_steps',type=int, default=2)
-    args = parser.parse_args()
+class TuneAVideoTrainer:
+    def __init__(self, args):
+        # device
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # data
+        dataset = EEGVideoDataset(args.zhat_dir, args.sem_dir)
+        train_size = int(0.8 * len(dataset))
+        val_size = len(dataset) - train_size
+        train_ds, val_ds = random_split(dataset, [train_size, val_size])
+        self.train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
+        self.val_loader   = DataLoader(val_ds,   batch_size=args.batch_size)
 
-    # Data
-    dataset = EEGVideoDataset(args.zhat_dir, args.sem_dir)
-    train_n = int(0.8 * len(dataset))
-    train_ds, val_ds = random_split(dataset, [train_n, len(dataset) - train_n])
-    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
-    val_loader   = DataLoader(val_ds,   batch_size=args.batch_size)
+        # pretrained components
+        root = args.root
+        self.vae = AutoencoderKL.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='vae').to(self.device)
+        self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
+        self.unet = UNet3DConditionModel.from_pretrained_2d(
+            f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4",
+            subfolder='unet'
+        ).to(self.device)
+        self.scheduler = PNDMScheduler.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='scheduler')
 
-    # Models
-    vae = AutoencoderKL.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='vae').to(device)
-    vae.requires_grad_(False)
+        # --- freeze logic ---
+        # Freeze entire VAE
+        self.vae.requires_grad_(False)
+        # Freeze entire UNet, then unfreeze only the designated attention sub-modules
+        self.unet.requires_grad_(False)
+        trainable_modules = ("attn1.to_q", "attn2.to_q", "attn_temp")
+        for name, module in self.unet.named_modules():
+            if any(name.endswith(m) for m in trainable_modules):
+                for p in module.parameters():
+                    p.requires_grad = True
+        # ---------------------
 
-    tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
-    text_encoder = CLIPTextModel.from_pretrained('openai/clip-vit-base-patch16').to(device)
+        # pipeline
+        self.pipeline = TuneAVideoPipeline(
+            vae=self.vae, tokenizer=self.tokenizer,
+            unet=self.unet, scheduler=self.scheduler
+        )
+        self.pipeline.unet.train()
 
-    unet = UNet3DConditionModel.from_pretrained_2d(f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4", subfolder="unet").to(device)
-    unet.enable_gradient_checkpointing()
-    try:
-        unet.enable_xformers_memory_efficient_attention()
-    except Exception:
-        pass
+        # projection
+        sem_dim   = dataset[0][1].shape[-1]
+        cross_dim = self.unet.config.cross_attention_dim
+        self.proj_eeg = nn.Linear(sem_dim, cross_dim).to(self.device)
 
-    scheduler = PNDMScheduler.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='scheduler')
-    scheduler.set_timesteps(scheduler.config.num_train_timesteps)
+        # optimizer & scheduler
+        # Only parameters with requires_grad=True (i.e. the three UNet submodules + proj_eeg) are optimized
+        self.optimizer = torch.optim.Adam(
+            list(self.pipeline.unet.parameters()) + list(self.proj_eeg.parameters()),
+            lr=args.lr
+        )
+        self.scheduler.set_timesteps(self.scheduler.config.num_train_timesteps)
 
-    # Include text_encoder in pipeline instantiation
-    pipeline = TuneAVideoPipeline(
-        vae=vae,
-        tokenizer=tokenizer,
-        text_encoder=text_encoder,
-        unet=unet,
-        scheduler=scheduler
-    )
-    pipeline.enable_vae_slicing()
+        # wandb
+        if args.use_wandb:
+            wandb.init(project="eeg2video-tuneavideo", config=vars(args))
 
-    # Projection EEG → cross_attention_dim
-    sem_dim   = dataset[0][1].shape[-1]
-    cross_dim = unet.config.cross_attention_dim
-    proj_eeg  = nn.Linear(sem_dim, cross_dim).to(device)
+        self.args = args
 
-    # Optimizer
-    parameters = list(unet.parameters()) + list(proj_eeg.parameters())
-    optimizer = torch.optim.Adam(parameters, lr=args.lr)
+    def _train_epoch(self, epoch):
+        self.pipeline.unet.train()
+        total_loss = 0.0
+        for z0, et in tqdm(self.train_loader, desc=f"Epoch {epoch}/{self.args.epochs} - train"):
+            z0 = z0.to(self.device).permute(0,2,1,3,4)
+            et = et.to(self.device).unsqueeze(1)
+            et = self.proj_eeg(et)
 
-    # AMP scaler
-    scaler = GradScaler()
+            noise = torch.randn_like(z0)
+            timesteps = torch.randint(0, len(self.scheduler.timesteps), (z0.size(0),), device=self.device)
+            z_t = self.scheduler.add_noise(z0, noise, timesteps)
 
-    # Training
-    for epoch in range(1, args.epochs + 1):
-        unet.train()
-        running_loss = 0.0
-        optimizer.zero_grad()
-        for step, (z0, et) in enumerate(train_loader):
-            z0 = z0.to(device).permute(0,2,1,3,4)
-            et = et.to(device).unsqueeze(1)
+            self.optimizer.zero_grad()
+            out = self.pipeline.unet(z_t, timesteps, encoder_hidden_states=et)
+            loss = F.mse_loss(out.sample, noise)
+            loss.backward()
+            self.optimizer.step()
+            total_loss += loss.item()
+            #torch.cuda.empty_cache()
 
-            with autocast():
-                et_proj = proj_eeg(et)
-                noise   = torch.randn_like(z0)
-                timesteps = torch.randint(0, len(scheduler.timesteps), (z0.size(0),), device=device)
-                z_t     = scheduler.add_noise(z0, noise, timesteps)
-                try:
-                    out = pipeline.unet(z_t, timesteps, encoder_hidden_states=et_proj)
-                except RuntimeError as e:
-                    if 'CUBLAS_STATUS_EXECUTION_FAILED' in str(e):
-                        out = pipeline.unet(z_t.float(), timesteps, encoder_hidden_states=et_proj.float())
-                    else:
-                        raise
-                loss = F.mse_loss(out.sample, noise) / args.accum_steps
+        return total_loss / len(self.train_loader)
 
-            scaler.scale(loss).backward()
-            if (step + 1) % args.accum_steps == 0:
-                scaler.step(optimizer)
-                scaler.update()
-                optimizer.zero_grad()
-
-            running_loss += loss.item() * args.accum_steps
-
-        # Validation
-        unet.eval()
+    def _validate_epoch(self):
+        self.pipeline.unet.eval()
         val_loss = 0.0
         with torch.no_grad(), autocast():
-            for z0, et in val_loader:
-                z0 = z0.to(device).permute(0,2,1,3,4)
-                et = et.to(device).unsqueeze(1)
-                et_proj  = proj_eeg(et)
-                noise    = torch.randn_like(z0)
-                timesteps = torch.randint(0, len(scheduler.timesteps), (z0.size(0),), device=device)
-                z_t      = scheduler.add_noise(z0, noise, timesteps)
+            for z0, et in tqdm(self.val_loader, desc="Validation"):
+                z0 = z0.to(self.device).permute(0,2,1,3,4)
+                et_proj = self.proj_eeg(et.to(self.device).unsqueeze(1))
+                noise = torch.randn_like(z0)
+                timesteps = torch.randint(0, len(self.scheduler.timesteps), (z0.size(0),), device=self.device)
+                z_t = self.scheduler.add_noise(z0, noise, timesteps)
                 try:
-                    out = pipeline.unet(z_t, timesteps, encoder_hidden_states=et_proj)
+                    out = self.pipeline.unet(z_t, timesteps, encoder_hidden_states=et_proj)
                 except RuntimeError as e:
                     if 'CUBLAS_STATUS_EXECUTION_FAILED' in str(e):
-                        out = pipeline.unet(z_t.float(), timesteps, encoder_hidden_states=et_proj.float())
+                        out = self.pipeline.unet(z_t.float(), timesteps, encoder_hidden_states=et_proj.float())
                     else:
                         raise
                 val_loss += F.mse_loss(out.sample, noise).item()
-        print(f"Epoch {epoch}: train_loss={running_loss/len(train_loader):.4f}, val_loss={val_loss/len(val_loader):.4f}")
+        return val_loss / len(self.val_loader)
 
-        torch.cuda.empty_cache()
+    def _save_checkpoint(self, epoch):
+        ckpt_dir = os.path.join(self.args.root, 'checkpoints')
+        os.makedirs(ckpt_dir, exist_ok=True)
+        path = os.path.join(ckpt_dir, f'tuneavideo_unet_epoch{epoch}.pt')
+        self.pipeline.unet.save_pretrained(path)
+        print(f"Saved checkpoint at {path}")
 
-    # Save
-    out_dir = f"{root}/checkpoints/tuneavideo_unet"
-    os.makedirs(out_dir, exist_ok=True)
-    pipeline.unet.save_pretrained(out_dir)
-    print("UNet saved.")
+    def train(self):
+        for epoch in range(1, self.args.epochs + 1):
+            train_loss = self._train_epoch(epoch)
+            val_loss = self._validate_epoch()
+            print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
+            #torch.cuda.empty_cache()
+            if epoch % self.args.save_every == 0:
+                self._save_checkpoint(epoch)
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Train Tune-A-Video with EEG')
+    root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
+    parser.add_argument('--zhat_dir',   type=str,   default=f"{root}/data/Predicted_latents")
+    parser.add_argument('--sem_dir',    type=str,   default=f"{root}/data/Semantic_embeddings")
+    parser.add_argument('--epochs',     type=int,   default=50)
+    parser.add_argument('--batch_size', type=int,   default=1)
+    parser.add_argument('--lr',         type=float, default=1e-4)
+    parser.add_argument('--use_wandb',  action='store_true')
+    parser.add_argument('--save_every', type=int,   default=10)
+    parser.add_argument('--root',       type=str,   default=root)
+    return parser.parse_args()
 
 if __name__ == '__main__':
-    train()
+    trainer = TuneAVideoTrainer(parse_args())
+    trainer.train()
