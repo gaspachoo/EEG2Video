@@ -1,7 +1,12 @@
+import torch
+import torch.nn as nn
+from models.my_autoregressive_transformer import PositionalEncoding
+
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, d_model=512, nhead=8, num_encoder_layers=2, num_decoder_layers=4,
                  dim_feedforward=1024, dropout=0.1):
         super().__init__()
+        
         # projetions
         self.input_proj  = nn.Linear(512, d_model)    # EEG embedding dim -> d_model
         self.output_proj = nn.Linear(9216, d_model)   # Video latent dim -> d_model
