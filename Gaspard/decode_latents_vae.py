@@ -42,8 +42,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
-    parser.add_argument("--latents_dir", type=str, default=f"{root}/data/Predicted_latents")
-    parser.add_argument("--output_dir", type=str, default=f"{root}/decoded_gifs")
+    parser.add_argument("--latents_dir", type=str, default="./data/Predicted_latents")
+    parser.add_argument("--output_dir", type=str, default="./decoded_gifs")
     parser.add_argument("--device", type=str, default="cuda")
     args = parser.parse_args()
 

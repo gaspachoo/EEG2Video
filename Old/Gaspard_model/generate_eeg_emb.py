@@ -45,10 +45,10 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video" #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
-    parser.add_argument("--raw_dir",  default = f"{root}/data/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
-    parser.add_argument("--feat_dir", default=f"{root}/data/DE_1per1s/", help="directory with .npy files")
-    parser.add_argument("--checkpoint_path", default=f"{root}/Gaspard_model/checkpoints/cv_glmnetv2/sub3_fold0_best.pt", help="checkpoint path")
-    parser.add_argument('--output_dir', default=f"{root}/data/EEG_embeddings/", help="Where to save EEG embeddings")
+    parser.add_argument("--raw_dir",  default = "./data/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
+    parser.add_argument("--feat_dir", default="./data/DE_1per1s/", help="directory with .npy files")
+    parser.add_argument("--checkpoint_path", default="./Gaspard_model/checkpoints/cv_glmnetv2/sub3_fold0_best.pt", help="checkpoint path")
+    parser.add_argument('--output_dir', default="./data/EEG_embeddings/", help="Where to save EEG embeddings")
     args = parser.parse_args()
 
     generate_all_embeddings(args.raw_dir, args.feat_dir, args.checkpoint_path, args.output_dir)

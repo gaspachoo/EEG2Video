@@ -32,9 +32,9 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
-    parser.add_argument('--z_hat', type=str, default=f"{root}/data/EEG_embeddings/sub3.npy")
-    parser.add_argument('--ckpt', type=str, default=f"{root}/Gaspard_model/checkpoints/seq2seq/seq2seq_block0.pth")
-    parser.add_argument('--output', type=str, default=f"{root}/data/Predicted_latents")
+    parser.add_argument('--z_hat', type=str, default="./data/EEG_embeddings/sub3.npy")
+    parser.add_argument('--ckpt', type=str, default="./Gaspard_model/checkpoints/seq2seq/seq2seq_block0.pth")
+    parser.add_argument('--output', type=str, default="./data/Predicted_latents")
     parser.add_argument('--device', type=str, default="cuda")
     args = parser.parse_args()
 

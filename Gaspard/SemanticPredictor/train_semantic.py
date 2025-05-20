@@ -66,9 +66,9 @@ def train():
     import argparse
     parser = argparse.ArgumentParser()
     root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
-    parser.add_argument('--eeg_file', type=str, default=f"{root}/data/DE_1per2s/sub1.npy")
-    parser.add_argument('--text_dir', type=str, default=f"{root}/data/Text_embeddings")
-    parser.add_argument('--save_path', type=str, default=f"{root}/Gaspard_model/checkpoints/semantic")
+    parser.add_argument('--eeg_file', type=str, default="./data/DE_1per2s/sub1.npy")
+    parser.add_argument('--text_dir', type=str, default="./data/Text_embeddings")
+    parser.add_argument('--save_path', type=str, default="./Gaspard_model/checkpoints/semantic")
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--lr', type=float, default=5e-4)

@@ -32,6 +32,6 @@ def batch_convert(gif_root, output_root):
 
 if __name__ == "__main__":
     root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
-    gif_root = f"{root}/data/Video_gifs"
-    output_root = f"{root}/data/Video_mp4"
+    gif_root = "./data/Video_gifs"
+    output_root = "./data/Video_mp4"
     batch_convert(gif_root, output_root)

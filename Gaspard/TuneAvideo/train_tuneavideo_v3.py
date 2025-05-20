@@ -66,7 +66,7 @@ class TuneAVideoTrainer:
         self.vae = AutoencoderKL.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='vae').to(self.device)
         self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
         self.unet = UNet3DConditionModel.from_pretrained_2d(
-            f"{root}/EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4",
+            "./EEG2Video/EEG2Video_New/Generation/stable-diffusion-v1-4",
             subfolder='unet'
         ).to(self.device)
         self.scheduler = PNDMScheduler.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='scheduler')
@@ -199,8 +199,8 @@ class TuneAVideoTrainer:
 def parse_args():
     p = argparse.ArgumentParser()
     root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
-    p.add_argument('--zhat_dir', type=str, default=f"{root}/data/Predicted_latents")
-    p.add_argument('--sem_dir', type=str, default=f"{root}/data/Semantic_embeddings")
+    p.add_argument('--zhat_dir', type=str, default="./data/Predicted_latents")
+    p.add_argument('--sem_dir', type=str, default="./data/Semantic_embeddings")
     p.add_argument('--epochs', type=int, default=50)
     p.add_argument('--batch_size', type=int, default=1)
     p.add_argument('--lr', type=float, default=1e-4)

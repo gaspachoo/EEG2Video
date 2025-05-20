@@ -35,9 +35,9 @@ def process_subject(raw_path, de_out_path, psd_out_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
-    parser.add_argument('--raw_dir',   default=f"{root}/data/Segmented_500ms_sw", help='dossier .npy fenêtré raw EEG')
-    parser.add_argument('--de_dir',    default=f"{root}/data/DE_500ms_sw",    help='où sauvegarder DE')
-    parser.add_argument('--psd_dir',   default=f"{root}/data/PSD_500ms_sw",   help='où sauvegarder PSD')
+    parser.add_argument('--raw_dir',   default="./data/Segmented_500ms_sw", help='dossier .npy fenêtré raw EEG')
+    parser.add_argument('--de_dir',    default="./data/DE_500ms_sw",    help='où sauvegarder DE')
+    parser.add_argument('--psd_dir',   default="./data/PSD_500ms_sw",   help='où sauvegarder PSD')
     parser.add_argument('--subs',      nargs='+', type=int, default=list(range(1,21)), help='numéro des sujets')
     args = parser.parse_args()
 

@@ -74,8 +74,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video" #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
-    parser.add_argument('--gif_dir', type=str,  default = f"{root}/data/Video_gifs/", help="Directory with .gif files")
-    parser.add_argument('--output_path', type=str, default = f"{root}/data/Video_latents/", help="Path to save .npy latents")
+    parser.add_argument('--gif_dir', type=str,  default = "./data/Video_gifs/", help="Directory with .gif files")
+    parser.add_argument('--output_path', type=str, default = "./data/Video_latents/", help="Path to save .npy latents")
     args = parser.parse_args()
 
     generate_all_latents(args.gif_dir, args.output_path)

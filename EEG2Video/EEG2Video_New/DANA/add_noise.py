@@ -98,10 +98,9 @@ GT_label = np.array([[23, 22, 9, 6, 18,       14, 5, 36, 25, 19,      28, 35, 3,
 from einops import rearrange
 chosed_label = [i for i in range(1,41)]
 if __name__ == '__main__':
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
     latents = np.load('../Seq2Seq/latent_out_block7_40_classes.npy')
     #opt = np.load('classification_optical_flow_score.npy')#[200,]
-    opt = np.load(f'{root}/data/meta_info/All_video_optical_flow_score.npy')[6,:] #[200,]
+    opt = np.load('./data/meta_info/All_video_optical_flow_score.npy')[6,:] #[200,]
     
     print(opt.shape)
     labels = np.where(opt >= 1.799, 1, 0)
