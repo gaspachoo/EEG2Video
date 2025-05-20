@@ -42,7 +42,7 @@ def predict_block_latents(block_id, embeddings, video_latents, model, device):
 
 def main():
     parser = argparse.ArgumentParser()
-    root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
+    
     parser.add_argument('--emb_path',      type=str,
                         default="./data/EEG_embeddings_sw/sub3.npy",
                         help='Path to embeddings .npy (shape 7*40*5*7,512)')

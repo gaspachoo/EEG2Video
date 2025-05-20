@@ -198,7 +198,7 @@ class TuneAVideoTrainer:
 
 def parse_args():
     p = argparse.ArgumentParser()
-    root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
+    
     p.add_argument('--zhat_dir', type=str, default="./data/Predicted_latents")
     p.add_argument('--sem_dir', type=str, default="./data/Semantic_embeddings")
     p.add_argument('--epochs', type=int, default=50)

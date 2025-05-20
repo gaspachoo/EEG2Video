@@ -165,7 +165,7 @@ def ddp_main(rank, args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='DDP Train Tune-A-Video with EEG')
-    root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
+    
     parser.add_argument('--zhat_dir', type=str, default="./data/Predicted_latents")
     parser.add_argument('--sem_dir', type=str, default="./data/Semantic_embeddings")
     parser.add_argument('--epochs', type=int, default=50)

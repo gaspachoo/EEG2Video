@@ -11,7 +11,7 @@ from models.transformer import Seq2SeqTransformer
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
+    
     parser.add_argument('--sub_emb',       type=str,
                         default="./data/EEG_embeddings_sw/sub3.npy",
                         help='EEG embeddings (.npy) path')

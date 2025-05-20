@@ -60,7 +60,7 @@ def generate_all_embeddings(raw_dir, feat_dir, ckpt_path, output_dir, device='cu
 # --- CLI ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
+    
     parser.add_argument('--raw_dir', default="./data/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
     parser.add_argument('--feat_dir', default="./data/DE_500ms_sw", help='directory of pre-windowed feature .npy files')
     parser.add_argument('--checkpoint_path', default="./Gaspard_model/checkpoints/cv_glmnetv2/sub3_fold0_best.pt", help='path to GLMNet checkpoint')

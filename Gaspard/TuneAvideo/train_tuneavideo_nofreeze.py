@@ -52,7 +52,7 @@ def train():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     import argparse
     parser = argparse.ArgumentParser()
-    root = os.environ.get('HOME', os.environ.get('USERPROFILE')) + '/EEG2Video'
+    
     parser.add_argument('--zhat_dir', type=str, default="./data/Predicted_latents")
     parser.add_argument('--sem_dir', type=str, default="./data/Semantic_embeddings")
     parser.add_argument('--epochs', type=int, default=50)
