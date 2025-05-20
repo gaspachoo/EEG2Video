@@ -31,21 +31,20 @@ Script : `EEG_preprocessing/segment_sliding_window.py`
 #### Video alignment and GIF creation:
 
 Segment 8min40s videos into 2s sliced into 200 2s clips (40 concepts × 5 repetitions) using cv2.
+
 Downscale to (512, 288), extract 6 frames (3 FPS) and save to .gif format using imageio.
 
-#### Normalization:
+Script: `EEG2Video/extract_gif.py`
 
-EEG segments flattened and standardized with StandardScaler.
-
-Reshaped back into tensor format for input into the encoder.
 
 ### 2. EEG Feature Encoding
-Custom EEGNet-based encoder:
+We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
 
-Implemented as MyEEGNet_embedding.
+Models path : `/dgxb_home/ext02/EEG2Video/EEG-VP/models.py` (Modified Pool Layer in Sha)
 
-Extracts a d_model-dimensional embedding (e.g., 128 or 512) from raw EEG input of shape [batch, 1, 62, 100].
+For training we use 2s raw EEGs and 1s windows for DE/PSD features.
 
+Script : 
 ### 3. Latent Extraction (VAE Encoder)
 #### AutoencoderKL from 🤗 diffusers:
 
