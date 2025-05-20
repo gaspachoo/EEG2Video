@@ -4,6 +4,7 @@ import torch.nn as nn
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 from sklearn.preprocessing import StandardScaler
+from models.personal_models import CLIP
 import wandb
 
 def seed_everything(seed=42):
@@ -13,24 +14,6 @@ def seed_everything(seed=42):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
-
-class CLIP(nn.Module):
-    def __init__(self):
-        super(CLIP, self).__init__()
-        self.mlp = nn.Sequential(
-            nn.Linear(310, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 77 * 768)
-        )
-
-    def forward(self, eeg):
-        return self.mlp(eeg)
 
 class EEGTextDataset(Dataset):
     def __init__(self, eeg_file, text_dir):
