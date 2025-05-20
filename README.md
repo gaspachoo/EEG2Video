@@ -104,20 +104,20 @@ We use the TuneAVideo pipeline to improve the quality of predicted video latents
 
     Script : **Not implemented yet**
 
-## 6. Decode Video Latents (potentially $\approx$ 1-2 days)
+## 6. Decode Video Latents (Not completed)
 
 - We decode precise video latents from part 5 using pretrained VAE Decoder to generate videos.
 
     Script : **Not implemented yet**
 
-## 🔴 Modules Yet To Be Implemented
+## 🔴 Modules Yet To Be Implemented (est. $\approx$ 1 week)
 
-### 5. TuneAVideo pipeline ($\approx$ 1 week)
+### 5. TuneAVideo pipeline (est. $\approx$ 1 week)
 
 - Improve training algorithm to make the training faster and ensure that it will not raise any error
 
 - Write the inference script and generate precise video latents
 
-### 6. Decode Video Latents ($\approx$ 1 day)
+### 6. Decode Video Latents (est. $\approx$ 1 day)
 
 - Write the decoding script using VAE
