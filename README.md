@@ -1,4 +1,9 @@
 # EEG2Video Pipeline 
+Acronyms used:
+-   EEG = ElectroEncephaloGram
+-   DE = Differential Entropy
+-   PSD = Power Spectral Density
+
 ## ✅ Modules Completed
 ## 1. Data Preprocessing  ($\approx$ 1 week)
 #### 1. EEG data segmentation:
