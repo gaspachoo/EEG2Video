@@ -4,7 +4,7 @@ from numpy.lib.stride_tricks import sliding_window_view
 
 
 # Dossiers d'entrée et de sortie
-INPUT_DIR = f'{root}/data/Segmented_Rawf_200Hz_2s'
+INPUT_DIR = './data/Segmented_Rawf_200Hz_2s'
 
 
 # Paramètres de découpage
@@ -14,7 +14,7 @@ STEP_S = 0.25             # recouvrement (secondes)
 WIN_T = int(FS * WIN_S)   # points temporels par fenêtre (100)
 STEP_T = int(FS * STEP_S) # pas entre fenêtres (50)
 
-OUTPUT_DIR = f'{root}/data/Segmented_{int(1000*WIN_S)}ms_sw'
+OUTPUT_DIR = './data/Segmented_{int(1000*WIN_S)}ms_sw'
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 

@@ -40,7 +40,7 @@ def seed_everything(seed=0, cudnn_deterministic=True):
 seed_everything(114514)
 
 
-eeg = torch.load(f'{root}/data/EEG/sub1.npy',map_location='cpu')
+eeg = torch.load('./data/EEG/sub1.npy',map_location='cpu')
 
 negative = eeg.mean(dim=0)
 

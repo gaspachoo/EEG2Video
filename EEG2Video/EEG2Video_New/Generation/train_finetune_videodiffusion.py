@@ -186,7 +186,7 @@ def main(
     # video_name_list = ['1st_10min', '2nd_10min', '3rd_10min', '4th_10min', '5th_10min']
     #video_name_list = ['1st_10min']
      #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
-    video_path = f'{root}/data/Video_mp4/Block0' #data/SEED-DV/output/block1'
+    video_path = './data/Video_mp4/Block0' #data/SEED-DV/output/block1'
     video_files = []
     video_ind = selected_indices
     for ind in video_ind:
@@ -200,7 +200,7 @@ def main(
 
     # text_path = './text'
     text_prompts = []
-    video_text = f'{root}/data/BLIP//1st_10min.txt' #rdata/SEED-DV/Video/BLIP-caption/1st_10min.txt'
+    video_text = './data/BLIP//1st_10min.txt' #rdata/SEED-DV/Video/BLIP-caption/1st_10min.txt'
 
     with open(video_text, 'r') as f:
         for line in f:

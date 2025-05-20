@@ -11,7 +11,7 @@ fre = 200
 
 for subname in range(1,21):
     
-    loaded_data = np.load(f'{root}/data/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy')
+    loaded_data = np.load('./data/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy')
     # (7 * 40 * 5 * 62 * 2*fre)
 
     print("Successfully loaded .npy file.")

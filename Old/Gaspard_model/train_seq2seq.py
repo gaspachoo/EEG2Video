@@ -49,8 +49,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
      #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     parser.add_argument('--sub_emb', type=str, default="./data/EEG_embeddings/sub3.npy", help='Path to EEG z_hat file')
-    parser.add_argument('--video_dir', type=str, default=f'{root}/data/Video_latents', help='Path to block-wise video latent files')
-    parser.add_argument('--save_path', type=str, default=f'{root}/Gaspard_model/checkpoints/seq2seq/')
+    parser.add_argument('--video_dir', type=str, default='./data/Video_latents', help='Path to block-wise video latent files')
+    parser.add_argument('--save_path', type=str, default='./Gaspard_model/checkpoints/seq2seq/')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--lr', type=float, default=1e-4)
