@@ -42,7 +42,7 @@ EEG2Video/
 │   ├── process_video.py           # Extract 2 s clips, down‑sample videos
 │   └── plot_data.py               # Quick visual checks
 │
-├── Gaspard_model/                 # Training scripts & custom models
+├── Gaspard/                 # Training scripts & custom models
 │   ├── train_glmnet_cv.py         # Cross‑validated GLMNet trainer
 │   ├── train_model_comparison.py  # ShallowNet vs Deep baselines
 │   ├── train_shallownet_{cv,paper}.py # ShallowNet experiments
@@ -82,7 +82,7 @@ EEG2Video/
 | **1. Pre‑processing** | `EEG_preprocessing/segment_raw_signals_200Hz.py`<br>`EEG_preprocessing/extract_DE_PSD_features_*.py` | Slice raw `.npy` recordings into windows (200 Hz) and compute DE/PSD features. |
 | **2. Feature Engineering** | `EEG_preprocessing/gen_features_from_sw_data.py` | Aggregate sliding‑window features for downstream tasks. |
 | **3. EEG Baselines** | `EEG-VP/EEG_VP_train_test.py` | Train ShallowNet / EEGNet / Conformer baselines on classification. |
-| **4. GLMNet & MLP** | `Gaspard_model/train_glmnet_cv.py`<br>`Gaspard_model/train_mlp_cv.py` | Cross‑validated training on spectral features. |
+| **4. GLMNet & MLP** | `Gaspard/train_glmnet_cv.py`<br>`Gaspard/train_mlp_cv.py` | Cross‑validated training on spectral features. |
 | **5. EEG‑to‑Video** | `EEG2Video/train_finetune_videodiffusion.py` | Fine‑tune latent‑diffusion pipeline conditioned on EEG embeddings. |
 | **6. Inference** | `EEG2Video/inference_eeg2video.py` | Generate video clips from unseen EEG segments. |
 | **7. Evaluation** | `EEG2Video/40_class_run_metrics.py` | Compute clip/video accuracy, CLIP Score, MSE, SSIM, PSNR, etc. |
@@ -102,8 +102,8 @@ Below is a non‑exhaustive registry of public classes & utilities (auto‑gener
 
 | Path | Classes |
 |------|---------|
-| `Gaspard_model/models/encoders.py` | `CLIP`, `GLMNetEncoder`, `MLPEncoder`, `ShallowNetEncoder`, `MLPEncoder_feat` |
-| `Gaspard_model/models/transformers.py` | `EEG2VideoTransformer` |
+| `Gaspard/models/encoders.py` | `CLIP`, `GLMNetEncoder`, `MLPEncoder`, `ShallowNetEncoder`, `MLPEncoder_feat` |
+| `Gaspard/models/transformers.py` | `EEG2VideoTransformer` |
 | `EEG2Video/models/unet.py` | `UNet3DConditionModel`, `UNet3DConditionOutput` |
 | `EEG2Video/models/DANA_module.py` | `Diffusion` |
 

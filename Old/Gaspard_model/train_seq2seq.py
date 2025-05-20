@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 from tqdm import tqdm
 import wandb
 import torch.nn.functional as F
-from Gaspard_model.Seq2Seq.my_autoregressive_transformer import PositionalEncoding
+from Gaspard.Seq2Seq.my_autoregressive_transformer import PositionalEncoding
 
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, d_model=512, nhead=8, num_encoder_layers=2, num_decoder_layers=4,
@@ -50,7 +50,7 @@ def parse_args():
      #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     parser.add_argument('--sub_emb', type=str, default="./data/EEG_embeddings/sub3.npy", help='Path to EEG z_hat file')
     parser.add_argument('--video_dir', type=str, default='./data/Video_latents', help='Path to block-wise video latent files')
-    parser.add_argument('--save_path', type=str, default='./Gaspard_model/checkpoints/seq2seq/')
+    parser.add_argument('--save_path', type=str, default='./Gaspard/checkpoints/seq2seq/')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--lr', type=float, default=1e-4)

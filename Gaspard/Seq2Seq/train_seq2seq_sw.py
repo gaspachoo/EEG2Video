@@ -19,7 +19,7 @@ def parse_args():
                         default="./data/Video_latents",
                         help='Directory with block{block_id}_latents.npy')
     parser.add_argument('--save_path',     type=str,
-                        default="./Gaspard_model/checkpoints/seq2seq_sw/",
+                        default="./Gaspard/checkpoints/seq2seq_sw/",
                         help='Where to save models')
     parser.add_argument('--epochs',        type=int,   default=200)
     parser.add_argument('--batch_size',    type=int,   default=64)

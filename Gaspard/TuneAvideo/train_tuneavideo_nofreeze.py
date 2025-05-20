@@ -163,7 +163,7 @@ def train():
         torch.cuda.empty_cache()
 
     # Save
-    pipeline.unet.save_pretrained("./Gaspard_model/checkpoints/tuneavideo_unet")
+    pipeline.unet.save_pretrained("./Gaspard/checkpoints/tuneavideo_unet")
     print("UNet saved.")
 
 if __name__ == '__main__':

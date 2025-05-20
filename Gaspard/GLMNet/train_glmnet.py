@@ -43,7 +43,7 @@ def parse_args():
     p.add_argument("--raw_dir",  default = "./data/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
     p.add_argument("--feat_dir", default="./data/DE_1per1s/", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info/All_video_label.npy", help="Label file")
-    p.add_argument("--save_dir", default="./Gaspard_model/checkpoints/cv_glmnetv2/")
+    p.add_argument("--save_dir", default="./Gaspard/checkpoints/cv_glmnetv2/")
     p.add_argument("--epochs",   type=int, default=50)
     p.add_argument("--bs",       type=int, default=128)
     p.add_argument("--lr",       type=float, default=1e-4)

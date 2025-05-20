@@ -1,7 +1,7 @@
 import os
 import torch
 import numpy as np
-from Gaspard_model.old.train_seq2seq import Seq2SeqTransformer
+from Gaspard.old.train_seq2seq import Seq2SeqTransformer
 from tqdm import tqdm
 
 @torch.no_grad()
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--z_hat', type=str, default="./data/EEG_embeddings/sub3.npy")
-    parser.add_argument('--ckpt', type=str, default="./Gaspard_model/checkpoints/seq2seq/seq2seq_block0.pth")
+    parser.add_argument('--ckpt', type=str, default="./Gaspard/checkpoints/seq2seq/seq2seq_block0.pth")
     parser.add_argument('--output', type=str, default="./data/Predicted_latents")
     parser.add_argument('--device', type=str, default="cuda")
     args = parser.parse_args()

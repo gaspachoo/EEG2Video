@@ -67,13 +67,13 @@ We detect on 2 types of windows :
 
 One layer in Shallownet is modified compared to original : AvgPool2d -> AdaptiveAvgPool2d
 
-Models path : `Gaspard_model/GLMNet/models.py` 
+Models path : `Gaspard/GLMNet/models.py` 
 
 - Training :
 
     We use 2s raw EEGs and 1s windows for DE/PSD features.
 
-    Script : `Gaspard_model/GLMNet/train_glmnet.py`
+    Script : `Gaspard/GLMNet/train_glmnet.py`
 
 - Inference :
     
@@ -81,7 +81,7 @@ Models path : `Gaspard_model/GLMNet/models.py`
 
     We use 2s raw EEGs and 500ms windows for DE/PSD features.
 
-    Script : `Gaspard_model/GLMNet/generate_eeg_emb_sw.py`
+    Script : `Gaspard/GLMNet/generate_eeg_emb_sw.py`
 
 ## 3. Align Video Latents with EEG embeddings (Seq2Seq Transformer) ($\approx$ 1 week)
 #### 1. Generate latents from pretrained VAE:
@@ -90,23 +90,23 @@ Models path : `Gaspard_model/GLMNet/models.py`
 
 - A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
 
-    Script : `Gaspard_model/Seq2Seq/generate_latents_vae.py`
+    Script : `Gaspard/Seq2Seq/generate_latents_vae.py`
 
 #### 2. Use Seq2Seq model to align EEGs embeddings and video latents
 
-The model is just a rewriting of original mode. : `Gaspard_model/Seq2Seq/models/transformer.py`
+The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transformer.py`
 
 - Training :
 
     We use the generated EEG embeddings from part 2 as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
     
-    Script : `Gaspard_model/Seq2Seq/train_seq2seq_sw.py`
+    Script : `Gaspard/Seq2Seq/train_seq2seq_sw.py`
 
 - Inference : 
 
     We use the generated EEG embeddings from part 2 to generate predicted latents.
 
-    Script : `Gaspard_model/Seq2Seq/predict_latents_s2s_sw.py`
+    Script : `Gaspard/Seq2Seq/predict_latents_s2s_sw.py`
 
 ## 4. Semantic Predictor ($\approx$ 2 days)
 
@@ -114,7 +114,7 @@ The model is just a rewriting of original mode. : `Gaspard_model/Seq2Seq/models/
 
 - We process the BLIP captions into pretrained CLIP model to generate text embeddings.
 
-    Script : `Gaspard_model/SemanticPredictor/generate_text_emb_clip.py`
+    Script : `Gaspard/SemanticPredictor/generate_text_emb_clip.py`
 
 #### 2. Generate semantic embeddings
 
@@ -124,13 +124,13 @@ The model is just a rewriting of original mode. : `Gaspard_model/Seq2Seq/models/
     
     We use the DE/PSD features of part 2 as source and the text embeddings from part 4.1 as target.
 
-    Script : `Gaspard_model/SemanticPredictor/train_semantic.py`
+    Script : `Gaspard/SemanticPredictor/train_semantic.py`
 
 - Inference : 
 
     We used the generated text embeddings from part 4.1 to generate semantic embeddings.
 
-    Script : `Gaspard_model/SemanticPredictor/generate_semantic_emb.py`
+    Script : `Gaspard/SemanticPredictor/generate_semantic_emb.py`
 
 ## 5. TuneAVideo pipeline (already $\approx$ 1.5 week)
 
@@ -140,7 +140,7 @@ The model is just a rewriting of original mode. : `Gaspard_model/Seq2Seq/models/
 
     We use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
 
-    Script : `Gaspard_model/TuneAVideo/train_tuneavideo.py`
+    Script : `Gaspard/TuneAVideo/train_tuneavideo.py`
 
 - Inference :
     
