@@ -40,7 +40,7 @@ Script: `EEG2Video/extract_gif.py`
 ### 2. EEG Feature Encoding
 We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
 
-Models path : `/dgxb_home/ext02/EEG2Video/EEG-VP/models.py` (Modified Pool Layer in Sha)
+Models path : `/dgxb_home/ext02/EEG2Video/EEG-VP/models.py` (Modified Layer in Shallownet compared to original : )
 
 For training we use 2s raw EEGs and 1s windows for DE/PSD features.
 

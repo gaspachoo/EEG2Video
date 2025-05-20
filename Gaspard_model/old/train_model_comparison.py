@@ -7,8 +7,8 @@ from tqdm import tqdm
 import argparse
 import wandb
 
-from Gaspard_model.models.models import ShallowNetEncoder, MLPEncoder
-from Gaspard_model.models.models_paper import shallownet, deepnet, eegnet, tsconv, mlpnet
+from Gaspard_model.models.personal_models import ShallowNetEncoder, MLPEncoder
+from Gaspard_model.models.models import shallownet, deepnet, eegnet, tsconv, mlpnet
 
 
 def parse_args():
