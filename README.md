@@ -94,7 +94,7 @@ Models path : `Gaspard_model/GLMNet/models.py`
 
 #### 2. Use Seq2Seq model to align EEGs embeddings and video latents
 
-The model is just a rewriting of original mode. : `Gaspard_model/Seq2Seq/models.py`
+The model is just a rewriting of original mode. : `Gaspard_model/Seq2Seq/models/transformer.py`
 
 - Training :
 
