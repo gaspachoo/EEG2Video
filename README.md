@@ -1,166 +1,123 @@
-# EEG2Video
+# EEG2Video Pipeline 
+## ✅ Modules Completed
+### 1. Data Preprocessing
+#### 1. EEG data segmentation:
 
-Transform electroencephalographic (EEG) activity into coherent video sequences using state‑of‑the‑art deep‑learning techniques: Conformers, Transformer‑encoders, 3‑D UNets with cross‑attention, and diffusion generative models. The repository also contains classical EEG‑classification baselines and extensive preprocessing utilities.
+Raw EEG (62 channels, 200Hz, 8min40s) segmented into 2s windows (per video : 40 concepts, 5 repetitions per concept, remove hint sequences)
 
----
+Shapes are : (block, concept, repetition, channel, time).
 
-## 📑 Table of Contents
+Script : `EEG_preprocessing/segment_raw_signals_200Hz.py`
 
-1. [Project Goals](#project-goals)
-2. [Directory Layout](#directory-layout)
-3. [Main Workflows](#main-workflows)
-4. [Key APIs & Scripts](#key-apis--scripts)
-5. [Installation](#installation)
-6. [Quick Start](#quick-start)
-7. [Evaluation](#evaluation)
-8. [Notes & Roadmap](#notes--roadmap)
+Then, segment each 2s windows into 500ms windows using a 250 ms overlap (=7 windows)
 
----
+Shapes adapted to (block, concept, repetition, window, channel, time).
 
-## Project Goals
+Script : `EEG_preprocessing/segment_sliding_window.py`
 
-* **EEG‑to‑Video** – learn a mapping from multichannel EEG sequences to short video clips.
-* **EEG‑VP baselines** – benchmark shallow/deep CNNs, Conformers and MLPs on motor‑imagery classification.
-* **Modular Pipeline** – decouple preprocessing, feature engineering, model training, and evaluation for reproducibility.
+#### 2. DE/PSD Features detection on 5 frequency bands:
+- Detect features on 1s windows without overlapping.
 
----
+    Shapes adapted to (block, concept, repetition, window, channel, band).
 
-## Directory Layout
+    Script : `EEG_preprocessing/extract_DE_PSD_features_1per1s.py`
 
-```text
-EEG2Video/
-│
-├── analyse_tree.py                # Static‑analysis helper (lists functions/classes)
-│
-├── EEG-VP/                        # EEG classification baselines
-│   ├── EEG_VP_train_test.py       # Training / test loop & helpers
-│   └── models.py                  # ShallowNet, DeepNet, EEGNet, Conformer, …
-│
-├── Gaspard_preprocess/            # Personal preprocessing utilities
-│   ├── import.py                  # Load & plot raw blocks
-│   ├── yaml_gen.py                # YAML metadata generator
-│   ├── process_video.py           # Extract 2 s clips, down‑sample videos
-│   └── plot_data.py               # Quick visual checks
-│
-├── Gaspard_model/                 # Training scripts & custom models
-│   ├── train_glmnet_cv.py         # Cross‑validated GLMNet trainer
-│   ├── train_model_comparison.py  # ShallowNet vs Deep baselines
-│   ├── train_shallownet_{cv,paper}.py # ShallowNet experiments
-│   ├── train_mlp_cv.py            # MLP on PSD/DE features
-│   └── models/                    # Encoders, Transformers, etc.
-│       ├── encoders.py            # CLIP, GLMNetEncoder, MLPEncoder, …
-│       ├── transformers.py        # EEG2VideoTransformer
-│       └── models.py              # Video & EEG backbones (shared)
-│
-├── EEG_preprocessing/             # Signal segmentation & feature extraction
-│   ├── segment_raw_signals_200Hz.py
-│   ├── segment_sliding_window.py
-│   ├── DE_PSD.py                  # Differential Entropy & Power Spectral Density
-│   ├── extract_DE_PSD_features_{1per1s,1per2s}.py
-│   └── gen_features_from_sw_data.py
-│
-├── EEG2Video/                     # Core EEG‑to‑Video pipeline
-│   ├── inference_eeg2video.py     # Zero‑shot / fine‑tuned inference
-│   ├── train_finetune_videodiffusion.py
-│   ├── 40_class_run_metrics.py    # MSE, SSIM, CLIP, Top‑k metrics
-│   ├── models/                    # Diffusers‑style latent models
-│   ├── pipelines/                 # Tune‑a‑Video and EEG‑conditioned versions
-│   └── models/… (resnet, unet, attention, …)
-│
-└── EEG2Video_New/                 # Experimental v2 pipeline (modularised)
-    └── … (mirrors the structure above)
-```
+- Detect features on 1s windows without overlapping.
 
-> **ℹ︎ Tip:** duplicate model definitions in `models/models.py` are kept for backward compatibility and will be consolidated in a future refactor.
+    Shapes adapted to (block, concept, repetition, window, channel, band).
 
----
+    Script : `EEG_preprocessing/extract_DE_PSD_features_1per500ms.py`
 
-## Main Workflows
+#### 3. Video alignment and GIF creation:
 
-| Stage | Script / Entry‑point | Description |
-|-------|----------------------|-------------|
-| **1. Pre‑processing** | `EEG_preprocessing/segment_raw_signals_200Hz.py`<br>`EEG_preprocessing/extract_DE_PSD_features_*.py` | Slice raw `.npy` recordings into windows (200 Hz) and compute DE/PSD features. |
-| **2. Feature Engineering** | `EEG_preprocessing/gen_features_from_sw_data.py` | Aggregate sliding‑window features for downstream tasks. |
-| **3. EEG Baselines** | `EEG-VP/EEG_VP_train_test.py` | Train ShallowNet / EEGNet / Conformer baselines on classification. |
-| **4. GLMNet & MLP** | `Gaspard_model/train_glmnet_cv.py`<br>`Gaspard_model/train_mlp_cv.py` | Cross‑validated training on spectral features. |
-| **5. EEG‑to‑Video** | `EEG2Video/train_finetune_videodiffusion.py` | Fine‑tune latent‑diffusion pipeline conditioned on EEG embeddings. |
-| **6. Inference** | `EEG2Video/inference_eeg2video.py` | Generate video clips from unseen EEG segments. |
-| **7. Evaluation** | `EEG2Video/40_class_run_metrics.py` | Compute clip/video accuracy, CLIP Score, MSE, SSIM, PSNR, etc. |
+Segment 8min40s videos into 2s sliced into 200 2s clips (40 concepts × 5 repetitions) using cv2.
 
----
+Downscale to (512, 288), extract 6 frames (3 FPS) and save to .gif format using imageio.
 
-## Key APIs & Scripts
+Script: `EEG2Video/extract_gif.py`
 
-Below is a non‑exhaustive registry of public classes & utilities (auto‑generated via `analyse_tree.py`). Use it as a quick reference when importing:
 
-### Core Helpers
+### 2. EEG Feature Encoding
+We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
 
-- **`analyse_tree.py`** – `list_functions_and_classes`, `scan_project`
-- **`Gaspard_preprocess/import.py`** – `load_all_eeg_data_by_subject`, `plot_eeg_block`
+One layer in Shallownet is modified compared to original : AvgPool2d -> AdaptiveAvgPool2d
 
-### Representative Models
+Models path : `Gaspard_model/models/models.py` 
 
-| Path | Classes |
-|------|---------|
-| `Gaspard_model/models/encoders.py` | `CLIP`, `GLMNetEncoder`, `MLPEncoder`, `ShallowNetEncoder`, `MLPEncoder_feat` |
-| `Gaspard_model/models/transformers.py` | `EEG2VideoTransformer` |
-| `EEG2Video/models/unet.py` | `UNet3DConditionModel`, `UNet3DConditionOutput` |
-| `EEG2Video/models/DANA_module.py` | `Diffusion` |
+- Training :  We use 2s raw EEGs and 1s windows for DE/PSD features.
 
-*(Expand the full list with `analyse_tree.py` when developing new components.)*
+    Script : `Gaspard_model/train_glmnet.py`
 
----
+- Inference : We generate EEgs embeddings from train GLMNet.
 
-## Installation
+    We use 2s raw EEGs and 500ms windows for DE/PSD features.
 
-```bash
-# 1. Clone
-$ git clone https://github.com/your‑username/EEG2Video.git
-$ cd EEG2Video
+    Script : `Gaspard_model/generate_eeg_emb_sw.py`
 
-# 2. Environment
-$ python -m venv .venv
-$ source .venv/bin/activate  # Windows: .venv\Scripts\activate
-$ pip install -r requirements.txt
-```
+### 3. Align Video Latents with EEG embeddings (Seq2Seq Transformer)
+#### 1. Generate latents from pretrained VAE:
 
-CUDA 11.8 + PyTorch 2.2 are recommended for 3‑D diffusion training.
+A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
 
----
+Script : `Gaspard_model/generate_latents_vae.py`
 
-## Quick Start
+#### 2. Use Seq2Seq model to align EEGs embeddings and video latents
 
-```bash
-# Finetune diffusion on preprocessed EEG
-python EEG2Video/train_finetune_videodiffusion.py \
-       --config configs/finetune.yaml
+The model is just a rewriting of original mode. : `Gaspard_model/models/personal_models.py`
 
-# Generate video from a saved EEG feature file
-python EEG2Video/inference_eeg2video.py \
-       --eeg ./samples/example.npy --output ./out/
-```
+- Training : we use the generated EEG embeddings from part 2 as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
+    
+    Script : `Gaspard_model/train_seq2seq_sw.py`
 
----
+- Inference : we use the generated EEG embeddings from part 2 to generate predicted latents.
 
-## Evaluation
+    Script : `Gaspard_model/predict_latents_s2s_sw.py`
 
-Run the comprehensive metrics suite:
+### 4. Semantic Predictor
 
-```bash
-python EEG2Video/40_class_run_metrics.py \
-       --pred_dir ./out/ --gt_dir ./ground_truth/ \
-       --metrics clip mse ssim topk
-```
+#### 1. Generate text embeddings
+We process the BLIP captions into pretrained CLIP model to generate text embeddings.
 
-Outputs include per‑video JSON logs and an aggregated CSV summary.
+Script : `Gaspard_model/generate_text_emb_clip.py`
 
----
+#### 2. Generate semantic embeddings
 
-## Notes & Roadmap
+We use a semantic predictor to generate semantic embeddings from the EEGs captions.
 
-- [ ] **Model consolidation** – unify duplicate `models/models.py` across sub‑packages.
-- [ ] **Lightning migration** – port training scripts to PyTorch Lightning for cleaner checkpoints.
-- [ ] **Web demo** – stream generated clips via Gradio.
+- Training : we use the DE/PSD features of part 2 as source and the text embeddings from part 4.1 as target.
 
-Contributions via pull requests or issues are welcome! Feel free to open a discussion for feature requests or questions.
+    Script : `Gaspard_model/train_semantic.py`
 
+- Inference : we used the generated text embeddings from part 4.1 to generate semantic embeddings.
+
+    Script : `Gaspard_model/generate_semantic_emb.py`
+
+### 5. TuneAVideo pipeline
+
+We use the TuneAVideo pipeline to improve the quality of predicted video latents of part 3.2 in adding context thanks to semantic predictor.
+
+- Training : we use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
+
+    Script : `Gaspard_model/train_tuneavideo.py`
+
+- Inference : we generate precise video latents from predicted latents of part 3.2.
+
+    Script : **Not implemented yet**
+
+### 6. Decode Video Latents
+
+- We decode precise video latents from part 5 using pretrained VAE Decoder to generate videos.
+
+    Script : **Not implemented yet**
+
+## 🔴 Modules Yet To Be Implemented
+
+### 5. TuneAVideo pipeline
+
+- Improve training algorithm to make the training faster and ensure that it will not raise any error
+
+- Write the inference script and generate precise video latents
+
+### 6. Decode Video Latents
+
+- Write the decoding script using VAE
