@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from models.models import shallownet, mlpnet  # <- adjust if package path differs
+from models import shallownet, mlpnet  # <- adjust if package path differs
 from tqdm import tqdm
 import  wandb
 from sklearn.preprocessing import StandardScaler

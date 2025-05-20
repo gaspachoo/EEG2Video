@@ -1,7 +1,7 @@
 import os
 import torch
 import numpy as np
-from Gaspard_model.train_glmnet import GLMNet, OCCIPITAL_IDX, RAW_T, split_raw_2s_to_1s,standard_scale_features
+from ..GLMNet.train_glmnet import GLMNet, OCCIPITAL_IDX, RAW_T, split_raw_2s_to_1s,standard_scale_features
 import argparse
 
 def load_glmnet_from_checkpoint(checkpoint_path, device='cuda'):
