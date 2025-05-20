@@ -7,7 +7,7 @@ from tqdm import tqdm
 import argparse
 import wandb
 
-from Gaspard_model.models.personal_models import ShallowNetEncoder, MLPEncoder
+from Gaspard_model.old.personal_models import ShallowNetEncoder, MLPEncoder
 from Gaspard_model.models.models import shallownet, deepnet, eegnet, tsconv, mlpnet
 
 

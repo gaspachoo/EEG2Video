@@ -40,19 +40,31 @@ Script: `EEG2Video/extract_gif.py`
 ### 2. EEG Feature Encoding
 We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
 
-Models path : `/dgxb_home/ext02/EEG2Video/EEG-VP/models.py` (Modified Layer in Shallownet compared to original : )
+One layer in Shallownet is modified compared to original : AvgPool2d -> AdaptiveAvgPool2d
 
-For training we use 2s raw EEGs and 1s windows for DE/PSD features.
+Models path : `Gaspard_model/models/models.py` 
 
-Script : 
-### 3. Latent Extraction (VAE Encoder)
-#### AutoencoderKL from 🤗 diffusers:
+- Training :  We use 2s raw EEGs and 1s windows for DE/PSD features.
 
-Used to convert 6-frame video clips (shape [6, 3, 288, 512]) into latent tensors [6, 4, 36, 64].
+    Script : `Gaspard_model/train_glmnet.py`
 
-Trained independently with train_vae.py on the extracted GIFs.
+- Inference : We generate EEgs embeddings from train GLMNet.
 
-VAE accepts resized inputs (e.g., 256×256 or 288×512) with custom sample size when using diffusers>=0.29.
+    We use 2s raw EEGs and 500ms windows for DE/PSD features.
+
+    Script : `Gaspard_model/generate_eeg_emb_sw.py`
+
+### 3. Align Video Latents with EEG embeddings
+#### Generate latents from pretrained VAE:
+
+A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
+
+Script : `Gaspard_model/generate_latents_vae.py`
+
+#### Use Seq2Seq model to align EEGs embeddings and video latents
+
+The model 
+- Training :
 
 4. Transformer Seq2Seq
 Seq2Seq Transformer implementation:

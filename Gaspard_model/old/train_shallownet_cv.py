@@ -6,7 +6,7 @@ from tqdm import tqdm
 import os
 import time
 import argparse
-from Gaspard_model.models.personal_models import ShallowNetEncoder
+from Gaspard_model.old.personal_models import ShallowNetEncoder
 import wandb
 
 
