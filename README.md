@@ -140,7 +140,7 @@ The model is just a rewriting of original mode. : `Gaspard_model/Seq2Seq/models/
 
     We use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
 
-    Script : `Gaspard_model/train_tuneavideo.py`
+    Script : `Gaspard_model/TuneAVideo/train_tuneavideo.py`
 
 - Inference :
     
