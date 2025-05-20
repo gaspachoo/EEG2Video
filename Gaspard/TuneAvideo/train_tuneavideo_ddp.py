@@ -66,7 +66,6 @@ class TuneAVideoTrainer:
             sampler=val_sampler
         )
 
-        root = args.root
         self.vae = AutoencoderKL.from_pretrained(
             'CompVis/stable-diffusion-v1-4', subfolder='vae'
         ).to("cpu").eval()
@@ -206,7 +205,7 @@ class TuneAVideoTrainer:
 
     def _save_checkpoint(self, epoch: int):
         if self.rank == 0:
-            ckpt_dir = os.path.join(self.args.root, 'checkpoints')
+            ckpt_dir = ("Gaspard/checkpoints/TuneAVideo")
             os.makedirs(ckpt_dir, exist_ok=True)
             self.pipeline.unet.module.save_pretrained(
                 os.path.join(ckpt_dir, f'unet_epoch{epoch}.pt')
@@ -257,7 +256,6 @@ if __name__ == '__main__':
     parser.add_argument('--lr',         type=float, default=1e-4)
     parser.add_argument('--use_wandb',  action='store_true')
     parser.add_argument('--save_every', type=int, default=10)
-    parser.add_argument('--root',       type=str, default=root)
     args = parser.parse_args()
 
     world_size = torch.cuda.device_count()

@@ -35,8 +35,8 @@ def main():
 
     # Paths
     
-    blip_dir = os.path.join(root, "data/BLIP")
-    save_dir = os.path.join(root, "data/Text_embeddings")
+    blip_dir = "./data/BLIP"
+    save_dir = "./data/Text_embeddings"
     os.makedirs(save_dir, exist_ok=True)
 
     # Gather text files for each block

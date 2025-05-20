@@ -18,9 +18,9 @@ if __name__ == '__main__':
     seed_everything()
     # default paths
     
-    default_eeg = os.path.join(root, "data/DE_1per2s/sub1.npy")
-    default_model = os.path.join(root, "Gaspard_model/checkpoints/semantic/eeg2text_clip.pt")
-    default_save = os.path.join(root, "data/Semantic_embeddings")
+    default_eeg = "./data/DE_1per2s/sub1.npy"
+    default_model = "./Gaspard_model/checkpoints/semantic/eeg2text_clip.pt"
+    default_save = "./data/Semantic_embeddings"
 
     parser = argparse.ArgumentParser(
         description="Generate semantic embeddings per block using pretrained Semantic Predictor"

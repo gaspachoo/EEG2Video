@@ -62,7 +62,6 @@ class TuneAVideoTrainer:
         self.val_loader   = DataLoader(val_ds, shuffle=False, **dl_kwargs)
 
         # Pretrained components
-        root = args.root
         self.vae = AutoencoderKL.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='vae').to(self.device)
         self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
         self.unet = UNet3DConditionModel.from_pretrained_2d(
@@ -184,7 +183,7 @@ class TuneAVideoTrainer:
         return val_loss / len(self.val_loader)
 
     def _save(self, epoch):
-        ckpt_dir = os.path.join(self.args.root, 'checkpoints')
+        ckpt_dir = ("Gaspard/checkpoints/TuneAVideo")
         os.makedirs(ckpt_dir, exist_ok=True)
         self.pipeline.unet.save_pretrained(os.path.join(ckpt_dir, f'unet_ep{epoch}.pt'))
 
@@ -205,7 +204,6 @@ def parse_args():
     p.add_argument('--batch_size', type=int, default=1)
     p.add_argument('--lr', type=float, default=1e-4)
     p.add_argument('--save_every', type=int, default=10)
-    p.add_argument('--root', type=str, default=root)
     p.add_argument('--use_wandb', action='store_true')
 
     # Performance flags

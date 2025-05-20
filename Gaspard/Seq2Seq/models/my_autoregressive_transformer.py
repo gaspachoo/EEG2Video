@@ -281,9 +281,9 @@ if __name__ == "__main__":
     eegdata = np.load(os.path.join(save_root,"data/Segmented_Rawf_200Hz_2s/sub1.npy"))
 
     # use VAE model to get the latent
-    latent_data = np.load(f"{save_root}/data/1200_latent.npy")
+    latent_data = np.load("./data/1200_latent.npy")
     latent_data = torch.from_numpy(latent_data)
-    test_latent = torch.load(f"{save_root}/data/40classes_latents.pt")
+    test_latent = torch.load("./data/40classes_latents.pt")
     # print(latent_data)
 
     print(eegdata.shape)
