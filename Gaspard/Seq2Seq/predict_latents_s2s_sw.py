@@ -4,7 +4,7 @@ import torch
 import numpy as np
 
 # Import Seq2SeqTransformer defined in your training script
-from models import Seq2SeqTransformer
+from models.transformer import Seq2SeqTransformer
 
 
 def load_model(ckpt_path, device):
