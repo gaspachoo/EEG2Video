@@ -4,7 +4,7 @@ import argparse
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import torch.nn as nn
-
+from models import CLIP
 
 def seed_everything(seed=42):
     import random
@@ -13,24 +13,6 @@ def seed_everything(seed=42):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
-
-class CLIP(nn.Module):
-    def __init__(self):
-        super(CLIP, self).__init__()
-        self.mlp = nn.Sequential(
-            nn.Linear(310, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 77 * 768)
-        )
-
-    def forward(self, eeg):
-        return self.mlp(eeg)
 
 if __name__ == '__main__':
     seed_everything()

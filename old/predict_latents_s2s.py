@@ -1,7 +1,7 @@
 import os
 import torch
 import numpy as np
-from train_seq2seq import Seq2SeqTransformer
+from Gaspard_model.old.train_seq2seq import Seq2SeqTransformer
 from tqdm import tqdm
 
 @torch.no_grad()

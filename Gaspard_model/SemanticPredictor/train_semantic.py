@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 from sklearn.preprocessing import StandardScaler
-from models.personal_models import CLIP
+from models import CLIP
 import wandb
 
 def seed_everything(seed=42):

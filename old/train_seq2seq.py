@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 from tqdm import tqdm
 import wandb
 import torch.nn.functional as F
-from models.my_autoregressive_transformer import PositionalEncoding
+from Gaspard_model.Seq2Seq.my_autoregressive_transformer import PositionalEncoding
 
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, d_model=512, nhead=8, num_encoder_layers=2, num_decoder_layers=4,

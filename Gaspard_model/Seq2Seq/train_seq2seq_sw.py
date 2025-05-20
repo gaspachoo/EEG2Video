@@ -7,8 +7,7 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 from tqdm import tqdm
 import wandb
 import argparse
-from models.my_autoregressive_transformer import PositionalEncoding
-from models.personal_models import Seq2SeqTransformer
+from models import Seq2SeqTransformer
 
 def parse_args():
     parser = argparse.ArgumentParser()

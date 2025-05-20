@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from models.my_autoregressive_transformer import PositionalEncoding
+from my_autoregressive_transformer import PositionalEncoding
 
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, d_model=512, nhead=8, num_encoder_layers=2, num_decoder_layers=4,
@@ -36,21 +36,3 @@ class Seq2SeqTransformer(nn.Module):
         memory = self.transformer_encoder(src)  # (B,7,d_model)
         output = self.transformer_decoder(tgt, memory, tgt_mask=tgt_mask)  # (B,6,d_model)
         return self.out_linear(output)  # (B,6,9216)
-
-class CLIP(nn.Module):
-    def __init__(self):
-        super(CLIP, self).__init__()
-        self.mlp = nn.Sequential(
-            nn.Linear(310, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 10000),
-            nn.ReLU(),
-            nn.Linear(10000, 77 * 768)
-        )
-
-    def forward(self, eeg):
-        return self.mlp(eeg)
