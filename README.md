@@ -1,6 +1,6 @@
 # EEG2Video Pipeline 
 ## ✅ Modules Completed
-### 1. Data Preprocessing
+## 1. Data Preprocessing  ($\approx$ 1 week)
 #### 1. EEG data segmentation:
 
 Raw EEG (62 channels, 200Hz, 8min40s) segmented into 2s windows (per video : 40 concepts, 5 repetitions per concept, remove hint sequences)
@@ -37,7 +37,7 @@ Downscale to (512, 288), extract 6 frames (3 FPS) and save to .gif format using 
 Script: `EEG2Video/extract_gif.py`
 
 
-### 2. EEG Feature Encoding
+## 2. EEG Feature Encoding ($\approx$ 2 weeks)
 We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
 
 One layer in Shallownet is modified compared to original : AvgPool2d -> AdaptiveAvgPool2d
@@ -54,7 +54,7 @@ Models path : `Gaspard_model/models/models.py`
 
     Script : `Gaspard_model/generate_eeg_emb_sw.py`
 
-### 3. Align Video Latents with EEG embeddings (Seq2Seq Transformer)
+## 3. Align Video Latents with EEG embeddings (Seq2Seq Transformer) ($\approx$ 1 week)
 #### 1. Generate latents from pretrained VAE:
 
 A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
@@ -73,7 +73,7 @@ The model is just a rewriting of original mode. : `Gaspard_model/models/personal
 
     Script : `Gaspard_model/predict_latents_s2s_sw.py`
 
-### 4. Semantic Predictor
+## 4. Semantic Predictor ($\approx$ 2 days)
 
 #### 1. Generate text embeddings
 We process the BLIP captions into pretrained CLIP model to generate text embeddings.
@@ -92,7 +92,7 @@ We use a semantic predictor to generate semantic embeddings from the EEGs captio
 
     Script : `Gaspard_model/generate_semantic_emb.py`
 
-### 5. TuneAVideo pipeline
+## 5. TuneAVideo pipeline (already $\approx$ 1.5 week)
 
 We use the TuneAVideo pipeline to improve the quality of predicted video latents of part 3.2 in adding context thanks to semantic predictor.
 
@@ -104,7 +104,7 @@ We use the TuneAVideo pipeline to improve the quality of predicted video latents
 
     Script : **Not implemented yet**
 
-### 6. Decode Video Latents
+## 6. Decode Video Latents (potentially $\approx$ 1-2 days)
 
 - We decode precise video latents from part 5 using pretrained VAE Decoder to generate videos.
 
@@ -112,12 +112,12 @@ We use the TuneAVideo pipeline to improve the quality of predicted video latents
 
 ## 🔴 Modules Yet To Be Implemented
 
-### 5. TuneAVideo pipeline
+### 5. TuneAVideo pipeline ($\approx$ 1 week)
 
 - Improve training algorithm to make the training faster and ensure that it will not raise any error
 
 - Write the inference script and generate precise video latents
 
-### 6. Decode Video Latents
+### 6. Decode Video Latents ($\approx$ 1 day)
 
 - Write the decoding script using VAE
