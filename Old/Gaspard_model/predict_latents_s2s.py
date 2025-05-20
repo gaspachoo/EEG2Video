@@ -31,7 +31,7 @@ def predict_latents(ckpt_path, z_hat_path, output_path, device="cuda"):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+    
     parser.add_argument('--z_hat', type=str, default="./data/EEG_embeddings/sub3.npy")
     parser.add_argument('--ckpt', type=str, default="./Gaspard_model/checkpoints/seq2seq/seq2seq_block0.pth")
     parser.add_argument('--output', type=str, default="./data/Predicted_latents")

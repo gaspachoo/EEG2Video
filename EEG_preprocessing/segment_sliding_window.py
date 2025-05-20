@@ -2,7 +2,7 @@ import os
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
-root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+
 # Dossiers d'entrée et de sortie
 INPUT_DIR = f'{root}/data/Segmented_Rawf_200Hz_2s'
 

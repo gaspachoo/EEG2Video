@@ -77,7 +77,7 @@ GT_label = np.array([[23, 22, 9, 6, 18,       14, 5, 36, 25, 19,      28, 35, 3,
 # chosed_label = [1, 10, 12, 16, 19, 23, 25, 31, 34, 39]
 chosed_label = [i for i in range(1, 41)]              # set subset for training semantic predictor
 if __name__ == '__main__':
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video" #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
+     #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     eeg_data_path = "./data/DE_1per1s/sub3.npy"   #[7,40,5,2,62,5]                     # your own data path for eeg data
     text_embedding_path = "./data/Text_embeddings/text_embeddings.npy"        # your own data path for text embedding
     eegdata = np.load(eeg_data_path)

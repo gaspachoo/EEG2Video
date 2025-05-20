@@ -10,7 +10,7 @@ import os
 fre = 200
 
 for subname in range(1,21):
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+    
     loaded_data = np.load(f'{root}/data/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy')
     # (7 * 40 * 5 * 62 * 2*fre)
 

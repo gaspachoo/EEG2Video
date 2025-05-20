@@ -185,7 +185,7 @@ def main(
     train_dataset = TuneMultiVideoDataset(**train_data)
     # video_name_list = ['1st_10min', '2nd_10min', '3rd_10min', '4th_10min', '5th_10min']
     #video_name_list = ['1st_10min']
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video" #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
+     #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     video_path = f'{root}/data/Video_mp4/Block0' #data/SEED-DV/output/block1'
     video_files = []
     video_ind = selected_indices

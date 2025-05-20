@@ -106,7 +106,7 @@ def get_time():
     return formatted_time
 
 if __name__ == '__main__':
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+    
     eegdata = np.load(f'{root}/data/DE_1per2s/sub1.npy')
     
     print(eegdata.shape)

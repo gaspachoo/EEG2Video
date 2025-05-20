@@ -34,7 +34,7 @@ def main():
     model = CLIPTextModel.from_pretrained("openai/clip-vit-large-patch14").to(device)
 
     # Paths
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+    
     blip_dir = os.path.join(root, "data/BLIP")
     save_dir = os.path.join(root, "data/Text_embeddings")
     os.makedirs(save_dir, exist_ok=True)

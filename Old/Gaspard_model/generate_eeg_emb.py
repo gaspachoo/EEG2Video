@@ -44,7 +44,7 @@ def generate_all_embeddings(raw_dir, feat_dir, checkpoint_path, output_dir, devi
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video" #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
+     #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     parser.add_argument("--raw_dir",  default = "./data/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
     parser.add_argument("--feat_dir", default="./data/DE_1per1s/", help="directory with .npy files")
     parser.add_argument("--checkpoint_path", default="./Gaspard_model/checkpoints/cv_glmnetv2/sub3_fold0_best.pt", help="checkpoint path")

@@ -17,7 +17,7 @@ def seed_everything(seed=42):
 if __name__ == '__main__':
     seed_everything()
     # default paths
-    root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+    
     default_eeg = os.path.join(root, "data/DE_1per2s/sub1.npy")
     default_model = os.path.join(root, "Gaspard_model/checkpoints/semantic/eeg2text_clip.pt")
     default_save = os.path.join(root, "data/Semantic_embeddings")

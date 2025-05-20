@@ -39,7 +39,7 @@ def seed_everything(seed=0, cudnn_deterministic=True):
         print('Note: not using cudnn.deterministic')
 seed_everything(114514)
 
-root = os.environ.get("HOME", os.environ.get("USERPROFILE")) + "/EEG2Video"
+
 eeg = torch.load(f'{root}/data/EEG/sub1.npy',map_location='cpu')
 
 negative = eeg.mean(dim=0)
