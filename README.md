@@ -8,19 +8,36 @@ Acronyms used:
 ## 1. Data Preprocessing  ($\approx$ 1 week)
 #### 1. EEG data segmentation:
 
-Raw EEG (62 channels, 200Hz, 8min40s) segmented into 2s windows (per video : 40 concepts, 5 repetitions per concept, remove hint sequences)
+**Purpose** : Segment raw  8min 40s EEG recordings into shorter recordings 
 
-Shapes are : (block, concept, repetition, channel, time).
+- First step :
 
-Script : `EEG_preprocessing/segment_raw_signals_200Hz.py`
+    Segment (62 channels, 200Hz, 8min40s)  into 2s windows (per video : 40 concepts, 5 repetitions per concept, remove hint sequences)
 
-Then, segment each 2s windows into 500ms windows using a 250 ms overlap (=7 windows)
+    Shapes are : (block, concept, repetition, channel, time).
 
-Shapes adapted to (block, concept, repetition, window, channel, time).
+    Script : `EEG_preprocessing/segment_raw_signals_200Hz.py`
 
-Script : `EEG_preprocessing/segment_sliding_window.py`
+- Second step :
+    
+    Segment each 2s windows into 500ms windows using a 250 ms overlap (=7 windows)
+
+    Shapes adapted to (block, concept, repetition, window, channel, time).
+
+    Script : `EEG_preprocessing/segment_sliding_window.py`
 
 #### 2. DE/PSD Features detection on 5 frequency bands:
+
+**Purpose**: detect DE and PSD features on segmented EEGs, on 5 different frequency bands:
+
+- Delta (1-4 Hz)
+- Theta (4-8 Hz)
+- Alpha (8-14 Hz)
+- Beta (14-31 Hz)
+- Gamma (31-99 Hz)
+
+We detect on 2 types of windows :
+
 - Detect features on 1s windows without overlapping.
 
     Shapes adapted to (block, concept, repetition, window, channel, band).
@@ -35,25 +52,32 @@ Script : `EEG_preprocessing/segment_sliding_window.py`
 
 #### 3. Video alignment and GIF creation:
 
-Segment 8min40s videos into 2s sliced into 200 2s clips (40 concepts × 5 repetitions) using cv2.
+**Purpose** : Segment raw  8min 40s Video recordings into shorter downscaled GIFs
 
-Downscale to (512, 288), extract 6 frames (3 FPS) and save to .gif format using imageio.
+- Segment 8 min 40s videos into 200 (40 concepts × 5 repetitions) 2s clips  using cv2.
 
-Script: `EEG2Video/extract_gif.py`
+    Downscale to (512, 288), extract 6 frames (3 FPS) and save to .gif format using imageio.
+
+    Script: `EEG2Video/extract_gif.py`
 
 
 ## 2. EEG Feature Encoding ($\approx$ 2 weeks)
-We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
+
+**Purpose** : We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
 
 One layer in Shallownet is modified compared to original : AvgPool2d -> AdaptiveAvgPool2d
 
 Models path : `Gaspard_model/models/models.py` 
 
-- Training :  We use 2s raw EEGs and 1s windows for DE/PSD features.
+- Training :
+
+    We use 2s raw EEGs and 1s windows for DE/PSD features.
 
     Script : `Gaspard_model/train_glmnet.py`
 
-- Inference : We generate EEgs embeddings from train GLMNet.
+- Inference :
+    
+    We generate EEgs embeddings from train GLMNet.
 
     We use 2s raw EEGs and 500ms windows for DE/PSD features.
 
@@ -62,50 +86,65 @@ Models path : `Gaspard_model/models/models.py`
 ## 3. Align Video Latents with EEG embeddings (Seq2Seq Transformer) ($\approx$ 1 week)
 #### 1. Generate latents from pretrained VAE:
 
-A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
+**Purpose** : Use a pre-trained VAE to convert GIFs into latents
 
-Script : `Gaspard_model/generate_latents_vae.py`
+- A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
+
+    Script : `Gaspard_model/generate_latents_vae.py`
 
 #### 2. Use Seq2Seq model to align EEGs embeddings and video latents
 
 The model is just a rewriting of original mode. : `Gaspard_model/models/personal_models.py`
 
-- Training : we use the generated EEG embeddings from part 2 as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
+- Training :
+
+    We use the generated EEG embeddings from part 2 as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
     
     Script : `Gaspard_model/train_seq2seq_sw.py`
 
-- Inference : we use the generated EEG embeddings from part 2 to generate predicted latents.
+- Inference : 
+
+    We use the generated EEG embeddings from part 2 to generate predicted latents.
 
     Script : `Gaspard_model/predict_latents_s2s_sw.py`
 
 ## 4. Semantic Predictor ($\approx$ 2 days)
 
 #### 1. Generate text embeddings
-We process the BLIP captions into pretrained CLIP model to generate text embeddings.
 
-Script : `Gaspard_model/generate_text_emb_clip.py`
+- We process the BLIP captions into pretrained CLIP model to generate text embeddings.
+
+    Script : `Gaspard_model/generate_text_emb_clip.py`
 
 #### 2. Generate semantic embeddings
 
-We use a semantic predictor to generate semantic embeddings from the EEGs captions.
+**Purpose** : We use a semantic predictor to generate semantic embeddings from the EEGs captions.
 
-- Training : we use the DE/PSD features of part 2 as source and the text embeddings from part 4.1 as target.
+- Training : 
+    
+    We use the DE/PSD features of part 2 as source and the text embeddings from part 4.1 as target.
 
     Script : `Gaspard_model/train_semantic.py`
 
-- Inference : we used the generated text embeddings from part 4.1 to generate semantic embeddings.
+- Inference : 
+
+    We used the generated text embeddings from part 4.1 to generate semantic embeddings.
 
     Script : `Gaspard_model/generate_semantic_emb.py`
 
 ## 5. TuneAVideo pipeline (already $\approx$ 1.5 week)
 
-We use the TuneAVideo pipeline to improve the quality of predicted video latents of part 3.2 in adding context thanks to semantic predictor.
+**Purpose** : We use the TuneAVideo pipeline to improve the quality of predicted video latents of part 3.2 in adding context thanks to semantic predictor.
 
-- Training : we use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
+- Training :
+
+    We use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
 
     Script : `Gaspard_model/train_tuneavideo.py`
 
-- Inference : we generate precise video latents from predicted latents of part 3.2.
+- Inference :
+    
+    We generate precise video latents from predicted latents of part 3.2.
 
     Script : **Not implemented yet**
 
