@@ -12,6 +12,8 @@ from torch.cuda.amp import autocast, GradScaler
 import wandb
 from tqdm import tqdm
 import argparse
+import pynvml
+from fvcore.nn import FlopCountAnalysis
 
 class EEGVideoDataset(Dataset):
     def __init__(self, zhat_dir: str, sem_dir: str):
@@ -45,6 +47,12 @@ class TuneAVideoTrainer:
         # CUDNN tuning
         if args.cudnn_benchmark:
             torch.backends.cudnn.benchmark = True
+            
+        # ----- Initialisation NVML pour les métriques GPU -----
+        pynvml.nvmlInit()
+        gpu_index = torch.cuda.current_device() if torch.cuda.is_available() else 0
+        self.nvml_handle = pynvml.nvmlDeviceGetHandleByIndex(gpu_index)
+
 
         # DataLoader settings
         dl_kwargs = dict(
@@ -123,6 +131,10 @@ class TuneAVideoTrainer:
         # W&B
         if args.use_wandb:
             wandb.init(project="eeg2video-tuneavideo", config=vars(args))
+            # log des métriques système GPU par défaut
+            wandb.define_metric("gpu/used_GB")
+            wandb.define_metric("gpu/clock_MHz")
+            wandb.define_metric("model/flops")
 
     def _step(self, z0, et):
         # Move and format tensors
@@ -210,7 +222,39 @@ class TuneAVideoTrainer:
                 wandb.log({"train_loss": tl})
             vl = self._validate_epoch()
             if self.args.use_wandb:
-                wandb.log({"val_loss": vl})
+                
+                wandb.log({"val_loss": vl})# ---- calcul et log des métriques GPU ----
+                mem = pynvml.nvmlDeviceGetMemoryInfo(self.nvml_handle)
+                gpu_clock = pynvml.nvmlDeviceGetClockInfo(self.nvml_handle, pynvml.NVML_CLOCK_GRAPHICS)
+                # récupération de la VRAM max allouée par PyTorch (optionnel)
+                max_alloc = torch.cuda.max_memory_reserved(device=self.device) / 1024**3
+
+                # → on récupère un batch pour générer des entrées factices
+                z0_sample, et_sample = next(iter(self.train_loader))
+
+                # → reuse de votre _step pour obtenir z_t et timesteps
+                z_t_dummy, _, timesteps_dummy = self._step(z0_sample, et_sample)
+
+                # → idem pour encoder_hidden_states (projection EEG)
+                encoder_hidden_states_dummy = self.proj_eeg(
+                    et_sample.to(self.device).unsqueeze(1)
+                ).contiguous()
+
+                # → on passe bien les 3 inputs au FlopCountAnalysis
+                flops = FlopCountAnalysis(
+                    self.pipeline.unet,
+                    (z_t_dummy, timesteps_dummy, encoder_hidden_states_dummy)
+                )
+
+                total_flops = flops.total()
+                
+                wandb.log({
+                    "gpu/used_GB": mem.used / 1024**3,
+                    "gpu/clock_MHz": gpu_clock,
+                    "gpu/max_allocated_GB": max_alloc,
+                    "model/flops": total_flops,
+                }, step=epoch)
+ 
             print(f"Epoch {epoch}: train={tl:.4f}, val={vl:.4f}")
             if epoch % self.args.save_every == 0: self._save(epoch)
 
