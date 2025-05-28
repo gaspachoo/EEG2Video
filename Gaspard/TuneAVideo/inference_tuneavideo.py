@@ -122,10 +122,13 @@ def main():
     z_hat = load_zlatents(args.seq2seq_dir, device)
     e_t   = load_semantics(args.sem_dir, device)
 
-    # → Préparer le negative baseline pour classifier-free guidance
-    # On crée un fichier './negative.npy' attendu par la pipeline
+        # → Préparer le negative baseline pour classifier-free guidance
+    # On crée le fichier '../negative.npy' attendu par la pipeline
+    import pathlib
+    neg_path = pathlib.Path(__file__).resolve().parent
+    
     neg = e_t.mean(dim=0, keepdim=True).cpu().numpy()
-    np.save(os.path.join(os.getcwd(), 'negative.npy'), neg)
+    np.save(f"{neg_path}/negative.npy", neg)
 
     # → Composants figés
     vae = AutoencoderKL.from_pretrained(args.base_model_path, subfolder='vae').to(device).eval()
