@@ -229,8 +229,6 @@ class TuneAVideoTrainerDDP:
                 print(f"Epoch {epoch}: train={tr_loss:.4f}, val={val_loss:.4f}")
                 
                 if self.args.use_wandb:
-                    
-                    wandb.log({'train_loss': tr_loss, 'val_loss': val_loss,'epoch': epoch})
 
                     # gpu stats
                     mem = pynvml.nvmlDeviceGetMemoryInfo(self.nvml_handle)
@@ -241,6 +239,9 @@ class TuneAVideoTrainerDDP:
                     current = torch.cuda.memory_allocated(self.device) / 1024**3
                     
                     wandb.log({
+                        'epoch': epoch,
+                        'train_loss': tr_loss,
+                        'val_loss': val_loss,
                         'gpu/clock_MHz': gpu_clock,
                         'gpu/max_allocated_GB': max_alloc,
                         'gpu/pk_GB': peak,
