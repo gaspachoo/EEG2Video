@@ -19,6 +19,9 @@ import pynvml
 import wandb
 from fvcore.nn import FlopCountAnalysis
 
+########
+# Multiparameter training script for TuneAVideo with DDP
+########
 
 # ---------------------------
 # Dataset
@@ -140,7 +143,7 @@ class TuneAVideoTrainerDDP:
 
         # wandb
         if args.use_wandb and rank == 0:
-            wandb.init(project='eeg2video-tuneavideo-ddp', config=vars(args))
+            wandb.init(project='eeg2video-tuneavideo-new', config=vars(args))
             wandb.define_metric('gpu/used_GB')
             wandb.define_metric('gpu/clock_MHz')
             wandb.define_metric('model/flops')
@@ -217,6 +220,7 @@ class TuneAVideoTrainerDDP:
     # ----------------------- epoch loop -----------------------
     def train(self):
         for epoch in range(1, self.args.epochs + 1):
+            torch.cuda.reset_peak_memory_stats(self.device)  
             if self.rank == 0 and self.args.use_wandb:
                 wandb.log({'epoch': epoch})
 
@@ -237,14 +241,17 @@ class TuneAVideoTrainerDDP:
                     z0_sample, et_sample = next(iter(self.train_loader))
                     z0_s, eh_s = self._format_batch(z0_sample, et_sample)
                     z_t_s, _, ts_s = self._step_ddpm_inputs(z0_s)
-                    flops = FlopCountAnalysis(self.pipeline.unet, (z_t_s, ts_s, eh_s))
-
+                    
+                    peak = torch.cuda.max_memory_reserved(self.device) / 1024**3
+                    current = torch.cuda.memory_allocated(self.device) / 1024**3
+                    
                     wandb.log({
-                        'gpu/used_GB': mem.used / 1024 ** 3,
                         'gpu/clock_MHz': gpu_clock,
                         'gpu/max_allocated_GB': max_alloc,
-                        'model/flops': flops.total()
-                    })
+                        'gpu/pk_GB': peak,
+                        'gpu/cur_GB': current
+                        })
+                    
 
             if epoch % self.args.save_every == 0:
                 self._save_ckpt(epoch)
