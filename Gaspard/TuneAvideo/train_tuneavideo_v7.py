@@ -1,3 +1,5 @@
+#compared to v6 : add lr scheduler, use 8bit adam, use torch compile
+# 
 import os
 import argparse
 import torch
