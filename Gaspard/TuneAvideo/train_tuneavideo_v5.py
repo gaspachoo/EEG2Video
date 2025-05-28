@@ -220,27 +220,22 @@ class TuneAVideoTrainerDDP:
     # ----------------------- epoch loop -----------------------
     def train(self):
         for epoch in range(1, self.args.epochs + 1):
-            torch.cuda.reset_peak_memory_stats(self.device)  
-            if self.rank == 0 and self.args.use_wandb:
-                wandb.log({'epoch': epoch})
+            torch.cuda.reset_peak_memory_stats(self.device)
 
             tr_loss = self._train_epoch(epoch)
             val_loss = self._validate_epoch()
 
             if self.rank == 0:
                 print(f"Epoch {epoch}: train={tr_loss:.4f}, val={val_loss:.4f}")
+                
                 if self.args.use_wandb:
-                    wandb.log({'train_loss': tr_loss, 'val_loss': val_loss})
+                    
+                    wandb.log({'train_loss': tr_loss, 'val_loss': val_loss,'epoch': epoch})
 
                     # gpu stats
                     mem = pynvml.nvmlDeviceGetMemoryInfo(self.nvml_handle)
                     gpu_clock = pynvml.nvmlDeviceGetClockInfo(self.nvml_handle, pynvml.NVML_CLOCK_GRAPHICS)
                     max_alloc = torch.cuda.max_memory_reserved(device=self.device) / 1024 ** 3
-
-                    # flops on dummy batch
-                    z0_sample, et_sample = next(iter(self.train_loader))
-                    z0_s, eh_s = self._format_batch(z0_sample, et_sample)
-                    z_t_s, _, ts_s = self._step_ddpm_inputs(z0_s)
                     
                     peak = torch.cuda.max_memory_reserved(self.device) / 1024**3
                     current = torch.cuda.memory_allocated(self.device) / 1024**3
