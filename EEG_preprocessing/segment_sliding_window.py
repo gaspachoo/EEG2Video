@@ -14,7 +14,7 @@ STEP_S = 0.25             # recouvrement (secondes)
 WIN_T = int(FS * WIN_S)   # points temporels par fenêtre (100)
 STEP_T = int(FS * STEP_S) # pas entre fenêtres (50)
 
-OUTPUT_DIR = './data/Segmented_{int(1000*WIN_S)}ms_sw'
+OUTPUT_DIR = './data/Preprocessing/Segmented_{int(1000*WIN_S)}ms_sw'
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
