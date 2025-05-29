@@ -68,7 +68,7 @@ def parse_args():
         help="Largeur des frames"
     )
     p.add_argument(
-        "--num_inference_steps", type=int, default=100,
+        "--num_inference_steps", type=int, default=500,
         help="Nombre de pas de diffusion"
     )
     p.add_argument(
@@ -77,109 +77,105 @@ def parse_args():
     )
     return p.parse_args()
 
-def load_zlatents(path_or_dir: str, device: torch.device) -> torch.Tensor:
+def load_pairs(seq2seq_dir: str, sem_dir: str, device: torch.device):
     """
-    Charge un fichier ou répertoire de latents vidéo (.npy ou .pt) 
-    et renvoie un Tensor (B, F, C, H, W).
+    Charge latents vidéo et embeddings sémantiques associés par bloc.
+    Reshape embeddings flat (B_i, 77*768) en (B_i, 77, 768).
+    Retourne :
+      video_latents: Tensor (B, F, C, H, W)
+      semantic_embeddings: Tensor (B, 77, 768)
     """
-    blocks = []
-    paths = sorted(os.listdir(path_or_dir)) if os.path.isdir(path_or_dir) else [path_or_dir]
-    for fname in paths:
-        full = os.path.join(path_or_dir, fname) if os.path.isdir(path_or_dir) else fname
-        if not (full.endswith('.npy') or full.endswith('.pt')):
-            continue
-        data = np.load(full) if full.endswith('.npy') else torch.load(full)
+    latent_files = sorted([f for f in os.listdir(seq2seq_dir) if f.endswith('.npy') or f.endswith('.pt')])
+    video_list, sem_list = [], []
+    for fname in latent_files:
+        # Charger latent vidéo
+        lat_path = os.path.join(seq2seq_dir, fname)
+        data = np.load(lat_path) if fname.endswith('.npy') else torch.load(lat_path)
         lat = torch.from_numpy(data) if isinstance(data, np.ndarray) else data
-        lat = lat.half().to(device)
-        lat = rearrange(lat, 'b c f h w -> b f c h w')
-        blocks.append(lat)
-    return torch.cat(blocks, dim=0)
+        lat = lat.to(device).half()
+        lat = rearrange(lat, 'b c f h w -> b f c h w')  # (B_i, F, C, H, W)
+        B_i = lat.shape[0]
+        video_list.append(lat)
 
-
-def load_semantics(path_or_dir: str, device: torch.device) -> torch.Tensor:
-    """
-    Charge un fichier ou répertoire d'embeddings sémantiques (*.npy)
-    et renvoie un Tensor (B, D).
-    """
-    blocks = []
-    paths = sorted(os.listdir(path_or_dir)) if os.path.isdir(path_or_dir) else [path_or_dir]
-    for fname in paths:
-        full = os.path.join(path_or_dir, fname) if os.path.isdir(path_or_dir) else fname
-        if not full.endswith('.npy'):
-            continue
-        arr = np.load(full)
-        emb = torch.from_numpy(arr).to(device)
-        blocks.append(emb)
-    return torch.cat(blocks, dim=0)
+        # Charger embedding semantique flat
+        sem_name = fname.replace('_latents', '')
+        sem_path = os.path.join(sem_dir, sem_name)
+        arr = np.load(sem_path)  # flat or already shaped
+        if arr.ndim == 1:
+            # single vector, treat as (1, D)
+            arr = arr[np.newaxis, :]
+        if arr.ndim == 2 and arr.shape[1] != 768:
+            # flat: shape (B_i, 77*768)
+            D = arr.shape[1]
+            if D % 768 != 0:
+                raise ValueError(f"Embedding length {D} not divisible by 768")
+            seq_len = D // 768
+            arr = arr.reshape(-1, seq_len, 768)
+        emb = torch.from_numpy(arr).to(device).half()  # (B_i, 77, 768)
+        sem_list.append(emb)
+    return torch.cat(video_list, dim=0), torch.cat(sem_list, dim=0)
 
 
 def main():
     args = parse_args()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    torch.manual_seed(114514)
 
-    # → Charger latents Seq2Seq et embeddings sémantiques
-    z_hat = load_zlatents(args.seq2seq_dir, device)
-    e_t   = load_semantics(args.sem_dir, device)
+    # Charger données
+    video_latents, semantic_embeddings = load_pairs(args.seq2seq_dir, args.sem_dir, device)
+    assert video_latents.size(0) == semantic_embeddings.size(0), \
+        f"Mismatch video ({video_latents.size(0)}) vs sem ({semantic_embeddings.size(0)})"
 
-        # → Préparer le negative baseline pour classifier-free guidance
-    # On crée le fichier '../negative.npy' attendu par la pipeline
-    import pathlib
-    neg_path = pathlib.Path(__file__).resolve().parent
-    
-    neg = e_t.mean(dim=0, keepdim=True).cpu().numpy()
-    np.save(f"{neg_path}/negative.npy", neg)
-
-    # → Composants figés
-    vae = AutoencoderKL.from_pretrained(args.base_model_path, subfolder='vae').to(device).eval()
+    # Charger modules en float16
+    vae = AutoencoderKL.from_pretrained(args.base_model_path, subfolder='vae').to(device).half().eval()
     tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
     scheduler = PNDMScheduler.from_pretrained(args.base_model_path, subfolder='scheduler')
+    unet_path = os.path.join(args.ckpt_dir, f'unet_ep{args.ckpt_epoch}.pt')
+    unet = UNet3DConditionModel.from_pretrained(unet_path).to(device).half().eval()
 
-    # → Charger UNet fine-tuné
-    ckpt_path = os.path.join(args.ckpt_dir, f'unet_ep{args.ckpt_epoch}.pt')
-    unet = UNet3DConditionModel.from_pretrained(ckpt_path).to(device).eval()
-
-        # → Construire la pipeline
-    pipe = TuneAVideoPipeline(
-        vae=vae,
-        tokenizer=tokenizer,
-        unet=unet,
-        scheduler=scheduler
-    )
-    # déplacer les modules et passer en mode évaluation
-    pipe.to(device)
-    pipe.unet.eval()
-    pipe.vae.eval()
-
+    # Construire pipeline
+    pipe = TuneAVideoPipeline(vae=vae, tokenizer=tokenizer, unet=unet, scheduler=scheduler).to(device)
     pipe.enable_xformers_memory_efficient_attention()
-        # ajustement VRAM: slicing plutôt que tiling
     pipe.vae.enable_slicing()
     pipe.scheduler.set_timesteps(args.num_inference_steps)
 
-    # → Préparer dossier de sortie
-    out_root = os.path.join(args.output_dir, 'Fullmodel')
-    os.makedirs(out_root, exist_ok=True)
+    # Override méthode interne pour embeddings
+    def _encode_eeg_override(self, model, eeg, device, num_videos_per_eeg,
+                              do_classifier_free_guidance, negative_eeg):
+        neg = negative_eeg.expand(-1, eeg.size(1), -1)
+        return torch.cat([neg, eeg], dim=0)
+    pipe._encode_eeg = _encode_eeg_override.__get__(pipe, TuneAVideoPipeline)
 
-        # → Boucle d’inférence
-    for i in range(z_hat.size(0)):
-        lat_z = z_hat[i:i+1]
-        sem   = e_t[i:i+1]
+    os.makedirs(args.output_dir, exist_ok=True)
+    B = video_latents.size(0)
 
-        # Inference : sem is passed as "eeg" argument, lat_z as latents
+    # Inférence
+    for i in range(B):
+        z0 = video_latents[i:i+1]
+        emb = semantic_embeddings[i:i+1]
+        neg_emb = emb.mean(dim=1, keepdim=True)
+
         result = pipe(
             None,
-            sem,
-            args.video_length,
+            emb,
+            negative_eeg=neg_emb,
+            latents=z0,
+            video_length=args.video_length,
             height=args.height,
             width=args.width,
             num_inference_steps=args.num_inference_steps,
-            guidance_scale=args.guidance_scale,
-            latents=lat_z
+            guidance_scale=args.guidance_scale
         )
-        videos = result.videos
+        videos = result.videos  # Tensor [1, F, H, W, 3]
 
-        save_videos_grid(videos, os.path.join(out_root, f'sample_{i}.gif'))
-        print(f"[INFO] Saved sample_{i}.gif → {out_root}")(f"[INFO] Saved sample_{i}.gif → {out_root}")
+        
+
+        # Sauvegarde sans double rescale (déjà normalisé)
+        save_videos_grid(
+            videos,
+            os.path.join(args.output_dir, f'sample_{i}.gif'),
+            rescale=True
+        )
+        print(f"[INFO] sample_{i}.gif saved in {args.output_dir}")
 
 if __name__ == '__main__':
     main()

@@ -76,6 +76,24 @@ def main():
         print(f"Predicting latents for block {block_id}...")
         pred = predict_block_latents(block_id, emb_flat, z0, model, device)
         out_path = os.path.join(args.output_dir, f'block{block_id}_predicted_latents.npy')
+        
+        # --- DEBUG Seq2Seq preds ---
+        # pred : np.ndarray shape (B_i, 77*768) ou (B_i, 77,768)
+        print(f"[DEBUG Seq2Seq] block {block_id}:",
+            "shape", pred.shape,
+            "mean", pred.mean(),
+            "std", pred.std(),
+            "min", pred.min(),
+            "max", pred.max())
+        # Si pred.ndim == 2, on peut aussi reshaper pour inspecter per-token
+        if pred.ndim == 2:
+            resh = pred.reshape(pred.shape[0], -1, 768)
+            print(f"[DEBUG Seq2Seq] after reshape: mean per token",
+                resh.mean(axis=(0,2))[:5], "... std per token",
+                resh.std(axis=(0,2))[:5])
+        # --------------------------------
+
+        
         np.save(out_path, pred)
         print(f"Saved predicted latents at {out_path}, shape {pred.shape}")
 
