@@ -79,19 +79,17 @@ def main():
         
         # --- DEBUG Seq2Seq preds ---
         # pred : np.ndarray shape (B_i, 77*768) ou (B_i, 77,768)
-        print(f"[DEBUG Seq2Seq] block {block_id}:",
-            "shape", pred.shape,
-            "mean", pred.mean(),
-            "std", pred.std(),
-            "min", pred.min(),
-            "max", pred.max())
-        # Si pred.ndim == 2, on peut aussi reshaper pour inspecter per-token
-        if pred.ndim == 2:
-            resh = pred.reshape(pred.shape[0], -1, 768)
-            print(f"[DEBUG Seq2Seq] after reshape: mean per token",
-                resh.mean(axis=(0,2))[:5], "... std per token",
-                resh.std(axis=(0,2))[:5])
+        #print(f"[DEBUG Seq2Seq] block {block_id}: shape", pred.shape, "mean", pred.mean(), "std", pred.std(), "min", pred.min(), "max", pred.max())
         # --------------------------------
+        # → Normalisation per-sample zero-mean / unit-std
+        # On réduit la moyenne et on divise par l’écart-type pour chaque instance
+        # utilises axes (1,2,3,4) pour couvrir tous les dims sauf le batch
+        mean = pred.mean(axis=(1,2,3,4), keepdims=True)
+        std  = pred.std(axis=(1,2,3,4), keepdims=True) + 1e-6
+        #pred = (pred - mean) / std ----------------------------------------to edit
+
+        # DEBUG après normalisation
+        #print(f"[DEBUG Seq2Seq post-norm] mean {pred.mean():.4f}, std {pred.std():.4f}, min {pred.min():.4f}, max {pred.max():.4f}")
 
         
         np.save(out_path, pred)
