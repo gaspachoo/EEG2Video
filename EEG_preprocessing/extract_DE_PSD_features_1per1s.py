@@ -48,9 +48,9 @@ for subname in sub_list:
         DE_data = np.concatenate((DE_data, de_block_data.reshape(1, 40, 5, 2, 62, 5)))
         PSD_data = np.concatenate((PSD_data, psd_block_data.reshape(1, 40, 5, 2, 62, 5)))
     
-    os.makedirs('./data/DE_1per1s', exist_ok=True)
-    os.makedirs('./data/PSD_1per1s', exist_ok=True)
-    np.save("./data/DE_1per1s/" + subname , DE_data) #+ ".npy"
-    np.save("./data/PSD_1per1s/" + subname, PSD_data) #+ ".npy"
+    os.makedirs('./data/Preprocessing/DE_1per1s', exist_ok=True)
+    os.makedirs('./data/Preprocessing/PSD_1per1s', exist_ok=True)
+    np.save("./data/Preprocessing/DE_1per1s/" + subname , DE_data) #+ ".npy"
+    np.save("./data/Preprocessing/PSD_1per1s/" + subname, PSD_data) #+ ".npy"
 
     # break

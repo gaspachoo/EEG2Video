@@ -212,13 +212,13 @@ def get_files_names_in_directory(directory):
             files_names.append(filename)
     return files_names
 
-sub_list = get_files_names_in_directory("./data/DE_1per1s/")
+sub_list = get_files_names_in_directory("./data/Preprocessing/DE_1per1s/")
 
 All_sub_top1 = []
 All_sub_top5 = []
 
 for subname in sub_list:
-    load_npy = np.load("./data/DE_1per1s/" + subname)
+    load_npy = np.load("./data/Preprocessing/DE_1per1s/" + subname)
 
     print(load_npy.shape)
 
