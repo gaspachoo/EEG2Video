@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 # Load files
 raw_data = np.load("./data/Preprocessing/Segmented_Rawf_200Hz_2s/sub1.npy")   # (7, 40, 5, 62, 400)
-de_data = np.load("./data/DE_1per2s/1.npy")                     # (1, 40, 5, 62, 5)
-psd_data = np.load("./data/PSD_1per2s/1.npy")                   # (1, 40, 5, 62, 5)
+de_data = np.load("./data/Preprocessing/DE_1per2s/1.npy")                     # (1, 40, 5, 62, 5)
+psd_data = np.load("./data/Preprocessing/PSD_1per2s/1.npy")                   # (1, 40, 5, 62, 5)
 
 # Oz channel = index 59
 channel_index = 59

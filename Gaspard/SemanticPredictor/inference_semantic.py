@@ -18,7 +18,7 @@ if __name__ == '__main__':
     seed_everything()
     # default paths
     
-    default_eeg = "./data/DE_1per2s/sub1.npy"
+    default_eeg = "./data/Preprocessing/DE_1per2s/sub1.npy"
     default_model = "./Gaspard/checkpoints/semantic/eeg2text_clip.pt"
     default_save = "./data/Semantic_embeddings"
 

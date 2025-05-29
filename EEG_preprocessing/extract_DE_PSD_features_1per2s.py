@@ -38,7 +38,7 @@ for subname in range(1,21):
         PSD_data = np.concatenate((PSD_data, psd_block_data.reshape(1, 40, 5, 62, 5)))
 
 
-    os.makedirs("./data/DE_1per2s", exist_ok=True)
-    os.makedirs("./data/PSD_1per2s", exist_ok=True)
-    np.save("./data/DE_1per2s/sub" + str(subname) +".npy", DE_data)
-    np.save("./data/PSD_1per2s/sub" + str(subname) + ".npy", PSD_data)
+    os.makedirs("./data/Preprocessing/DE_1per2s", exist_ok=True)
+    os.makedirs("./data/Preprocessing/PSD_1per2s", exist_ok=True)
+    np.save("./data/Preprocessing/DE_1per2s/sub" + str(subname) +".npy", DE_data)
+    np.save("./data/Preprocessing/PSD_1per2s/sub" + str(subname) + ".npy", PSD_data)

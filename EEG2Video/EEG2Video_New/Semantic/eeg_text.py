@@ -107,7 +107,7 @@ def get_time():
 
 if __name__ == '__main__':
     
-    eegdata = np.load('./data/DE_1per2s/sub1.npy')
+    eegdata = np.load('./data/Preprocessing/DE_1per2s/sub1.npy')
     
     print(eegdata.shape)
     EEG = []

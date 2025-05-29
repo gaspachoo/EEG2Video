@@ -66,7 +66,7 @@ def train():
     import argparse
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--eeg_file', type=str, default="./data/DE_1per2s/sub1.npy")
+    parser.add_argument('--eeg_file', type=str, default="./data/Preprocessing/DE_1per2s/sub1.npy")
     parser.add_argument('--text_dir', type=str, default="./data/Text_embeddings")
     parser.add_argument('--save_path', type=str, default="./Gaspard/checkpoints/semantic")
     parser.add_argument('--epochs', type=int, default=200)
