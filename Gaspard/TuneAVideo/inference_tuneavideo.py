@@ -52,7 +52,7 @@ def parse_args():
         help="Répertoire des embeddings sémantiques (*.npy)"
     )
     p.add_argument(
-        "--output_dir", type=str, default="./outputs/inference_v7",
+        "--output_dir", type=str, default=".data/TuneAVideo/outputs",
         help="Répertoire de sortie pour les GIFs"
     )
     p.add_argument(
