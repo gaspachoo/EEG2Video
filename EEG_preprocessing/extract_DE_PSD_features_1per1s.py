@@ -17,11 +17,11 @@ def get_files_names_in_directory(directory):
             files_names.append(filename)
     return files_names
 
-sub_list = get_files_names_in_directory("./data/Segmented_Rawf_200Hz_2s/")
+sub_list = get_files_names_in_directory("./data/Preprocessing/Segmented_Rawf_200Hz_2s/")
 
 for subname in sub_list:
 
-    loaded_data = np.load('./data/Segmented_Rawf_200Hz_2s/' + subname)
+    loaded_data = np.load('./data/Preprocessing/Segmented_Rawf_200Hz_2s/' + subname)
     # (7 * 40 * 5 * 62 * 2*fre)
 
     print("Successfully loaded .npy file.")

@@ -40,7 +40,7 @@ class GLMNet(nn.Module):
 def parse_args():
      #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     p = argparse.ArgumentParser()
-    p.add_argument("--raw_dir",  default = "./data/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
+    p.add_argument("--raw_dir",  default = "./data/Preprocessing/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
     p.add_argument("--feat_dir", default="./data/DE_1per1s/", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info/All_video_label.npy", help="Label file")
     p.add_argument("--save_dir", default="./Gaspard/checkpoints/glmnet/")

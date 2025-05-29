@@ -4,7 +4,7 @@ from numpy.lib.stride_tricks import sliding_window_view
 
 
 # Dossiers d'entrée et de sortie
-INPUT_DIR = './data/Segmented_Rawf_200Hz_2s'
+INPUT_DIR = './data/Preprocessing/Segmented_Rawf_200Hz_2s'
 
 
 # Paramètres de découpage

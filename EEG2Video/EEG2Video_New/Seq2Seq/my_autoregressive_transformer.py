@@ -276,7 +276,7 @@ GT_label = np.array([[23, 22, 9, 6, 18, 14, 5, 36, 25, 19, 28, 35, 3, 16, 24, 40
                      ])
 
 if __name__ == "__main__":
-    eegdata = np.load('../../../data/Segmented_Rawf_200Hz_2s/sub1.npy')
+    eegdata = np.load('../../../data/Preprocessing/Segmented_Rawf_200Hz_2s/sub1.npy')
 
     # use VAE model to get the latent
     latent_data = np.load('1200_latent.npy')

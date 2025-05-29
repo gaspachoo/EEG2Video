@@ -7,7 +7,7 @@ from tqdm import tqdm
 # meaning 7 blocks, 40 concepts, 5 video clips, 62 channels, and 2s*fre time-points.
 
 fre = 200
-os.makedirs('./data/Segmented_Rawf_200Hz_2s', exist_ok=True)
+os.makedirs('./data/Preprocessing/Segmented_Rawf_200Hz_2s', exist_ok=True)
 
 def get_files_names_in_directory(directory):
     files_names = []
@@ -38,4 +38,4 @@ for subname in sub_list:
             block_data = np.concatenate((block_data, class_data.reshape(1, 5, 62, 2*fre)))
         save_data = np.concatenate((save_data, block_data.reshape(1, 40, 5, 62, 2*fre)))
 
-    np.save('./data/Segmented_Rawf_200Hz_2s/' + subname, save_data) ## ./data/Segmented_Rawf_200Hz_2s/
+    np.save('./data/Preprocessing/Segmented_Rawf_200Hz_2s/' + subname, save_data) ## ./data/Preprocessing/Segmented_Rawf_200Hz_2s/
