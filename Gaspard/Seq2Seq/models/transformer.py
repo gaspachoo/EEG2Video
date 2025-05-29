@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from my_autoregressive_transformer import PositionalEncoding
+from .my_autoregressive_transformer import PositionalEncoding
 
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, d_model=512, nhead=8, num_encoder_layers=2, num_decoder_layers=4,
