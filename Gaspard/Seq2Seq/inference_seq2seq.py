@@ -47,13 +47,13 @@ def main():
                         default="./data/GLMNet/EEG_embeddings_sw/sub3.npy",
                         help='Path to embeddings .npy (shape 7*40*5*7,512)')
     parser.add_argument('--video_dir',     type=str,
-                        default="./data/Video_latents",
+                        default="./data/Seq2Seq/Video_latents",
                         help='Directory with block{block}_latents.npy (shape 200,6,4,36,64)')
     parser.add_argument('--ckpt_dir',      type=str,
                         default="./Gaspard/checkpoints/seq2seq/",
                         help='Directory with seq2seq_sw_block{block}.pth')
     parser.add_argument('--output_dir',    type=str,
-                        default="./data/Predicted_latents/",
+                        default="./data/Seq2Seq/Predicted_latents/",
                         help='Where to save predicted latents')
     parser.add_argument('--device',        default='cuda',
                         help='cuda or cpu')

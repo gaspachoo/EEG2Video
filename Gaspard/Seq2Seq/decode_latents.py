@@ -42,8 +42,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--latents_dir", type=str, default="./data/Predicted_latents")
-    parser.add_argument("--output_dir", type=str, default="./decoded_gifs")
+    parser.add_argument("--latents_dir", type=str, default="./data/Seq2Seq/Predicted_latents")
+    parser.add_argument("--output_dir", type=str, default="./data/Seq2Seq/decoded_gifs")
     parser.add_argument("--device", type=str, default="cuda")
     args = parser.parse_args()
 

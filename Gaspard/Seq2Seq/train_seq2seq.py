@@ -16,7 +16,7 @@ def parse_args():
                         default="./data/GLMNet/EEG_embeddings_sw/sub3.npy",
                         help='EEG embeddings (.npy) path')
     parser.add_argument('--video_dir',     type=str,
-                        default="./data/Video_latents",
+                        default="./data/Seq2Seq/Video_latents",
                         help='Directory with block{block_id}_latents.npy')
     parser.add_argument('--save_path',     type=str,
                         default="./Gaspard/checkpoints/seq2seq/",
