@@ -80,7 +80,7 @@ Models path : `Gaspard/GLMNet/models.py`
 
     We use 2s raw EEGs and 500ms windows for DE/PSD features.
 
-    Script : `Gaspard/GLMNet/generate_eeg_emb.py`
+    Script : `Gaspard/GLMNet/inference_glmnet.py`
 
 ## 3. Align Video Latents with EEG embeddings (Seq2Seq Transformer) ($\approx$ 1 week)
 #### 1. Generate latents from pretrained VAE:
@@ -89,7 +89,7 @@ Models path : `Gaspard/GLMNet/models.py`
 
 - A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
 
-    Script : `Gaspard/Seq2Seq/generate_latents_vae.py`
+    Script : `Gaspard/Seq2Seq/generate_video_latents.py`
 
 #### 2. Use Seq2Seq model to align EEGs embeddings and video latents
 
@@ -105,7 +105,7 @@ The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transf
 
     We use the generated EEG embeddings from part 2 to generate predicted latents.
 
-    Script : `Gaspard/Seq2Seq/predict_latents_s2s.py`
+    Script : `Gaspard/Seq2Seq/inference_seq2seq.py`
 
 ## 4. Semantic Predictor ($\approx$ 2 days)
 
@@ -113,7 +113,7 @@ The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transf
 
 - We process the BLIP captions into pretrained CLIP model to generate text embeddings.
 
-    Script : `Gaspard/SemanticPredictor/generate_text_emb_clip.py`
+    Script : `Gaspard/SemanticPredictor/generate_text_emb.py`
 
 #### 2. Generate semantic embeddings
 
@@ -129,7 +129,7 @@ The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transf
 
     We used the generated text embeddings from part 4.1 to generate semantic embeddings.
 
-    Script : `Gaspard/SemanticPredictor/generate_semantic_emb.py`
+    Script : `Gaspard/SemanticPredictor/inference_semantic.py`
 
 ## 5. TuneAVideo pipeline ($\approx$ 3 weeks)
 
