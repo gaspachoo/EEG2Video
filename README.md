@@ -81,7 +81,7 @@ Models path : `Gaspard/GLMNet/models.py`
 
     We use 2s raw EEGs and 500ms windows for DE/PSD features.
 
-    Script : `Gaspard/GLMNet/generate_eeg_emb_sw.py`
+    Script : `Gaspard/GLMNet/generate_eeg_emb.py`
 
 ## 3. Align Video Latents with EEG embeddings (Seq2Seq Transformer) ($\approx$ 1 week)
 #### 1. Generate latents from pretrained VAE:
