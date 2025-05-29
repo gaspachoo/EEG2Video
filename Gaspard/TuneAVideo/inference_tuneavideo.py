@@ -153,12 +153,12 @@ def main():
 
     # scaling_factor du VAE
     #sf = vae.config.scaling_factor
-    print("[DEBUG inf] VAE scaling_factor =", sf)
+    #print("[DEBUG inf] VAE scaling_factor =", sf)
 
     # appliquer le scaling
     #video_latents = video_latents * sf
 
-    print("[DEBUG inf] video_latents scaled:", "mean", video_latents.mean().item(),"std",  video_latents.std().item(),"min",  video_latents.min().item(),"max",  video_latents.max().item())
+    #print("[DEBUG inf] video_latents scaled:", "mean", video_latents.mean().item(),"std",  video_latents.std().item(),"min",  video_latents.min().item(),"max",  video_latents.max().item())
     # ---------------------------------------
 
     
