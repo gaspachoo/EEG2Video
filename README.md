@@ -4,7 +4,6 @@ Acronyms used:
 -   DE = Differential Entropy
 -   PSD = Power Spectral Density
 
-## ✅ Modules Completed
 ## 1. Data Preprocessing  ($\approx$ 1 week)
 #### 1. EEG data segmentation:
 
@@ -100,13 +99,13 @@ The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transf
 
     We use the generated EEG embeddings from part 2 as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
     
-    Script : `Gaspard/Seq2Seq/train_seq2seq_sw.py`
+    Script : `Gaspard/Seq2Seq/train_seq2seq.py`
 
 - Inference : 
 
     We use the generated EEG embeddings from part 2 to generate predicted latents.
 
-    Script : `Gaspard/Seq2Seq/predict_latents_s2s_sw.py`
+    Script : `Gaspard/Seq2Seq/predict_latents_s2s.py`
 
 ## 4. Semantic Predictor ($\approx$ 2 days)
 
@@ -132,7 +131,7 @@ The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transf
 
     Script : `Gaspard/SemanticPredictor/generate_semantic_emb.py`
 
-## 5. TuneAVideo pipeline (already $\approx$ 1.5 week)
+## 5. TuneAVideo pipeline ($\approx$ 3 weeks)
 
 **Purpose** : We use the TuneAVideo pipeline to improve the quality of predicted video latents of part 3.2 in adding context thanks to semantic predictor.
 
@@ -140,28 +139,10 @@ The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transf
 
     We use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
 
-    Script : `Gaspard/TuneAVideo/train_tuneavideo.py`
+    Script : `Gaspard/TuneAVideo/train_tuneavideo_v7.py --mixed_precision --batch_size 7 --use_xformers --num workers 2 --pin_memory --use_empty_cache use_channels_last`
 
 - Inference :
     
-    We generate precise video latents from predicted latents of part 3.2.
+    We generate precise video latents, and respective videos from predicted latents of part 3.2.
 
-    Script : **Not implemented yet**
-
-## 6. Decode Video Latents (Not completed)
-
-- We decode precise video latents from part 5 using pretrained VAE Decoder to generate videos.
-
-    Script : **Not implemented yet**
-
-## 🔴 Modules Yet To Be Implemented (est. $\approx$ 1 week)
-
-### 5. TuneAVideo pipeline (est. $\approx$ 1 week)
-
-- Improve training algorithm to make the training faster and ensure that it will not raise any error
-
-- Write the inference script and generate precise video latents
-
-### 6. Decode Video Latents (est. $\approx$ 1 day)
-
-- Write the decoding script using VAE
+    Script : `Gaspard/TuneAVideo/inference_tuneavideo.py`
