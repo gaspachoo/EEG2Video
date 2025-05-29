@@ -6,7 +6,7 @@ from torchvision import transforms
 from diffusers.models import AutoencoderKL
 
 # === Config ===
-video_dir = "./data/Video_gifs/Block6"
+video_dir = "./data/Seq2Seq/Video_gifs/Block6"
 out_path = "./data/40classes_latents.pt"
 
 vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").cuda().eval()

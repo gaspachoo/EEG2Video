@@ -32,6 +32,6 @@ def batch_convert(gif_root, output_root):
 
 if __name__ == "__main__":
     
-    gif_root = "./data/Video_gifs"
+    gif_root = "./data/Seq2Seq/Video_gifs"
     output_root = "./data/Video_mp4"
     batch_convert(gif_root, output_root)

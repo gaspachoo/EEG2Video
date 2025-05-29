@@ -72,6 +72,6 @@ for video_id in range(len(video_names)):
         
         k += 1
         print("k =", k, len(gif_frame))
-        os.makedirs(f'./data/Video_gifs/Block{str(int(video_names[video_id][0])-1)}', exist_ok=True)
-        imageio.mimsave(f'./data/Video_gifs/Block{video_id}/{k}.gif', gif_frame, 'GIF', duration=0.33333)
+        os.makedirs(f'./data/Seq2Seq/Video_gifs/Block{str(int(video_names[video_id][0])-1)}', exist_ok=True)
+        imageio.mimsave(f'./data/Seq2Seq/Video_gifs/Block{video_id}/{k}.gif', gif_frame, 'GIF', duration=0.33333)
         
