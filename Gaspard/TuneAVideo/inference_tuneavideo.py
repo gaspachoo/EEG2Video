@@ -68,7 +68,7 @@ def parse_args():
         help="Largeur des frames"
     )
     p.add_argument(
-        "--num_inference_steps", type=int, default=500,
+        "--num_inference_steps", type=int, default=100,
         help="Nombre de pas de diffusion"
     )
     p.add_argument(
@@ -124,7 +124,7 @@ def main():
     video_latents, semantic_embeddings = load_pairs(args.seq2seq_dir, args.sem_dir, device)
     assert video_latents.size(0) == semantic_embeddings.size(0), \
         f"Mismatch video ({video_latents.size(0)}) vs sem ({semantic_embeddings.size(0)})"
-
+        
     # Charger modules en float16
     vae = AutoencoderKL.from_pretrained(args.base_model_path, subfolder='vae').to(device).half().eval()
     tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
@@ -148,6 +148,20 @@ def main():
     os.makedirs(args.output_dir, exist_ok=True)
     B = video_latents.size(0)
 
+    # --- DEBUG inf z0 avant/après scaling ---
+    print("[DEBUG inf] video_latents raw:", "shape", video_latents.shape,"mean", video_latents.mean().item(),"std",  video_latents.std().item(),"min",  video_latents.min().item(),"max",  video_latents.max().item())
+
+    # scaling_factor du VAE
+    #sf = vae.config.scaling_factor
+    print("[DEBUG inf] VAE scaling_factor =", sf)
+
+    # appliquer le scaling
+    #video_latents = video_latents * sf
+
+    print("[DEBUG inf] video_latents scaled:", "mean", video_latents.mean().item(),"std",  video_latents.std().item(),"min",  video_latents.min().item(),"max",  video_latents.max().item())
+    # ---------------------------------------
+
+    
     # Inférence
     for i in range(B):
         z0 = video_latents[i:i+1]

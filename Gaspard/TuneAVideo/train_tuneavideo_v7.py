@@ -159,6 +159,21 @@ class TuneAVideoTrainerDDP:
 
     def _format_batch(self, z0, et):
         z0 = z0.to(self.device).permute(0, 2, 1, 3, 4).contiguous()  # (B,4,6,36,64)
+        
+        # --- DEBUG z0 avant/après scaling ---
+        #print("[DEBUG train] z0 raw:", "mean", z0.mean().item(),"std",  z0.std().item(),"min",  z0.min().item(),"max",  z0.max().item())
+
+        #sf = self.vae.config.scaling_factor if hasattr(self.vae.config, "scaling_factor") else None
+        #print("[DEBUG train] VAE scaling_factor =", sf)
+
+        # applique scaling
+        #if sf is not None:
+         #   z0 = z0 * sf
+
+        #print("[DEBUG train] z0 scaled:", "mean", z0.mean().item(),"std",  z0.std().item(),"min",  z0.min().item(),"max",  z0.max().item())
+        # -----------------------------------
+
+        
         eh = self.proj_eeg(et.to(self.device).unsqueeze(1)).contiguous()
         return z0, eh
 
