@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--raw_dir', default="./data/Preprocessing/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
-    parser.add_argument('--feat_dir', default="./data/DE_500ms_sw", help='directory of pre-windowed feature .npy files')
+    parser.add_argument('--feat_dir', default="./data/Preprocessing/DE_500ms_sw", help='directory of pre-windowed feature .npy files')
     parser.add_argument('--checkpoint_path', default="./Gaspard/checkpoints/glmnet/sub3_fold0_best.pt", help='path to GLMNet checkpoint')
     parser.add_argument('--output_dir', default="./data/GLMNet/EEG_embeddings_sw", help='where to save concatenated embeddings')
     args = parser.parse_args()

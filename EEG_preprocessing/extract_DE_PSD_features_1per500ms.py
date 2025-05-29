@@ -36,7 +36,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--raw_dir',   default="./data/Preprocessing/Segmented_500ms_sw", help='dossier .npy fenêtré raw EEG')
-    parser.add_argument('--de_dir',    default="./data/DE_500ms_sw",    help='où sauvegarder DE')
+    parser.add_argument('--de_dir',    default="./data/Preprocessing/DE_500ms_sw",    help='où sauvegarder DE')
     parser.add_argument('--psd_dir',   default="./data/PSD_500ms_sw",   help='où sauvegarder PSD')
     parser.add_argument('--subs',      nargs='+', type=int, default=list(range(1,21)), help='numéro des sujets')
     args = parser.parse_args()
