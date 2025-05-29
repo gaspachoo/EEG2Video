@@ -5,7 +5,7 @@ Acronyms used:
 -   PSD = Power Spectral Density
 
 ## 1. Data Preprocessing  ($\approx$ 1 week)
-#### 1. EEG data segmentation:
+### 1. EEG data segmentation:
 
 **Purpose** : Segment raw  8min 40s EEG recordings into shorter recordings 
 
@@ -25,7 +25,7 @@ Acronyms used:
 
     Script : `EEG_preprocessing/segment_sliding_window.py`
 
-#### 2. DE/PSD Features detection on 5 frequency bands:
+### 2. DE/PSD Features detection on 5 frequency bands:
 
 **Purpose**: detect DE and PSD features on segmented EEGs, on 5 different frequency bands:
 
@@ -35,7 +35,13 @@ Acronyms used:
 - Beta (14-31 Hz)
 - Gamma (31-99 Hz)
 
-We detect on 2 types of windows :
+We detect on 3 types of windows :
+
+- Detect features on 2s raw windows.
+
+    Shapes adapted to (block, concept, repetition, channel, band).
+
+    Script : `EEG_preprocessing/extract_DE_PSD_features_1per2s.py`
 
 - Detect features on 1s windows without overlapping.
 
@@ -49,7 +55,7 @@ We detect on 2 types of windows :
 
     Script : `EEG_preprocessing/extract_DE_PSD_features_1per500ms.py`
 
-#### 3. Video alignment and GIF creation:
+### 3. Video alignment and GIF creation:
 
 **Purpose** : Segment raw  8min 40s Video recordings into shorter downscaled GIFs
 
@@ -60,32 +66,46 @@ We detect on 2 types of windows :
     Script: `EEG2Video/extract_gif.py`
 
 
+
+
 ## 2. EEG Feature Encoding ($\approx$ 2 weeks)
 
-**Purpose** : We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
+### Purpose :
+
+We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
 
 One layer in Shallownet is modified compared to original : AvgPool2d -> AdaptiveAvgPool2d
 
 Models path : `Gaspard/GLMNet/models.py` 
 
-- Training :
+### Training :
 
-    We use 2s raw EEGs and 1s windows for DE/PSD features.
+We use 2s raw EEGs and 1s windows for DE/PSD features.
 
-    Script : `Gaspard/GLMNet/train_glmnet.py`
+Script : `Gaspard/GLMNet/train_glmnet.py`
 
-- Inference :
+### Inference :
     
-    We generate EEgs embeddings from train GLMNet.
+We generate EEgs embeddings from train GLMNet.
 
-    We use 2s raw EEGs and 500ms windows for DE/PSD features.
+We use 2s raw EEGs and 500ms windows for DE/PSD features.
 
-    Script : `Gaspard/GLMNet/inference_glmnet.py`
+Script : `Gaspard/GLMNet/inference_glmnet.py`
 
-## 3. Align Video Latents with EEG embeddings (Seq2Seq Transformer) ($\approx$ 1 week)
+
+
+
+## 3. Seq2Seq Transformer ($\approx$ 1 week)
+
+### Purpose :
+
+We align EEG embeddings with videos
+
+The model is just a rewriting of original model : `Gaspard/Seq2Seq/models/transformer.py`
+
+### Training :
+
 #### 1. Generate latents from pretrained VAE:
-
-**Purpose** : Use a pre-trained VAE to convert GIFs into latents
 
 - A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
 
@@ -93,21 +113,28 @@ Models path : `Gaspard/GLMNet/models.py`
 
 #### 2. Use Seq2Seq model to align EEGs embeddings and video latents
 
-The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transformer.py`
+- We use the generated EEG embeddings from part  as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
 
-- Training :
-
-    We use the generated EEG embeddings from part 2 as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
-    
     Script : `Gaspard/Seq2Seq/train_seq2seq.py`
 
-- Inference : 
+ ### Inference : 
 
-    We use the generated EEG embeddings from part 2 to generate predicted latents.
+We use the generated EEG embeddings from part 2 to generate predicted latents.
 
-    Script : `Gaspard/Seq2Seq/inference_seq2seq.py`
+Script : `Gaspard/Seq2Seq/inference_seq2seq.py`
+
+
+
+
 
 ## 4. Semantic Predictor ($\approx$ 2 days)
+
+### Purpose :
+We use a semantic predictor to align EEG features with BLIP captions
+
+Model path : `Gaspard/SemanticPredictor/models.py`
+
+### Training :
 
 #### 1. Generate text embeddings
 
@@ -115,35 +142,35 @@ The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transf
 
     Script : `Gaspard/SemanticPredictor/generate_text_emb.py`
 
-#### 2. Generate semantic embeddings
+#### 2. Align EEG features with BLIP captions
 
-**Purpose** : We use a semantic predictor to generate semantic embeddings from the EEGs captions.
-
-- Training : 
     
-    We use the DE/PSD features of part 2 as source and the text embeddings from part 4.1 as target.
+- We use the DE/PSD features of part 2 as source and the text embeddings from part 4.1 as target.
 
     Script : `Gaspard/SemanticPredictor/train_semantic.py`
 
-- Inference : 
+### Inference : 
 
-    We used the generated text embeddings from part 4.1 to generate semantic embeddings.
+- We used the generated text embeddings from part 4.1 to generate semantic embeddings.
 
     Script : `Gaspard/SemanticPredictor/inference_semantic.py`
 
+
+
+
 ## 5. TuneAVideo pipeline ($\approx$ 3 weeks)
 
-**Purpose** : We use the TuneAVideo pipeline to improve the quality of predicted video latents of part 3.2 in adding context thanks to semantic predictor.
+### Purpose : We use the TuneAVideo pipeline to improve the quality of the video latents from part 3 in adding context thanks to semantic predictor.
 
-- Training :
+### Training :
 
-    We use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
+- We use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
 
     Script : `Gaspard/TuneAVideo/train_tuneavideo_v7.py --mixed_precision --batch_size 7 --use_xformers --num workers 2 --pin_memory --use_empty_cache use_channels_last`
 
-- Inference :
+### Inference :
     
-    We generate precise video latents, and respective videos from predicted latents of part 3.2.
+- We generate precise video latents, and respective videos from predicted latents of part 3.2.
 
     Script : `Gaspard/TuneAVideo/inference_tuneavideo.py`
 
