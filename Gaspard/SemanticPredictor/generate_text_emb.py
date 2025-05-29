@@ -36,7 +36,7 @@ def main():
     # Paths
     
     blip_dir = "./data/BLIP"
-    save_dir = "./data/Text_embeddings"
+    save_dir = "./data/SemanticPredictor/Text_embeddings"
     os.makedirs(save_dir, exist_ok=True)
 
     # Gather text files for each block
