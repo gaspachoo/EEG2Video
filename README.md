@@ -146,3 +146,7 @@ The model is just a rewriting of original mode. : `Gaspard/Seq2Seq/models/transf
     We generate precise video latents, and respective videos from predicted latents of part 3.2.
 
     Script : `Gaspard/TuneAVideo/inference_tuneavideo.py`
+
+
+# Further work
+Investigate on the reason why generated videos lack of contrast.
