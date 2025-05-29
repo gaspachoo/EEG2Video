@@ -13,7 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--sub_emb',       type=str,
-                        default="./data/EEG_embeddings_sw/sub3.npy",
+                        default="./data/GLMNet/EEG_embeddings_sw/sub3.npy",
                         help='EEG embeddings (.npy) path')
     parser.add_argument('--video_dir',     type=str,
                         default="./data/Video_latents",

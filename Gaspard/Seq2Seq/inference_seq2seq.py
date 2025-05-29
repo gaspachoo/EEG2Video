@@ -44,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--emb_path',      type=str,
-                        default="./data/EEG_embeddings_sw/sub3.npy",
+                        default="./data/GLMNet/EEG_embeddings_sw/sub3.npy",
                         help='Path to embeddings .npy (shape 7*40*5*7,512)')
     parser.add_argument('--video_dir',     type=str,
                         default="./data/Video_latents",
