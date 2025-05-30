@@ -12,6 +12,7 @@ from models.transformer import Seq2SeqTransformer
 def parse_args():
     parser = argparse.ArgumentParser()
     
+    # Paths
     parser.add_argument('--sub_emb',       type=str,
                         default="./data/GLMNet/EEG_embeddings_sw/sub3.npy",
                         help='EEG embeddings (.npy) path')
@@ -21,9 +22,23 @@ def parse_args():
     parser.add_argument('--save_path',     type=str,
                         default="./Gaspard/checkpoints/seq2seq/",
                         help='Where to save models')
+    
+    # Training parameters
     parser.add_argument('--epochs',        type=int,   default=200)
     parser.add_argument('--batch_size',    type=int,   default=64)
+    
+    #Learning rate parameters
     parser.add_argument('--lr',            type=float, default=1e-4)
+    
+    parser.add_argument('--scheduler', type=str, default='cosine',
+                    choices=['cosine', 'step', 'plateau'],
+                    help='Type of LR scheduler to use')
+    parser.add_argument('--step_size', type=int, default=10,
+                        help='Step size for StepLR')
+    parser.add_argument('--gamma', type=float, default=0.1,
+                        help='Decay factor for StepLR or ExponentialLR')
+
+    # WandB logging
     parser.add_argument('--use_wandb',     action='store_true', help='Log to wandb')
     return parser.parse_args()
 
@@ -64,8 +79,25 @@ def train_seq2seq(args):
         # Model, optimizer, scheduler
         model     = Seq2SeqTransformer().to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+        
+        # Loss function and scheduler
         criterion = nn.MSELoss()
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs * len(train_loader))
+        if args.scheduler == 'cosine':
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=args.epochs * len(train_loader)
+            )
+        elif args.scheduler == 'step':
+            scheduler = torch.optim.lr_scheduler.StepLR(
+                optimizer, step_size=args.step_size, gamma=args.gamma
+            )
+        elif args.scheduler == 'plateau':
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer, mode='min', factor=args.gamma, patience=5
+            )
+        else:
+            scheduler = None
+
+        
 
         # WandB init
         if args.use_wandb:
@@ -83,7 +115,8 @@ def train_seq2seq(args):
                 loss = criterion(out, tgt)
                 loss.backward()
                 optimizer.step()
-                scheduler.step()
+                if scheduler is not None and not isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                    scheduler.step()
                 train_loss += loss.item()
                 train_cos += F.cosine_similarity(out, tgt, dim=-1).mean().item()
                 count += 1
@@ -102,6 +135,9 @@ def train_seq2seq(args):
                     count += 1
             val_loss /= count
             val_cos  /= count
+            
+            if args.scheduler == 'plateau':
+                scheduler.step(val_loss)
 
             # Log
             if args.use_wandb:
