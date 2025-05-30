@@ -40,15 +40,15 @@ def parse_args():
         help="Répertoire des checkpoints UNet (unet_epXX.pt)"
     )
     p.add_argument(
-        "--ckpt_epoch", type=int, default=50,
+        "--ckpt_epoch", type=int, default=100,
         help="Numéro de l’epoch à charger"
     )
     p.add_argument(
-        "--seq2seq_dir", type=str, default="./data/Video_latents",
+        "--seq2seq_dir", type=str, default="./data/Seq2Seq/Predicted_latents",
         help="Répertoire des latents Seq2Seq (*.npy)"
     )
     p.add_argument(
-        "--sem_dir", type=str, default="./data/Semantic_embeddings",
+        "--sem_dir", type=str, default="./data/SemanticPredictor/Semantic_embeddings",
         help="Répertoire des embeddings sémantiques (*.npy)"
     )
     p.add_argument(
@@ -98,7 +98,7 @@ def load_pairs(seq2seq_dir: str, sem_dir: str, device: torch.device):
         video_list.append(lat)
 
         # Charger embedding semantique flat
-        sem_name = fname.replace('_latents', '')
+        sem_name = fname.replace('_predicted_latents', '')
         sem_path = os.path.join(sem_dir, sem_name)
         arr = np.load(sem_path)  # flat or already shaped
         if arr.ndim == 1:

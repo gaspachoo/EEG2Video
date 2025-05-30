@@ -340,8 +340,8 @@ def parse_args():
     p = argparse.ArgumentParser()
     
     # Paths & data
-    p.add_argument("--zhat_dir", type=str, default="./data/Predicted_latents")
-    p.add_argument("--sem_dir", type=str, default="./data/Semantic_embeddings")
+    p.add_argument("--zhat_dir", type=str, default="./data/Seq2Seq/Predicted_latents")
+    p.add_argument("--sem_dir", type=str, default="./data/SemanticPredictor/Semantic_embeddings")
     p.add_argument("--base_model_path", type=str, default="./Gaspard/stable-diffusion-v1-4",
                    help="Path to the 2D SD‑1.4 checkpoint that was temporally inflated.")
 
@@ -376,7 +376,7 @@ def parse_args():
     
     # Checkpointing & logging
     p.add_argument("--use_wandb", action="store_true") 
-    p.add_argument("--ckpt_dir", type=str, default="./checkpoints/TuneAVideo")
+    p.add_argument("--ckpt_dir", type=str, default="./Gaspard/checkpoints/TuneAVideo")
     p.add_argument("--save_every", type=int, default=1)
     return p.parse_args()
 
