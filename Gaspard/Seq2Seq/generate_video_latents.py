@@ -39,7 +39,7 @@ def extract_frames_from_gif(gif_path, n_frames=N_FRAMES):
         return None
 
 def generate_all_latents(gif_root, output_root, device='cuda'):
-    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-ema").to(device)
+    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(device)
     vae.eval()
 
     os.makedirs(output_root, exist_ok=True)

@@ -52,7 +52,7 @@ def parse_args():
         help="Répertoire des embeddings sémantiques (*.npy)"
     )
     p.add_argument(
-        "--output_dir", type=str, default=".data/TuneAVideo/outputs",
+        "--output_dir", type=str, default="./data/TuneAVideo_outputs",
         help="Répertoire de sortie pour les GIFs"
     )
     p.add_argument(
@@ -181,15 +181,15 @@ def main():
         )
         videos = result.videos  # Tensor [1, F, H, W, 3]
 
-        
+        os.makedirs(os.path.join(args.output_dir, f'Block{i//200}'), exist_ok=True)
 
         # Sauvegarde sans double rescale (déjà normalisé)
         save_videos_grid(
             videos,
-            os.path.join(args.output_dir, f'sample_{i}.gif'),
+            os.path.join(args.output_dir,f'Block{i//200}', f'{i%200+1}.gif'),
             rescale=True
         )
-        print(f"[INFO] sample_{i}.gif saved in {args.output_dir}")
+        print(f"[INFO] {i%200+1}.gif saved in {args.output_dir}")
 
 if __name__ == '__main__':
     main()

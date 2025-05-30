@@ -11,7 +11,7 @@ def decode_latents(latents_dir, output_dir, device="cuda"):
     os.makedirs(output_dir, exist_ok=True)
 
     # Load VAE decoder
-    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-ema").to(device)
+    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(device)
     vae.eval()
 
     # List latent files
@@ -35,7 +35,7 @@ def decode_latents(latents_dir, output_dir, device="cuda"):
 
             # Save as 
             os.makedirs(os.path.join(output_dir, f'Block{i_file}'), exist_ok=True)
-            gif_path = os.path.join(output_dir,f'Block{i_file}', f"{file.replace('.npy','')}_clip{i}.gif")
+            gif_path = os.path.join(output_dir,f'Block{i_file}', f"{i+1}.gif")
             clip_imgs[0].save(gif_path, save_all=True, append_images=clip_imgs[1:], duration=300, loop=0)
 
 
