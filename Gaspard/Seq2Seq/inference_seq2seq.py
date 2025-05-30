@@ -70,7 +70,7 @@ def main():
         ckpt_path = os.path.join(args.ckpt_dir, f'seq2seq_sw_block{block_id}.pth')
         model = load_model(ckpt_path, device)
 
-        vid_path = os.path.join(args.video_dir, f'block{block_id}_latents.npy')
+        vid_path = os.path.join(args.video_dir, f'block{block_id}.npy')
         z0 = np.load(vid_path)  # (200,6,4,36,64)
 
         print(f"Predicting latents for block {block_id}...")

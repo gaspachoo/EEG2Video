@@ -166,7 +166,7 @@ Model path : `Gaspard/SemanticPredictor/models.py`
 
 - We use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
 
-    Script : `Gaspard/TuneAVideo/train_tuneavideo_v7.py --mixed_precision --batch_size 7 --use_xformers --num workers 2 --pin_memory --use_empty_cache use_channels_last`
+    Script : `Gaspard/TuneAVideo/train_tuneavideo_v7.py --mixed_precision --batch_size 7 --use_xformers --num_workers 2 --pin_memory --use_empty_cache --use_channels_last`
 
 ### Inference :
     
