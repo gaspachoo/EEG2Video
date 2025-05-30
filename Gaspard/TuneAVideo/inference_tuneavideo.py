@@ -98,7 +98,7 @@ def load_pairs(seq2seq_dir: str, sem_dir: str, device: torch.device):
         video_list.append(lat)
 
         # Charger embedding semantique flat
-        sem_name = fname.replace('_predicted_latents', '')
+        sem_name = fname
         sem_path = os.path.join(sem_dir, sem_name)
         arr = np.load(sem_path)  # flat or already shaped
         if arr.ndim == 1:

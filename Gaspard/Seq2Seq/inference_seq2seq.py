@@ -75,7 +75,7 @@ def main():
 
         print(f"Predicting latents for block {block_id}...")
         pred = predict_block_latents(block_id, emb_flat, z0, model, device)
-        out_path = os.path.join(args.output_dir, f'block{block_id}_predicted_latents.npy')
+        out_path = os.path.join(args.output_dir, f'block{block_id}.npy')
         
         # --- DEBUG Seq2Seq preds ---
         # pred : np.ndarray shape (B_i, 77*768) ou (B_i, 77,768)

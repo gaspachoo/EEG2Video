@@ -17,7 +17,7 @@ def decode_latents(latents_dir, output_dir, device="cuda"):
     # List latent files
     latent_files = sorted([f for f in os.listdir(latents_dir) if f.endswith(".npy")])
 
-    for file in tqdm(latent_files, desc="Decoding latent files"):
+    for i,file in enumerate(tqdm(latent_files, desc="Decoding latent files")):
         latents = np.load(os.path.join(latents_dir, file))  # shape: (N, 6, 4, 36, 64)
         latents = torch.tensor(latents, dtype=torch.float32).to(device)
         print(f"Loaded latents: {file}, shape={latents.shape}")
@@ -34,7 +34,7 @@ def decode_latents(latents_dir, output_dir, device="cuda"):
                     clip_imgs.append(img_pil)
 
             # Save as GIF
-            gif_path = os.path.join(output_dir, f"{file.replace('.npy','')}_clip{i}.gif")
+            gif_path = os.path.join(output_dir,f'Block{i}', f"{file.replace('.npy','')}_clip{i}.gif")
             clip_imgs[0].save(gif_path, save_all=True, append_images=clip_imgs[1:], duration=300, loop=0)
 
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--latents_dir", type=str, default="./data/Seq2Seq/Predicted_latents")
+    parser.add_argument("--latents_dir", type=str, default="./data/Seq2Seq/Video_latents")
     parser.add_argument("--output_dir", type=str, default="./data/Seq2Seq/decoded_gifs")
     parser.add_argument("--device", type=str, default="cuda")
     args = parser.parse_args()
