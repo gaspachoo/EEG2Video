@@ -66,7 +66,7 @@ def generate_all_latents(gif_root, output_root, device='cuda'):
             continue
 
         all_latents = np.stack(all_latents)  # (N, 6, 4, 36, 64)
-        output_path = os.path.join(output_root, f"block{i}_latents.npy")
+        output_path = os.path.join(output_root, f"block{i}.npy")
         np.save(output_path, all_latents)
         print(f"Saved Block {i} latents to {output_path} with shape {all_latents.shape}")
 
