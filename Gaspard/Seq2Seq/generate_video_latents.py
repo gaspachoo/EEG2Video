@@ -10,6 +10,7 @@ from PIL import Image
 # Configuration
 IMG_SIZE = (288, 512)  # height, width
 N_FRAMES = 6           # number of frames to extract (2s at 3 FPS)
+SCALE_FACTOR = 0.18215
 
 transform = transforms.Compose([
     transforms.Resize(IMG_SIZE),
@@ -39,7 +40,7 @@ def extract_frames_from_gif(gif_path, n_frames=N_FRAMES):
         return None
 
 def generate_all_latents(gif_root, output_root, device='cuda'):
-    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(device)
+    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-ema").to(device)
     vae.eval()
 
     os.makedirs(output_root, exist_ok=True)
@@ -56,10 +57,14 @@ def generate_all_latents(gif_root, output_root, device='cuda'):
             if frames is None:
                 continue
             with torch.no_grad():
-                frames = frames.to(device)
+                # 1) encode
+                frames = frames.to(device)  # (6, 3, 288, 512)
                 latents = vae.encode(frames).latent_dist.sample()  # (6, 4, 36, 64)
+                # 2) appliquez le scaling_factor directement depuis l’attribut du modèle
+                #latents = latents * SCALE_FACTOR
+                # 3) on repasse en numpy pour la sauvegarde
                 latents = latents.cpu().numpy()
-                all_latents.append(latents)
+            all_latents.append(latents)
 
         if len(all_latents) == 0:
             print(f"No valid GIFs found in Block {i}. Skipping save.")
