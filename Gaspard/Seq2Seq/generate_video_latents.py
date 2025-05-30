@@ -59,7 +59,7 @@ def generate_all_latents(gif_root, output_root, device='cuda'):
             with torch.no_grad():
                 # 1) encode
                 frames = frames.to(device)  # (6, 3, 288, 512)
-                latents = vae.encode(frames).latent_dist.mode() #sample()  # (6, 4, 36, 64)
+                latents = vae.encode(frames).latent_dist.sample()  # (6, 4, 36, 64)
                 
                 # 3) on repasse en numpy pour la sauvegarde
                 latents = latents.cpu().numpy()
