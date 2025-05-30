@@ -10,11 +10,11 @@ from PIL import Image
 # Configuration
 IMG_SIZE = (288, 512)  # height, width
 N_FRAMES = 6           # number of frames to extract (2s at 3 FPS)
-SCALE_FACTOR = 0.18215
 
 transform = transforms.Compose([
     transforms.Resize(IMG_SIZE),
     transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5], std=[0.5])  # [-1, 1]
 ])
 
 def extract_frames_from_gif(gif_path, n_frames=N_FRAMES):
@@ -59,9 +59,8 @@ def generate_all_latents(gif_root, output_root, device='cuda'):
             with torch.no_grad():
                 # 1) encode
                 frames = frames.to(device)  # (6, 3, 288, 512)
-                latents = vae.encode(frames).latent_dist.sample()  # (6, 4, 36, 64)
-                # 2) appliquez le scaling_factor directement depuis l’attribut du modèle
-                #latents = latents * SCALE_FACTOR
+                latents = vae.encode(frames).latent_dist.mode() #sample()  # (6, 4, 36, 64)
+                
                 # 3) on repasse en numpy pour la sauvegarde
                 latents = latents.cpu().numpy()
             all_latents.append(latents)
