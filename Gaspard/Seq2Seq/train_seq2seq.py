@@ -17,7 +17,7 @@ def parse_args():
                         help='EEG embeddings (.npy) path')
     parser.add_argument('--video_dir',     type=str,
                         default="./data/Seq2Seq/Video_latents",
-                        help='Directory with block{block_id}_latents.npy')
+                        help='Directory with block{block_id}.npy')
     parser.add_argument('--save_path',     type=str,
                         default="./Gaspard/checkpoints/seq2seq/",
                         help='Where to save models')
@@ -37,7 +37,7 @@ def prepare_data(sub_emb, video_dir, block_id):
     z_hat   = z_block.reshape(-1, 7, 512) # (200,7,512)
 
     # Load video latents: shape (200,6,4,36,64)
-    vid_path = os.path.join(video_dir, f'block{block_id}_latents.npy')
+    vid_path = os.path.join(video_dir, f'block{block_id}.npy')
     z0 = np.load(vid_path)
     z0 = z0.reshape(z0.shape[0], 6, -1)  # (200,6,9216)
 
