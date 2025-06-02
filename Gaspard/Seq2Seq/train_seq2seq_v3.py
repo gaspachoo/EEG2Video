@@ -62,7 +62,7 @@ def build_lr_scheduler(args,optimizer):
         if sched == 'none':
             return None
         if sched == 'cosine':
-            return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,T_max = 200, eta_min = args.min_lr)
+            return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,T_max = args.epochs, eta_min = args.min_lr)
         if sched == 'step':
             return torch.optim.lr_scheduler.StepLR(optimizer, step_size=50,gamma=0.5)
         if sched == 'plateau':
