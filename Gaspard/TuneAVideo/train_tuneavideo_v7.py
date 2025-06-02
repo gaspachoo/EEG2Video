@@ -311,6 +311,7 @@ class TuneAVideoTrainerDDP:
                         "gpu/clock_MHz": gpu_clock,
                         "gpu/peak_GB": peak_mem,
                         "gpu/cur_GB": cur_mem,
+                        'lr': self.optimizer.param_groups[0]['lr'],
                     })
             if epoch % self.args.save_every == 0:
                 self._save_ckpt(epoch)

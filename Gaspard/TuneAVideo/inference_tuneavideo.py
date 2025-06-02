@@ -40,7 +40,7 @@ def parse_args():
         help="Répertoire des checkpoints UNet (unet_epXX.pt)"
     )
     p.add_argument(
-        "--ckpt_epoch", type=int, default=100,
+        "--ckpt_epoch", type=int, default=50,
         help="Numéro de l’epoch à charger"
     )
     p.add_argument(
