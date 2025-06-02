@@ -36,6 +36,8 @@ def parse_args():
                         help='Taux d\u2019apprentissage initial')
     parser.add_argument('--min_lr',        type=float, default=1e-6,
                         help='Taux d\u2019apprentissage minimal pour le scheduler')
+    parser.add_argument('--scheduler',     type=str, choices=['cosine', 'step', 'plateau'], default="step",
+                        help='Taux d\u2019apprentissage initial')
     parser.add_argument('--warmup_epochs', type=int,   default=10,
                         help='Nombre d\u2019époques pour le warm-up linéaire du learning rate')
 
@@ -49,9 +51,24 @@ def parse_args():
     # Normalisation (optionnel)
     parser.add_argument('--normalize',     action='store_true',
                         help='Activer la normalisation des latents vidéo (calculer mean/std global)')
+    parser.add_argument('--noise_gamma', type=float, default=0.0, help='Ajouter du bruit à l entrainement')
 
     return parser.parse_args()
 
+# ------------------ Scheduler builder ----------------------
+def build_lr_scheduler(args,optimizer):
+        sched = args.scheduler
+        min_lr = args.min_lr
+        if sched == 'none':
+            return None
+        if sched == 'cosine':
+            return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,T_max = 200, eta_min = args.min_lr)
+        if sched == 'step':
+            return torch.optim.lr_scheduler.StepLR(optimizer, step_size=50,gamma=0.5)
+        if sched == 'plateau':
+            return torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=10, min_lr=min_lr)
+        raise ValueError(sched)
+    
 # ------------------ Préparation des données ------------------
 
 def load_and_prepare_data(args):
@@ -121,9 +138,10 @@ def train_seq2seq(args):
 
     # Optimizer & Scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=0.5, patience=10, min_lr=args.min_lr
-    )
+    #scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    #    optimizer, mode='min', factor=0.5, patience=10, min_lr=args.min_lr
+    #)
+    scheduler = build_lr_scheduler(args, optimizer)
 
     criterion = nn.MSELoss()
 
@@ -142,6 +160,10 @@ def train_seq2seq(args):
             src = src.to(device)   # (B,7,512)
             tgt = tgt.to(device)   # (B,6,9216)
 
+            # Injecter un bruit léger (σ = 0.01 ou 0.02)
+            noise = torch.randn_like(tgt) * args.noise_gamma
+            tgt_noisy = tgt + noise
+            
             # Warm-up linéaire du learning rate
             if global_step < warmup_steps:
                 lr_scale = float(global_step) / float(max(1, warmup_steps))
@@ -149,7 +171,7 @@ def train_seq2seq(args):
                     pg['lr'] = lr_scale * args.lr
                     
             optimizer.zero_grad()
-            out = model(src, tgt)  # (B,6,9216)
+            out = model(src, tgt_noisy)  # (B,6,9216)
             loss = criterion(out, tgt)
             loss.backward()
             optimizer.step()
@@ -183,8 +205,14 @@ def train_seq2seq(args):
         avg_val = val_loss / len(val_loader)
         avg_diff_mean_val = val_diff_mean_sum / len(val_loader)
         avg_diff_std_val = val_diff_std_sum / len(val_loader)
-        scheduler.step(avg_val)
-
+        
+        # LR scheduler step
+        if args.scheduler != "none":
+            if args.scheduler == 'plateau':
+                scheduler.step(val_loss)
+            else:
+                scheduler.step()
+        
         if args.use_wandb:
             wandb.log({ 'epoch': epoch, 'train_loss': avg_train, 'val_loss': avg_val,
                         'val_diff_mean': avg_diff_mean_val,
@@ -197,7 +225,7 @@ def train_seq2seq(args):
         if avg_val < best_val:
             best_val = avg_val
             os.makedirs(args.save_path, exist_ok=True)
-            ckpt = os.path.join(args.save_path, 'seq2seq_v3.pth')
+            ckpt = os.path.join(args.save_path, f'seq2seq_v3_{args.scheduler}_{args.noise_gamma}.pth')
             torch.save(model.state_dict(), ckpt)
             print(f"Meilleur modèle sauvegardé -> {ckpt}")
 
