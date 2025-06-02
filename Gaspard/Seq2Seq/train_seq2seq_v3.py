@@ -153,6 +153,12 @@ def train_seq2seq(args):
             loss = criterion(out, tgt)
             loss.backward()
             optimizer.step()
+            
+            # Calcul de moyenne et écart-type de (out - tgt)
+            diff = out - tgt
+            diff_mean = diff.mean().item()
+            diff_std = diff.std().item()
+            
             train_loss += loss.item()
             global_step += 1
 
@@ -161,17 +167,28 @@ def train_seq2seq(args):
         # Phase validation
         model.eval()
         val_loss = 0.0
+        val_diff_mean_sum = 0.0
+        val_diff_std_sum = 0.0
         with torch.no_grad():
             for src, tgt in tqdm(val_loader, desc=f"Val Epoch {epoch}"):
                 src = src.to(device)
                 tgt = tgt.to(device)
                 out = model(src, tgt)
                 val_loss += criterion(out, tgt).item()
+                
+                diff = out - tgt
+                val_diff_mean_sum += diff.mean().item()
+                val_diff_std_sum += diff.std().item()
+                
         avg_val = val_loss / len(val_loader)
+        avg_diff_mean_val = val_diff_mean_sum / len(val_loader)
+        avg_diff_std_val = val_diff_std_sum / len(val_loader)
         scheduler.step(avg_val)
 
         if args.use_wandb:
             wandb.log({ 'epoch': epoch, 'train_loss': avg_train, 'val_loss': avg_val,
+                        'val_diff_mean': avg_diff_mean_val,
+                        'val_diff_std': avg_diff_std_val,
                         'lr': optimizer.param_groups[0]['lr'] })
 
         print(f"Epoch {epoch:03d}  train_loss={avg_train:.4f}  val_loss={avg_val:.4f}  lr={optimizer.param_groups[0]['lr']:.6e}")
