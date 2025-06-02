@@ -52,7 +52,8 @@ def parse_args():
     parser.add_argument('--normalize',     action='store_true',
                         help='Activer la normalisation des latents vidéo (calculer mean/std global)')
     parser.add_argument('--noise_gamma', type=float, default=0.0, help='Ajouter du bruit à l entrainement')
-
+    parser.add_argument('--cosine_sim',    action='store_true',
+                        help='Utiliser la similarité cosinus comme régularisation')
     return parser.parse_args()
 
 # ------------------ Scheduler builder ----------------------
@@ -62,9 +63,9 @@ def build_lr_scheduler(args,optimizer):
         if sched == 'none':
             return None
         if sched == 'cosine':
-            return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,T_max = args.epochs, eta_min = args.min_lr)
+            return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,T_max = args.epochs//2, eta_min = args.min_lr)
         if sched == 'step':
-            return torch.optim.lr_scheduler.StepLR(optimizer, step_size=50,gamma=0.5)
+            return torch.optim.lr_scheduler.StepLR(optimizer, step_size=80,gamma=0.5)
         if sched == 'plateau':
             return torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=10, min_lr=min_lr)
         raise ValueError(sched)
@@ -172,7 +173,12 @@ def train_seq2seq(args):
                     
             optimizer.zero_grad()
             out = model(src, tgt_noisy)  # (B,6,9216)
-            loss = criterion(out, tgt)
+            loss_mse = criterion(out, tgt)
+            if args.cosine_sim:
+                cos = F.cosine_similarity(out.view(out.size(0), -1), tgt.view(tgt.size(0), -1), dim=1).mean()
+                loss = loss_mse + 0.05 * (1.0 - cos)   # α = 0.05 ou 0.1, à tester
+            else:
+                loss = loss_mse
             loss.backward()
             optimizer.step()
             
@@ -225,7 +231,7 @@ def train_seq2seq(args):
         if avg_val < best_val:
             best_val = avg_val
             os.makedirs(args.save_path, exist_ok=True)
-            ckpt = os.path.join(args.save_path, f'seq2seq_v3_{args.scheduler}_{args.noise_gamma}.pth')
+            ckpt = os.path.join(args.save_path, f'seq2seq_v3_{args.scheduler}_morelayers.pth')
             torch.save(model.state_dict(), ckpt)
             print(f"Meilleur modèle sauvegardé -> {ckpt}")
 
