@@ -327,7 +327,7 @@ def parse_args():
     p = argparse.ArgumentParser()
     
     # Paths & data
-    p.add_argument("--zhat_dir", type=str, default="./data/Seq2Seq/Video_latents")
+    p.add_argument("--zhat_dir", type=str, default="./data/Seq2Seq/Predicted_latents")
     p.add_argument("--sem_dir", type=str, default="./data/SemanticPredictor/Semantic_embeddings")
     p.add_argument("--base_model_path", type=str, default="./Gaspard/stable-diffusion-v1-4",
                    help="Path to the 2D SD‑1.4 checkpoint that was temporally inflated.")

@@ -44,7 +44,7 @@ def parse_args():
         help="Numéro de l’epoch à charger"
     )
     p.add_argument(
-        "--seq2seq_dir", type=str, default="./data/Seq2Seq/Video_latents",
+        "--seq2seq_dir", type=str, default="./data/Seq2Seq/Predicted_latents",
         help="Répertoire des latents Seq2Seq (*.npy)"
     )
     p.add_argument(
