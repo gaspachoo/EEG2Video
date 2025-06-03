@@ -44,7 +44,7 @@ def parse_args():
         help="Numéro de l’epoch à charger"
     )
     p.add_argument(
-        "--seq2seq_dir", type=str, default="./data/Seq2Seq/Predicted_latents",
+        "--seq2seq_dir", type=str, default="./data/Seq2Seq/Video_latents",
         help="Répertoire des latents Seq2Seq (*.npy)"
     )
     p.add_argument(
@@ -187,7 +187,7 @@ def main():
         save_videos_grid(
             videos,
             os.path.join(args.output_dir,f'Block{i//200}', f'{i%200+1}.gif'),
-            rescale=True
+            rescale=False
         )
         print(f"[INFO] {i%200+1}.gif saved in {args.output_dir}")
 
