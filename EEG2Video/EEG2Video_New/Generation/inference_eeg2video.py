@@ -44,7 +44,7 @@ eeg = torch.load('./data/EEG/sub1.npy',map_location='cpu')
 
 negative = eeg.mean(dim=0)
 
-pretrained_model_path = "CompVis/stable-diffusion-v1-4" #"Zhoutianyi/huggingface/stable-diffusion-v1-4"
+pretrained_model_path = "./Gaspard/stable-diffusion-v1-4" #"Zhoutianyi/huggingface/stable-diffusion-v1-4"
 my_model_path = "outputs/40_classes_200_epoch"
 
 unet = UNet3DConditionModel.from_pretrained(my_model_path, subfolder='unet', torch_dtype=torch.float16).to(device)
@@ -58,7 +58,7 @@ woSeq2Seq = False
 woDANA = True
 
 if woSeq2Seq:
-    latents = np.load('Seq2Seq/latent_out_block7_40_classes.npy')
+    latents = np.load('./EEG2Video/EEG2Video_New/Seq2Seq/latent_out_block7_40_classes.npy')
     latents = torch.from_numpy(latents).half()
     latents = rearrange(latents, 'a b c d e -> a c b d e')
     latents = latents.to(device)
