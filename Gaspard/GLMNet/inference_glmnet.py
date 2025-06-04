@@ -1,18 +1,23 @@
 import os
 import torch
 import numpy as np
-from train_glmnet import GLMNet, OCCIPITAL_IDX, standard_scale_features
+from modules.utils_glmnet import GLMNet, standard_scale_features
 import argparse
+
+OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
 
 # --- Load the pretrained GLMNet ---
 def load_glmnet_from_checkpoint(ckpt_path, device='cuda'):
-    model = GLMNet(out_dim=40).to(device)
+    model = GLMNet(OCCIPITAL_IDX, out_dim=40).to(device)
     state = torch.load(ckpt_path, map_location=device)
     model.load_state_dict(state)
     model.eval()
     return model
 
-def inf_glmnet(model, raw_sw, feat_sw, device='cuda'):
+def inf_glmnet(ckpt_path, raw_sw, feat_sw, device='cuda'):
+    
+    model = load_glmnet_from_checkpoint(ckpt_path, device)
+    
     # verify consistency
     assert raw_sw.shape[:4] == feat_sw.shape[:4], \
         f"Raw windows {raw_sw.shape} and feat windows {feat_sw.shape} mismatch"
@@ -42,7 +47,6 @@ def inf_glmnet(model, raw_sw, feat_sw, device='cuda'):
 # --- Main generation loop ---
 def generate_all_embeddings(raw_dir, feat_dir, ckpt_path, output_dir, device='cuda'):
     os.makedirs(output_dir, exist_ok=True)
-    model = load_glmnet_from_checkpoint(ckpt_path, device)
 
     for fname in os.listdir(raw_dir):
         if not fname.endswith('.npy'):
@@ -55,7 +59,7 @@ def generate_all_embeddings(raw_dir, feat_dir, ckpt_path, output_dir, device='cu
         FEAT_SW = np.load(os.path.join(feat_dir, fname))
         # expect shape: (7, 40, 5, 7, 62, 100) and (7, 40, 5, 7, 62, 5)
 
-        embeddings = inf_glmnet(model, RAW_SW, FEAT_SW, device)
+        embeddings = inf_glmnet(ckpt_path, RAW_SW, FEAT_SW, device)
         
         out_path = os.path.join(output_dir, f"{subj}.npy")
         np.save(out_path, embeddings)

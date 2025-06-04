@@ -4,37 +4,19 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from models import shallownet, mlpnet  # <- adjust if package path differs
 from tqdm import tqdm
 import  wandb
-from sklearn.preprocessing import StandardScaler
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from modules.utils_glmnet import GLMNet, standard_scale_features
 
 
 # -------- W&B -------------------------------------------------------------
 PROJECT_NAME = "eeg2video-GLMNetv2"  # <‑‑ change if you need another project
 
-# -------- Model parts (reuse existing codebase) ---------------------------
-
-
+# ------------------------------ constants ---------------------------------
 OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
 RAW_T = 200 # time points in raw EEG, 1 second at 200Hz
 
-# ------------------------------ model -------------------------------------
-class GLMNet(nn.Module):
-    """ShallowNet (raw) + MLP (freq) → concat → FC"""
-    def __init__(self, out_dim: int = 40, emb_dim: int = 256): ### Use required embedding dim/2 here
-        super().__init__()
-        self.raw_global  = shallownet(emb_dim, 62, 200)  # (B,1,62,200)
-        self.freq_local  = mlpnet(emb_dim, len(OCCIPITAL_IDX) * 5)  # (B,1,len(occipital*5)
-        self.fc = nn.Sequential(
-            nn.Linear(emb_dim * 2, emb_dim), nn.GELU(), nn.Linear(emb_dim, out_dim)
-        )
-
-    def forward(self, x_raw, x_feat):
-        g_raw  = self.raw_global(x_raw)  # (B,emb)
-        l_freq = self.freq_local(x_feat[:, OCCIPITAL_IDX, :])
-        return self.fc(torch.cat([g_raw, l_freq], dim=1))
 
 # ------------------------------ utils -------------------------------------
 def parse_args():
@@ -68,19 +50,6 @@ def reshape_labels(labels: np.ndarray) -> np.ndarray:
     assert labels.shape == (7,40,5,2), "Label shape must be (7,40,5,2) after expansion"
     return labels -1 # 0-39 labels
 
-
-
-def standard_scale_features(X):
-    # X: (N, features...)
-    # Flatten to 2D if needed
-    orig_shape = X.shape[1:]
-    X_2d = X.reshape(len(X), -1)
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_2d)
-        
-    # Reshape back
-    X_scaled = X_scaled.reshape((len(X),) + orig_shape)
-    return X_scaled
 
 
 # ------------------------------ main -------------------------------------
@@ -131,7 +100,7 @@ def main():
         dl_test  = DataLoader(ds_test, args.bs)
 
         # Initialisation modèle
-        model = GLMNet(out_dim=40).to(device)
+        model = GLMNet(OCCIPITAL_IDX, out_dim=40).to(device)
         opt = optim.Adam(model.parameters(), lr=args.lr)
         scheduler = ReduceLROnPlateau(opt, mode='max', factor=0.8, patience=10, verbose=True)
         criterion = nn.CrossEntropyLoss()
