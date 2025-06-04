@@ -1,17 +1,18 @@
 import os
 import numpy as np
-from DE_PSD import DE_PSD
+from .DE_PSD import DE_PSD
 from tqdm import tqdm
 import argparse
 
 
 # --- Extraction DE/PSD sur fenêtres de 500 ms ---
 def extract_de_psd_sw(raw, fs,win_sec):
-    # raw shape: (7, 40, 5, 7, 62, 100)
+    # raw shape: (7, 40, 5, 7, 62, 100) if 7 blocks, 40 concepts, 5 repetitions, 7 windows, 62 channels, 100 samples per window
     
     # Pré-allocation
-    DE_data  = np.zeros((7, 40, 5, 7, 62, 5), dtype=np.float32)
-    PSD_data = np.zeros((7, 40, 5, 7, 62, 5), dtype=np.float32)
+    DE_data  = np.zeros((raw.shape[0], raw.shape[1], raw.shape[2], raw.shape[3], raw.shape[4], 5), dtype=np.float32)
+    PSD_data  = np.zeros((raw.shape[0], raw.shape[1], raw.shape[2], raw.shape[3], raw.shape[4], 5), dtype=np.float32)
+    
 
     for blk in range(raw.shape[0]):
         for cls in range(raw.shape[1]):
