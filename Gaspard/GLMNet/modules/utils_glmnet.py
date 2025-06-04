@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from modules.models_paper import shallownet, mlpnet
+from Gaspard.GLMNet.modules.models_paper import shallownet, mlpnet
 from sklearn.preprocessing import StandardScaler 
 
 class GLMNet(nn.Module):

@@ -1,4 +1,4 @@
-import os, time, argparse
+import os, time, argparse, sys
 import numpy as np
 import torch
 import torch.nn as nn
@@ -7,7 +7,17 @@ from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 import  wandb
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from modules.utils_glmnet import GLMNet, standard_scale_features
+
+project_root = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    
+
+from Gaspard.GLMNet.modules.utils_glmnet import GLMNet, standard_scale_features
 
 
 # -------- W&B -------------------------------------------------------------

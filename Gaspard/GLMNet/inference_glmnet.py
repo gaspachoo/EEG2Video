@@ -1,8 +1,20 @@
-import os
+import os,sys
 import torch
 import numpy as np
-from modules.utils_glmnet import GLMNet, standard_scale_features
 import argparse
+
+project_root = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    
+
+from Gaspard.GLMNet.modules.utils_glmnet import GLMNet, standard_scale_features
+
+
 
 OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
 
