@@ -104,8 +104,9 @@ def extract_2s_segment(
 
     if segment.shape[1] != video_len:
         raise RuntimeError("Segment length mismatch – check indices and data integrity.")
-
-    return np.asarray(segment)
+    seg_full = np.asarray(segment)[None, None, None, ...]
+    print(seg_full.shape, seg_full.dtype)  # Debugging output
+    return np.asarray(seg_full)
 
 
 if __name__ == "__main__":

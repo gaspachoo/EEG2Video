@@ -6,7 +6,7 @@ from numpy.lib.stride_tricks import sliding_window_view
 def seg_sliding_window(data, win_s, step_s, fs=200):    
     
     win_t = int(fs * win_s)   # points temporels par fenêtre (100)
-    step_t = int(fs * STEP_S) # pas entre fenêtres (50)
+    step_t = int(fs * step_s) # pas entre fenêtres (50)
     # Sliding window le long de l'axe temporel (-1)
     windows = sliding_window_view(data, window_shape=win_t, axis=-1)
     # windows.shape -> (7, 40, 5, 62, 301, 100)
