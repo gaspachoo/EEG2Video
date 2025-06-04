@@ -34,6 +34,6 @@ if __name__ == "__main__":
     print("Sliding window shape:", seven_sw.shape)
     print("Features shape:", features_seven_sw.shape)
     
-    eeg_embeddings = inf_glmnet(args.glmnet_path, seven_sw, features_seven_sw, device='cuda')
+    eeg_embeddings = inf_glmnet(args.glmnet_path, seven_sw, features_seven_sw, device='cuda')[None, None, None, ...]
     print("EEG embeddings shape:", eeg_embeddings.shape)
     
