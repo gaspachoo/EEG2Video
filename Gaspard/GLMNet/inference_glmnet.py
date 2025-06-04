@@ -12,6 +12,33 @@ def load_glmnet_from_checkpoint(ckpt_path, device='cuda'):
     model.eval()
     return model
 
+def inf_glmnet(model, raw_sw, feat_sw, device='cuda'):
+    # verify consistency
+    assert raw_sw.shape[:4] == feat_sw.shape[:4], \
+        f"Raw windows {raw_sw.shape} and feat windows {feat_sw.shape} mismatch"
+
+    # flatten for batch inference
+    raw_flat = raw_sw.reshape(-1, raw_sw.shape[-2], raw_sw.shape[-1])
+    feat_flat = feat_sw.reshape(-1, feat_sw.shape[-2], feat_sw.shape[-1])
+
+    # scale features
+    feat_scaled = standard_scale_features(feat_flat)
+
+    embeddings = []
+    with torch.no_grad():
+        for raw_seg, feat_seg in zip(raw_flat, feat_scaled):
+            x_raw = torch.tensor(raw_seg, dtype=torch.float32)
+            x_raw = x_raw.unsqueeze(0).unsqueeze(0).to(device)  # (1,1,62,100)
+            x_feat = torch.tensor(feat_seg, dtype=torch.float32)
+            x_feat = x_feat.unsqueeze(0).to(device)            # (1,62,5)
+
+            g = model.raw_global(x_raw)                # (1, emb_dim)
+            l = model.freq_local(x_feat[:, OCCIPITAL_IDX, :])  # (1, emb_dim)
+            z = torch.cat([g, l], dim=1).squeeze(0).cpu().numpy()
+            embeddings.append(z)
+
+    return np.stack(embeddings)  # shape: (N_segments, emb_dim*2)
+
 # --- Main generation loop ---
 def generate_all_embeddings(raw_dir, feat_dir, ckpt_path, output_dir, device='cuda'):
     os.makedirs(output_dir, exist_ok=True)
@@ -24,35 +51,12 @@ def generate_all_embeddings(raw_dir, feat_dir, ckpt_path, output_dir, device='cu
         subj = os.path.splitext(fname)[0]
 
         # load pre-segmented windows
-        raw_sw = np.load(os.path.join(raw_dir, fname))
-        feat_sw = np.load(os.path.join(feat_dir, fname))
+        RAW_SW = np.load(os.path.join(raw_dir, fname))
+        FEAT_SW = np.load(os.path.join(feat_dir, fname))
         # expect shape: (7, 40, 5, 7, 62, 100) and (7, 40, 5, 7, 62, 5)
 
-        # verify consistency
-        assert raw_sw.shape[:4] == feat_sw.shape[:4], \
-            f"Raw windows {raw_sw.shape} and feat windows {feat_sw.shape} mismatch"
-
-        # flatten for batch inference
-        raw_flat = raw_sw.reshape(-1, raw_sw.shape[-2], raw_sw.shape[-1])
-        feat_flat = feat_sw.reshape(-1, feat_sw.shape[-2], feat_sw.shape[-1])
-
-        # scale features
-        feat_scaled = standard_scale_features(feat_flat)
-
-        embeddings = []
-        with torch.no_grad():
-            for raw_seg, feat_seg in zip(raw_flat, feat_scaled):
-                x_raw = torch.tensor(raw_seg, dtype=torch.float32)
-                x_raw = x_raw.unsqueeze(0).unsqueeze(0).to(device)  # (1,1,62,100)
-                x_feat = torch.tensor(feat_seg, dtype=torch.float32)
-                x_feat = x_feat.unsqueeze(0).to(device)            # (1,62,5)
-
-                g = model.raw_global(x_raw)                # (1, emb_dim)
-                l = model.freq_local(x_feat[:, OCCIPITAL_IDX, :])  # (1, emb_dim)
-                z = torch.cat([g, l], dim=1).squeeze(0).cpu().numpy()
-                embeddings.append(z)
-
-        embeddings = np.stack(embeddings)  # shape: (N_segments, emb_dim*2)
+        embeddings = inf_glmnet(model, RAW_SW, FEAT_SW, device)
+        
         out_path = os.path.join(output_dir, f"{subj}.npy")
         np.save(out_path, embeddings)
         print(f"Saved embeddings for {subj}, shape {embeddings.shape}")
