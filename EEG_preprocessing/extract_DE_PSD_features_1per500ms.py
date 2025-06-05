@@ -1,9 +1,12 @@
-import os
+import os,sys
 import numpy as np
-from .DE_PSD import DE_PSD
 from tqdm import tqdm
 import argparse
 
+project_root = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+from EEG_preprocessing.DE_PSD import DE_PSD
 
 # --- Extraction DE/PSD sur fenêtres de 500 ms ---
 def extract_de_psd_sw(raw, fs,win_sec):

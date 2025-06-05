@@ -1,7 +1,11 @@
 import numpy as np
-import os
-from DE_PSD import DE_PSD
+import os,sys
 from tqdm import tqdm
+
+project_root = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+from EEG_preprocessing.DE_PSD import DE_PSD
 
 fre = 200
 

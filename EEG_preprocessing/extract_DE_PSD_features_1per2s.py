@@ -1,7 +1,11 @@
 import numpy as np
-from DE_PSD import DE_PSD
 from tqdm import tqdm
-import os
+import os,sys
+
+project_root = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+from EEG_preprocessing.DE_PSD import DE_PSD
 
 # Extract DE or PSD features with a 2-second window, that is, for each 2-second EEG segment, we extract a DE or PSD feature.
 # Input the shape of (7 * 40 * 5 * 62 * 2s*fre), meaning 7 blocks, 40 concepts, 5 video clips, 62 channels, and 2s*fre time-points.
@@ -13,7 +17,7 @@ def extract_de_psd_raw(raw,fs=200):
     DE_data  = np.zeros((raw.shape[0], raw.shape[1], raw.shape[2], raw.shape[3], 5), dtype=np.float32)
     PSD_data  = np.zeros((raw.shape[0], raw.shape[1], raw.shape[2], raw.shape[3], 5), dtype=np.float32)
 
-    for blk in tqdm(range(raw.shape[0])):
+    for blk in range(raw.shape[0]):
         for cls in range(raw.shape[1]):
             for rep in range(raw.shape[2]):
                 segment = raw[blk, cls, rep, :, :].reshape(raw.shape[3], 2*fre)
