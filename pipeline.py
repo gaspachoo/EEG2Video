@@ -1,7 +1,8 @@
 from Gaspard.FullPipeline.segment_raw_signals_single import extract_2s_segment
 from EEG_preprocessing.segment_sliding_window import seg_sliding_window
 from EEG_preprocessing.extract_DE_PSD_features_1per500ms import extract_de_psd_sw
-from Gaspard.GLMNet.inference_glmnet import inf_glmnet
+from Gaspard.GLMNet.inference_glmnet import inf_glmnet, load_glmnet_from_checkpoint
+from Gaspard.Seq2Seq.inference_seq2seq_v2 import inf_seq2seq, load_s2s_model
 
 if __name__ == "__main__":
     import argparse
@@ -34,6 +35,7 @@ if __name__ == "__main__":
     print("Sliding window shape:", seven_sw.shape)
     print("Features shape:", features_seven_sw.shape)
     
-    eeg_embeddings = inf_glmnet(args.glmnet_path, seven_sw, features_seven_sw, device='cuda')[None, None, None, ...]
+    model_glmnet = load_glmnet_from_checkpoint(args.glmnet_path, device='cuda')
+    eeg_embeddings = inf_glmnet(model_glmnet, seven_sw, features_seven_sw, device='cuda')[None, None, None, ...]
     print("EEG embeddings shape:", eeg_embeddings.shape)
     

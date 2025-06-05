@@ -23,10 +23,8 @@ def load_glmnet_from_checkpoint(ckpt_path, device='cuda'):
     model.eval()
     return model
 
-def inf_glmnet(ckpt_path, raw_sw, feat_sw, device='cuda'):
-    
-    model = load_glmnet_from_checkpoint(ckpt_path, device)
-    
+def inf_glmnet(model, raw_sw, feat_sw, device='cuda'):
+       
     # verify consistency
     assert raw_sw.shape[:4] == feat_sw.shape[:4], \
         f"Raw windows {raw_sw.shape} and feat windows {feat_sw.shape} mismatch"
@@ -67,8 +65,8 @@ def generate_all_embeddings(raw_dir, feat_dir, ckpt_path, output_dir, device='cu
         RAW_SW = np.load(os.path.join(raw_dir, fname))
         FEAT_SW = np.load(os.path.join(feat_dir, fname))
         # expect shape: (7, 40, 5, 7, 62, 100) and (7, 40, 5, 7, 62, 5)
-
-        embeddings = inf_glmnet(ckpt_path, RAW_SW, FEAT_SW, device)
+        model = load_glmnet_from_checkpoint(ckpt_path, device)
+        embeddings = inf_glmnet(model, RAW_SW, FEAT_SW, device)
         
         out_path = os.path.join(output_dir, f"{subj}.npy")
         np.save(out_path, embeddings)
