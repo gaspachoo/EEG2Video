@@ -39,9 +39,8 @@ def inf_seq2seq(model, embeddings, device, seq_len=6):
     """
 
     # flatten concepts & repetitions -> (200, 7, 512)
-    src = embeddings.reshape(-1, embeddings.shape[2], embeddings.shape[3])
+    src = embeddings.reshape(-1, embeddings.shape[-2], embeddings.shape[-1])
     src = torch.from_numpy(src).float().to(device)
-
     batch_size = src.size(0)
     tgt_pred = torch.zeros(batch_size, seq_len, 9216, device=device)
 
