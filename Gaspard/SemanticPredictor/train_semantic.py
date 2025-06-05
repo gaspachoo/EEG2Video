@@ -1,10 +1,11 @@
-import os,sys
+import os, sys
 import torch
 import torch.nn as nn
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 from sklearn.preprocessing import StandardScaler
 import wandb
+import pickle
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )
@@ -56,8 +57,8 @@ class EEGTextDataset(Dataset):
             text_all = text_all[:min_n]
 
         # Standardize EEG features
-        scaler = StandardScaler()
-        eeg_std = scaler.fit_transform(eeg_vecs.astype(np.float32))
+        self.scaler = StandardScaler().fit(eeg_vecs.astype(np.float32))
+        eeg_std = self.scaler.transform(eeg_vecs.astype(np.float32))
 
         self.eeg = torch.from_numpy(eeg_std)
         self.text = torch.from_numpy(text_all.astype(np.float32))
@@ -86,6 +87,10 @@ def train():
         wandb.init(project="eeg2video-semantic", name = 'semantic predictor', config=vars(args))
 
     dataset = EEGTextDataset(args.eeg_file, args.text_dir)
+    # save fitted scaler for inference
+    os.makedirs(args.save_path, exist_ok=True)
+    with open(os.path.join(args.save_path, 'scaler.pkl'), 'wb') as f:
+        pickle.dump(dataset.scaler, f)
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size
     train_ds, val_ds = random_split(dataset, [train_size, val_size])
