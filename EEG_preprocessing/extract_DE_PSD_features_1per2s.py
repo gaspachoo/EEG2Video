@@ -27,15 +27,16 @@ def extract_de_psd_raw(raw,fs=200):
                 
     return DE_data, PSD_data
 
-for subname in range(1,21):
-    loaded_data = np.load('./data/Preprocessing/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy')
-    # (7 * 40 * 5 * 62 * 2*fre)
-    print("Successfully loaded .npy file.")
-    DE_data, PSD_data = extract_de_psd_raw(loaded_data,fre)
+if __name__ == "__main__":
+    for subname in range(1,21):
+        loaded_data = np.load('./data/Preprocessing/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy')
+        # (7 * 40 * 5 * 62 * 2*fre)
+        print("Successfully loaded .npy file.")
+        DE_data, PSD_data = extract_de_psd_raw(loaded_data,fre)
 
-    os.makedirs("./data/Preprocessing/DE_1per2s", exist_ok=True)
-    os.makedirs("./data/Preprocessing/PSD_1per2s", exist_ok=True)
-    np.save("./data/Preprocessing/DE_1per2s/sub" + str(subname) +".npy", DE_data)
-    np.save("./data/Preprocessing/PSD_1per2s/sub" + str(subname) + ".npy", PSD_data)
-    print(f"Saved DE data in ./data/Preprocessing/DE_1per2s/sub{str(subname)}.npy")
-    print(f"Saved PSD data in ./data/Preprocessing/PSD_1per2s/sub{str(subname)}.npy")
+        os.makedirs("./data/Preprocessing/DE_1per2s", exist_ok=True)
+        os.makedirs("./data/Preprocessing/PSD_1per2s", exist_ok=True)
+        np.save("./data/Preprocessing/DE_1per2s/sub" + str(subname) +".npy", DE_data)
+        np.save("./data/Preprocessing/PSD_1per2s/sub" + str(subname) + ".npy", PSD_data)
+        print(f"Saved DE data in ./data/Preprocessing/DE_1per2s/sub{str(subname)}.npy")
+        print(f"Saved PSD data in ./data/Preprocessing/PSD_1per2s/sub{str(subname)}.npy")
