@@ -121,7 +121,7 @@ The model is just a rewriting of original model : `Gaspard/Seq2Seq/models/transf
 
 We use the generated EEG embeddings from part 2 to generate predicted latents.
 
-Script : `Gaspard/Seq2Seq/inference_seq2seq.py`
+Script : `Gaspard/Seq2Seq/inference_seq2seq_v2.py`
 
 
 
