@@ -41,6 +41,6 @@ if __name__ == "__main__":
     print("EEG embeddings shape:", eeg_embeddings.shape)
     
     model_s2s = load_s2s_model(args.s2s_path, device='cuda')
-    eeg_embeddings = inf_glmnet(model_s2s, seven_sw, features_seven_sw, device='cuda')[None, None, None, ...]
-    print("Video latents shape:", eeg_embeddings.shape)
+    vid_latents = inf_seq2seq(model_s2s, eeg_embeddings, device='cuda')
+    print("Video latents shape:", vid_latents.shape)
     
