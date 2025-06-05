@@ -115,6 +115,9 @@ def load_pairs(seq2seq_dir: str, sem_dir: str, device: torch.device):
         sem_list.append(emb)
     return torch.cat(video_list, dim=0), torch.cat(sem_list, dim=0)
 
+#def load_pairs(latent_data, embedding_data,device="cuda"):
+    
+
 
 def main():
     args = parse_args()

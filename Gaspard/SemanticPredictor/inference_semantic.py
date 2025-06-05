@@ -102,5 +102,5 @@ if __name__ == '__main__':
         emb_block = inf_semantic_predictor(model, block, device=device)
         save_path = os.path.join(args.save_dir, f"block{bi}.npy")
         np.save(save_path, emb_block)
-        print(f"Saved block {bi} embeddings to {save_path}")
+        print(f"Saved block {bi} embeddings to {save_path} with shape {emb_block.shape}")
     print("Done generating semantic embeddings.")

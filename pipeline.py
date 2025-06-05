@@ -33,6 +33,7 @@ if __name__ == "__main__":
     )
     
     FS = 200
+    DEVICE = 'cuda'
     
     features_raw, _ = extract_de_psd_raw(seg,fs=FS)
     seven_sw = seg_sliding_window(seg, win_s=0.5, step_s=0.25, fs=FS)
@@ -45,16 +46,16 @@ if __name__ == "__main__":
     print("Sliding window features shape:", features_seven_sw.shape)
     
     
-    model_glmnet = load_glmnet_from_checkpoint(args.glmnet_path, device='cuda')
-    eeg_embeddings = inf_glmnet(model_glmnet, seven_sw, features_seven_sw, device='cuda')[None, None, None, ...]
+    model_glmnet = load_glmnet_from_checkpoint(args.glmnet_path, device=DEVICE)
+    eeg_embeddings = inf_glmnet(model_glmnet, seven_sw, features_seven_sw, device=DEVICE)[None, None, None, ...]
     print("EEG embeddings shape:", eeg_embeddings.shape)
     
-    model_s2s = load_s2s_from_checkpoint(args.s2s_path, device='cuda')
-    vid_latents = inf_seq2seq(model_s2s, eeg_embeddings, device='cuda')
+    model_s2s = load_s2s_from_checkpoint(args.s2s_path, device=DEVICE)
+    vid_latents = inf_seq2seq(model_s2s, eeg_embeddings, device=DEVICE)
     print("Video latents shape:", vid_latents.shape)
     
-    """model_s2s = load_semantic_predictor_from_checkpoint(args.s2s_path, device='cuda')
-    vid_latents = inf_seq2seq(model_s2s, eeg_embeddings, device='cuda')
-    print("Video latents shape:", vid_latents.shape)
-    """
+    model_semantic = load_semantic_predictor_from_checkpoint(args.sempred_path, device=DEVICE)
+    sem_embeddings = inf_semantic_predictor(model_semantic, features_raw[0], device=DEVICE)
+    print("Semantic embeddings shape:", sem_embeddings.shape)
+
     
