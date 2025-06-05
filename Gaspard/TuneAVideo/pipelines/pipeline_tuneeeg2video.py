@@ -31,8 +31,12 @@ from diffusers.schedulers import (
 from diffusers.utils import deprecate, logging, BaseOutput
 
 from einops import rearrange
-
-from models.unet import UNet3DConditionModel
+import os,sys
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+if project_root not in sys.path:
+    sys.path.insert(1, project_root)
+from Gaspard.TuneAVideo.models.unet import UNet3DConditionModel
 
 torch.cuda.set_device(0)
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
