@@ -77,45 +77,83 @@ def parse_args():
     )
     return p.parse_args()
 
-def load_pairs(seq2seq_dir: str, sem_dir: str, device: torch.device):
+def load_files(seq2seq_dir: str, sem_dir: str):
+    """Load latent and semantic embedding blocks from disk.
+
+    Parameters
+    ----------
+    seq2seq_dir : str
+        Directory containing latent video blocks (``.npy``).
+    sem_dir : str
+        Directory containing semantic embedding blocks (``.npy``).
+
+    Returns
+    -------
+    latent_data : list[np.ndarray]
+        List of latent blocks loaded from ``seq2seq_dir``.
+    embedding_data : list[np.ndarray]
+        List of embedding blocks loaded from ``sem_dir``.
     """
-    Charge latents vidéo et embeddings sémantiques associés par bloc.
-    Reshape embeddings flat (B_i, 77*768) en (B_i, 77, 768).
-    Retourne :
-      video_latents: Tensor (B, F, C, H, W)
-      semantic_embeddings: Tensor (B, 77, 768)
-    """
-    latent_files = sorted([f for f in os.listdir(seq2seq_dir) if f.endswith('.npy') or f.endswith('.pt')])
-    video_list, sem_list = [], []
+    latent_files = sorted(
+        [f for f in os.listdir(seq2seq_dir) if f.endswith(".npy") or f.endswith(".pt")]
+    )
+    latent_data, embedding_data = [], []
     for fname in latent_files:
-        # Charger latent vidéo
-        lat_path = os.path.join(seq2seq_dir, fname)
-        data = np.load(lat_path)
-        lat = torch.from_numpy(data)
-        lat = lat.to(device).half()
-        lat = rearrange(lat, 'b c f h w -> b f c h w')  # (B_i, F, C, H, W)
-        B_i = lat.shape[0]
+        latent_data.append(np.load(os.path.join(seq2seq_dir, fname)))
+        embedding_data.append(np.load(os.path.join(sem_dir, fname)))
+    return latent_data, embedding_data
+
+
+def load_pairs(latent_data, embedding_data, device="cuda"):
+    """Preprocess and concatenate latent and embedding blocks.
+
+    Parameters
+    ----------
+    latent_data : list[np.ndarray] | np.ndarray
+        Latent video blocks.
+    embedding_data : list[np.ndarray] | np.ndarray
+        Corresponding semantic embedding blocks.
+    device : str or torch.device, optional
+        Device where tensors will be allocated.
+
+    Returns
+    -------
+    video_latents : torch.Tensor
+        Tensor of shape ``(B, F, C, H, W)``.
+    semantic_embeddings : torch.Tensor
+        Tensor of shape ``(B, 77, 768)``.
+    """
+
+    if isinstance(latent_data, np.ndarray):
+        latent_data = [latent_data]
+    if isinstance(embedding_data, np.ndarray):
+        embedding_data = [embedding_data]
+
+    assert len(latent_data) == len(embedding_data), (
+        f"Mismatch between latent blocks ({len(latent_data)}) and embedding blocks ({len(embedding_data)})"
+    )
+
+    device = torch.device(device)
+    video_list, sem_list = [], []
+    for lat_arr, emb_arr in zip(latent_data, embedding_data):
+        lat = torch.from_numpy(lat_arr).to(device).half()
+        lat = rearrange(lat, "b c f h w -> b f c h w")
         video_list.append(lat)
 
-        # Charger embedding semantique flat
-        sem_name = fname
-        sem_path = os.path.join(sem_dir, sem_name)
-        arr = np.load(sem_path)  # flat or already shaped
+        arr = emb_arr
         if arr.ndim == 1:
-            # single vector, treat as (1, D)
             arr = arr[np.newaxis, :]
         if arr.ndim == 2 and arr.shape[1] != 768:
-            # flat: shape (B_i, 77*768)
             D = arr.shape[1]
             if D % 768 != 0:
                 raise ValueError(f"Embedding length {D} not divisible by 768")
             seq_len = D // 768
             arr = arr.reshape(-1, seq_len, 768)
-        emb = torch.from_numpy(arr).to(device).half()  # (B_i, 77, 768)
+        emb = torch.from_numpy(arr).to(device).half()
         sem_list.append(emb)
+
     return torch.cat(video_list, dim=0), torch.cat(sem_list, dim=0)
 
- #def load_pairs(latent_data, embedding_data,device="cuda"):
     
 
 
@@ -124,7 +162,8 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Charger données
-    video_latents, semantic_embeddings = load_pairs(args.seq2seq_dir, args.sem_dir, device)
+    latent_data, embedding_data = load_files(args.seq2seq_dir, args.sem_dir)
+    video_latents, semantic_embeddings = load_pairs(latent_data, embedding_data, device)
     assert video_latents.size(0) == semantic_embeddings.size(0), \
         f"Mismatch video ({video_latents.size(0)}) vs sem ({semantic_embeddings.size(0)})"
         
