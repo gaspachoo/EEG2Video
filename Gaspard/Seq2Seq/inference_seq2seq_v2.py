@@ -1,12 +1,16 @@
-import os
+import os, sys
 import argparse
 import torch
 import numpy as np
 
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    
 # Import Seq2SeqTransformer defined in your training script
-from models.transformer import Seq2SeqTransformer
-
-
+from Gaspard.Seq2Seq.models.transformer import Seq2SeqTransformer
+    
 def load_model(ckpt_path, device):
     model = Seq2SeqTransformer().to(device)
     state = torch.load(ckpt_path, map_location=device)
@@ -15,17 +19,16 @@ def load_model(ckpt_path, device):
     return model
 
 
-def predict_block_latents(block_id, embeddings, video_latents, model, device):
+def inf_seq2seq(embeddings, video_latents, model, device):
     """
     embeddings: np.array shape (7,40,5,7,512)
     video_latents: np.array shape (200,6,4,36,64)
     model: loaded Seq2SeqTransformer
     returns predicted latents np.array shape (200,6,4,36,64)
     """
-    # select embeddings for this block
-    emb_block = embeddings[block_id]             # (40,5,7,512)
+    
     # flatten concepts & repetitions -> (200,7,512)
-    src = emb_block.reshape(-1, emb_block.shape[2], emb_block.shape[3])  # (200,7,512)
+    src = embeddings.reshape(-1, embeddings.shape[2], embeddings.shape[3])  # (200,7,512)
     src = torch.from_numpy(src).float().to(device)
 
     # prepare target latents as teacher input
@@ -65,32 +68,20 @@ def main():
     # load full embeddings and reshape
     all_emb = np.load(args.emb_path)  # (7*40*5*7, 512)
     emb_flat = all_emb.reshape(7, 40, 5, 7, 512)
-    model = load_model(args.ckpt_file, device)
     
+    model = load_model(args.ckpt_file, device)
     for block_id in range(7):
 
         vid_path = os.path.join(args.video_dir, f'block{block_id}.npy')
         z0 = np.load(vid_path)  # (200,6,4,36,64)
 
         print(f"Predicting latents for block {block_id}...")
-        pred = predict_block_latents(block_id, emb_flat, z0, model, device)
+        emb_block = emb_flat[block_id]             # (40,5,7,512)
+        
+        pred = inf_seq2seq(emb_block, z0, model, device)
         out_path = os.path.join(args.output_dir, f'block{block_id}.npy')
         
-        # --- DEBUG Seq2Seq preds ---
-        # pred : np.ndarray shape (B_i, 77*768) ou (B_i, 77,768)
-        #print(f"[DEBUG Seq2Seq] block {block_id}: shape", pred.shape, "mean", pred.mean(), "std", pred.std(), "min", pred.min(), "max", pred.max())
-        # --------------------------------
-        # → Normalisation per-sample zero-mean / unit-std
-        # On réduit la moyenne et on divise par l’écart-type pour chaque instance
-        # utilises axes (1,2,3,4) pour couvrir tous les dims sauf le batch
-        mean = pred.mean(axis=(1,2,3,4), keepdims=True)
-        std  = pred.std(axis=(1,2,3,4), keepdims=True) + 1e-6
-        #pred = (pred - mean) / std ----------------------------------------to edit
 
-        # DEBUG après normalisation
-        #print(f"[DEBUG Seq2Seq post-norm] mean {pred.mean():.4f}, std {pred.std():.4f}, min {pred.min():.4f}, max {pred.max():.4f}")
-
-        
         np.save(out_path, pred)
         print(f"Saved predicted latents at {out_path}, shape {pred.shape}")
 
