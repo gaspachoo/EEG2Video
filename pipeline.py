@@ -2,7 +2,7 @@ import os, argparse
 import numpy as np
 import imageio
 import matplotlib.pyplot as plt
-from Gaspard.FullPipeline.segment_raw_signals_single import extract_2s_segment
+from EEG_preprocessing.segment_raw_signals_200Hz import extract_2s_segment
 from EEG_preprocessing.segment_sliding_window import seg_sliding_window
 from EEG_preprocessing.extract_DE_PSD_features_1per500ms import extract_de_psd_sw
 from EEG_preprocessing.extract_DE_PSD_features_1per2s import extract_de_psd_raw
