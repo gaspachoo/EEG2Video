@@ -1,10 +1,15 @@
-import os
+import os,sys
 import torch
 import argparse
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import torch.nn as nn
-from models import CLIP
+
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+from Gaspard.SemanticPredictor.models.clip import CLIP
 
 def seed_everything(seed=42):
     import random
@@ -13,6 +18,46 @@ def seed_everything(seed=42):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+        
+def load_semantic_predictor(model_path, device):
+    model = CLIP().to(device)
+    state = torch.load(model_path, map_location=device)
+    model.load_state_dict(state)
+    model.eval()
+    return model
+
+def inf_semantic_predictor(model, eeg_data, batch_size=64, device='cuda'):
+    """Generate semantic embeddings for EEG data using a pretrained model.
+
+    Parameters
+    ----------
+    model : nn.Module
+        Pretrained SemanticPredictor model.
+    eeg_data : np.ndarray
+        EEG data with shape (blocks, concepts, trials, channels, windows).
+    batch_size : int
+        Batch size for inference.
+    device : torch.device
+        Device to run the model on.
+
+    Returns
+    -------
+    np.ndarray
+        Semantic embeddings of shape (blocks, concepts, trials, embedding_dim).
+    """
+    
+    flat = eeg_data.reshape(-1, ch * w)
+    std = scaler.transform(flat)
+
+    embs = []
+    with torch.no_grad():
+        for i in range(0, std.shape[0], batch_size):
+            batch = torch.from_numpy(std[i:i+batch_size]).float().to(device)
+            out = model(batch)
+            embs.append(out.cpu().numpy())
+    emb_block = np.vstack(embs)  # (c*t, 77*768)
+    return emb_block
+    
 
 if __name__ == '__main__':
     seed_everything()
@@ -37,38 +82,26 @@ if __name__ == '__main__':
 
     os.makedirs(args.save_dir, exist_ok=True)
 
+
+    # load model
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    model = load_semantic_predictor(args.model_path, device)
+    
+    # fit scaler
     eeg = np.load(args.eeg_file)
     if eeg.ndim != 5:
         raise ValueError(f"Expected EEG ndim=5, got {eeg.shape}")
     b, c, t, ch, w = eeg.shape
-
-    # load model
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = CLIP().to(device)
-    state = torch.load(args.model_path, map_location=device)
-    model.load_state_dict(state)
-    model.eval()
-
-    # fit scaler
+    
     all_eeg = eeg.reshape(b * c * t, ch * w).astype(np.float32)
     scaler = StandardScaler().fit(all_eeg)
 
     # process blocks
     for bi in range(b):
         block = eeg[bi]  # (concepts, trials, ch, w)
-        flat = block.reshape(-1, ch * w)
-        std = scaler.transform(flat)
-
-        embs = []
-        with torch.no_grad():
-            for i in range(0, std.shape[0], args.batch_size):
-                batch = torch.from_numpy(std[i:i+args.batch_size]).float().to(device)
-                out = model(batch)
-                embs.append(out.cpu().numpy())
-        emb_block = np.vstack(embs)  # (c*t, 77*768)
-
+        emb_block = inf_semantic_predictor(model, block, batch_size=args.batch_size, device=device)
         save_path = os.path.join(args.save_dir, f"block{bi}.npy")
         np.save(save_path, emb_block)
         print(f"Saved block {bi} embeddings to {save_path}")
-
     print("Done generating semantic embeddings.")

@@ -1,11 +1,17 @@
-import os
+import os,sys
 import torch
 import torch.nn as nn
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 from sklearn.preprocessing import StandardScaler
-from models import CLIP
 import wandb
+
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+from Gaspard.SemanticPredictor.models.clip import CLIP
+
 
 def seed_everything(seed=42):
     import random
