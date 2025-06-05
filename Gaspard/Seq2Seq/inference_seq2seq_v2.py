@@ -11,13 +11,12 @@ if project_root not in sys.path:
 # Import Seq2SeqTransformer defined in your training script
 from Gaspard.Seq2Seq.models.transformer import Seq2SeqTransformer
     
-def load_model(ckpt_path, device):
+def load_s2s_model(ckpt_path, device):
     model = Seq2SeqTransformer().to(device)
     state = torch.load(ckpt_path, map_location=device)
     model.load_state_dict(state)
     model.eval()
     return model
-
 
 def inf_seq2seq(embeddings, model, device, seq_len=6):
     """Run autoregressive inference without using ground truth latents.
@@ -78,7 +77,7 @@ def main():
     all_emb = np.load(args.emb_path)  # (7*40*5*7, 512)
     emb_flat = all_emb.reshape(7, 40, 5, 7, 512)
     
-    model = load_model(args.ckpt_file, device)
+    model = load_s2s_model(args.ckpt_file, device)
     for block_id in range(7):
 
         print(f"Predicting latents for block {block_id}...")
