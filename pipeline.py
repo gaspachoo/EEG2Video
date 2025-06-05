@@ -1,4 +1,7 @@
 import os, argparse
+import numpy as np
+import imageio
+import matplotlib.pyplot as plt
 from Gaspard.FullPipeline.segment_raw_signals_single import extract_2s_segment
 from EEG_preprocessing.segment_sliding_window import seg_sliding_window
 from EEG_preprocessing.extract_DE_PSD_features_1per500ms import extract_de_psd_sw
@@ -8,9 +11,7 @@ from Gaspard.Seq2Seq.inference_seq2seq_v2 import inf_seq2seq, load_s2s_from_chec
 from Gaspard.SemanticPredictor.inference_semantic import inf_semantic_predictor, load_semantic_predictor_from_checkpoint
 from Gaspard.TuneAVideo.inference_tuneavideo import inf_tuneavideo, load_tuneavideo_from_checkpoint, load_pairs
 from Gaspard.TuneAVideo.tuneavideo.util import save_videos_grid
-import numpy as np
-import imageio
-import matplotlib.pyplot as plt
+
 
 
 def parse_args():
@@ -136,5 +137,4 @@ if __name__ == "__main__":
     axes[2].axis("off")
 
     plt.tight_layout()
-    plt.show()
-    
+    plt.savefig(os.path.join(args.output_dir, f"Block{args.block}", f"{5*args.concept + args.rep}_comparison.png"))
