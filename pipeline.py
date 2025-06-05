@@ -8,6 +8,9 @@ from Gaspard.Seq2Seq.inference_seq2seq_v2 import inf_seq2seq, load_s2s_from_chec
 from Gaspard.SemanticPredictor.inference_semantic import inf_semantic_predictor, load_semantic_predictor_from_checkpoint
 from Gaspard.TuneAVideo.inference_tuneavideo import inf_tuneavideo, load_tuneavideo_from_checkpoint, load_pairs
 from Gaspard.TuneAVideo.tuneavideo.util import save_videos_grid
+import numpy as np
+import imageio
+import matplotlib.pyplot as plt
 
 
 def parse_args():
@@ -95,4 +98,43 @@ if __name__ == "__main__":
         rescale=False
     )
     print(f"[INFO] {5*args.concept + args.rep}.gif saved in {args.output_dir}/Block{args.block}")
+
+    # Visualisation EEG, ground truth et prédiction
+    eeg_seg = np.squeeze(seg)  # (62, 400)
+
+    gt_path = os.path.join(
+        "./data/Seq2Seq/Video_gifs",
+        f"Block{args.block}",
+        f"{5*args.concept + args.rep}.gif",
+    )
+    pred_path = os.path.join(
+        args.output_dir,
+        f"Block{args.block}",
+        f"{5*args.concept + args.rep}.gif",
+    )
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+    axes[0].imshow(eeg_seg, aspect="auto", cmap="viridis")
+    axes[0].set_title("EEG segment")
+    axes[0].set_xlabel("Time (samples)")
+    axes[0].set_ylabel("Channel")
+
+    if os.path.exists(gt_path):
+        gt_frames = imageio.mimread(gt_path)
+        axes[1].imshow(gt_frames[0])
+        axes[1].set_title("Ground truth")
+        axes[1].axis("off")
+    else:
+        axes[1].text(0.5, 0.5, "GT not found", ha="center", va="center")
+        axes[1].set_axis_off()
+        axes[1].set_title("Ground truth")
+
+    pred_frames = imageio.mimread(pred_path)
+    axes[2].imshow(pred_frames[0])
+    axes[2].set_title("Generated")
+    axes[2].axis("off")
+
+    plt.tight_layout()
+    plt.show()
     
