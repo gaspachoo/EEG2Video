@@ -18,7 +18,7 @@ def load_s2s_model(ckpt_path, device):
     model.eval()
     return model
 
-def inf_seq2seq(embeddings, model, device, seq_len=6):
+def inf_seq2seq(model, embeddings, device, seq_len=6):
     """Run autoregressive inference without using ground truth latents.
 
     Parameters
@@ -83,7 +83,7 @@ def main():
         print(f"Predicting latents for block {block_id}...")
         emb_block = emb_flat[block_id]             # (40,5,7,512)
 
-        pred = inf_seq2seq(emb_block, model, device)
+        pred = inf_seq2seq(model, emb_block, device)
         out_path = os.path.join(args.output_dir, f'block{block_id}.npy')
         
 

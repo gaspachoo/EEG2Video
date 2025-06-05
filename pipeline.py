@@ -17,7 +17,8 @@ if __name__ == "__main__":
     
     # Define models to use
     parser.add_argument("--glmnet_path", type=str, default="./Gaspard/checkpoints/glmnet/sub3_fold0_best.pt", help="Path to GLMNet model checkpoint")
-
+    parser.add_argument("--s2s_path", type=str, default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_classic.pth", help="Path to Seq2Seq model checkpoint")
+    
     args = parser.parse_args()
 
     seg = extract_2s_segment(
@@ -38,4 +39,8 @@ if __name__ == "__main__":
     model_glmnet = load_glmnet_from_checkpoint(args.glmnet_path, device='cuda')
     eeg_embeddings = inf_glmnet(model_glmnet, seven_sw, features_seven_sw, device='cuda')[None, None, None, ...]
     print("EEG embeddings shape:", eeg_embeddings.shape)
+    
+    model_s2s = load_s2s_model(args.s2s_path, device='cuda')
+    eeg_embeddings = inf_glmnet(model_s2s, seven_sw, features_seven_sw, device='cuda')[None, None, None, ...]
+    print("Video latents shape:", eeg_embeddings.shape)
     
