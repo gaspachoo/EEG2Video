@@ -9,36 +9,30 @@ import os
 
 fre = 200
 
+def extract_de_psd_raw(raw,fs=200):
+    DE_data  = np.zeros((raw.shape[0], raw.shape[1], raw.shape[2], raw.shape[3], 5), dtype=np.float32)
+    PSD_data  = np.zeros((raw.shape[0], raw.shape[1], raw.shape[2], raw.shape[3], 5), dtype=np.float32)
+
+    for blk in tqdm(range(raw.shape[0])):
+        for cls in range(raw.shape[1]):
+            for rep in range(raw.shape[2]):
+                segment = raw[blk, cls, rep, :, :].reshape(raw.shape[3], 2*fre)
+                de,psd = DE_PSD(segment, fs, 2) # 2 sec
+                DE_data[blk, cls, rep]  = de  # (62,5)
+                PSD_data[blk, cls, rep] = psd # (62,5)
+                
+    return DE_data, PSD_data
+
 for subname in range(1,21):
-    
     loaded_data = np.load('./data/Preprocessing/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy')
     # (7 * 40 * 5 * 62 * 2*fre)
-
     print("Successfully loaded .npy file.")
-    print("Loaded data:")
 
-    DE_data = np.empty((0, 40, 5, 62, 5))
-    PSD_data = np.empty((0, 40, 5, 62, 5))
-
-    for block_id in range(7):
-        print("block: ", block_id)
-        now_data = loaded_data[block_id]
-        de_block_data = np.empty((0, 5, 62, 5))
-        psd_block_data = np.empty((0, 5, 62, 5))
-        for class_id in tqdm(range(40)):
-            de_class_data = np.empty((0, 62, 5))
-            psd_class_data = np.empty((0, 62, 5))
-            for i in range(5):
-                de, psd = DE_PSD(now_data[class_id, i, :, :].reshape(62, 2*fre), fre, 2)
-                de_class_data = np.concatenate((de_class_data, de.reshape(1, 62, 5)))
-                psd_class_data = np.concatenate((psd_class_data, psd.reshape(1, 62, 5)))
-            de_block_data = np.concatenate((de_block_data, de_class_data.reshape(1, 5, 62, 5)))
-            psd_block_data = np.concatenate((psd_block_data, psd_class_data.reshape(1, 5, 62, 5)))
-        DE_data = np.concatenate((DE_data, de_block_data.reshape(1, 40, 5, 62, 5)))
-        PSD_data = np.concatenate((PSD_data, psd_block_data.reshape(1, 40, 5, 62, 5)))
-
+    DE_data, PSD_data = extract_de_psd_raw(loaded_data,fre)
 
     os.makedirs("./data/Preprocessing/DE_1per2s", exist_ok=True)
     os.makedirs("./data/Preprocessing/PSD_1per2s", exist_ok=True)
     np.save("./data/Preprocessing/DE_1per2s/sub" + str(subname) +".npy", DE_data)
     np.save("./data/Preprocessing/PSD_1per2s/sub" + str(subname) + ".npy", PSD_data)
+    print(f"Saved DE data in ./data/Preprocessing/DE_1per2s/sub{str(subname)}.npy")
+    print(f"Saved PSD data in ./data/Preprocessing/PSD_1per2s/sub{str(subname)}.npy")
