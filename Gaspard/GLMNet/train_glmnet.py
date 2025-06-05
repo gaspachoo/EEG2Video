@@ -78,7 +78,8 @@ def main():
     feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,62,5)
     labels = np.load(args.label_dir)                       # (7,40)
     labels = reshape_labels(labels)                        # (7,40,5,2)
-
+    num_unique_labels = len(np.unique(labels))
+    print("Number of categories:", num_unique_labels)
     raw1s = split_raw_2s_to_1s(raw2s)                      # (7,40,5,2,62,200)
 
     acc_folds = []
@@ -110,7 +111,7 @@ def main():
         dl_test  = DataLoader(ds_test, args.bs)
 
         # Initialisation modèle
-        model = GLMNet(OCCIPITAL_IDX, out_dim=40).to(device)
+        model = GLMNet(OCCIPITAL_IDX, out_dim=num_unique_labels).to(device)
         opt = optim.Adam(model.parameters(), lr=args.lr)
         scheduler = ReduceLROnPlateau(opt, mode='max', factor=0.8, patience=10, verbose=True)
         criterion = nn.CrossEntropyLoss()
