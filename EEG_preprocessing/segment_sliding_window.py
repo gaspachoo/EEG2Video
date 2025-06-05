@@ -22,16 +22,17 @@ def seg_sliding_window(data, win_s, step_s, fs=200):
 
 
 if __name__ == "__main__":
-    
-    # Input and output directories
+
+    # Input directory
     INPUT_DIR = './data/Preprocessing/Segmented_Rawf_200Hz_2s'
-    OUTPUT_DIR = './data/Preprocessing/Segmented_{int(1000*WIN_S)}ms_sw'
-    
+
     # Segmenting settings
     FS = 200                  # fréquence d'échantillonnage (Hz)
     WIN_S = 0.5               # fenêtre (secondes)
     STEP_S = 0.25             # recouvrement (secondes)
-    
+
+    # Output directory depends on WIN_S
+    OUTPUT_DIR = f'./data/Preprocessing/Segmented_{int(1000*WIN_S)}ms_sw'
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     for fname in os.listdir(INPUT_DIR):
