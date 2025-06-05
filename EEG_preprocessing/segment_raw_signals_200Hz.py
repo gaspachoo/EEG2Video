@@ -1,41 +1,78 @@
-import numpy as np
+"""Utilities to segment SEED-DV EEG recordings."""
+
 import os
+import numpy as np
 from tqdm import tqdm
 
-# segment a EEG data numpy array with the shape of (7 * 62 * 520s*fre) into 2-sec EEG segments
-# segment it into a new array with the shape of (7 * 40 * 5 * 62 * 2s*fre), 
-# meaning 7 blocks, 40 concepts, 5 video clips, 62 channels, and 2s*fre time-points.
+__all__ = ["extract_2s_segment", "segment_all_files"]
 
-fre = 200
-os.makedirs('./data/Preprocessing/Segmented_Rawf_200Hz_2s', exist_ok=True)
+FS = 200
+_BASELINE_SEC = 3
+_REPS_PER_CONCEPT = 5
+_CONCEPTS_PER_BLOCK = 40
 
-def get_files_names_in_directory(directory):
-    files_names = []
-    for root, _, filenames in os.walk(directory):
-        for filename in filenames:
-            files_names.append(filename)
-    return files_names
 
-sub_list = [f for f in get_files_names_in_directory('./data/EEG/') if f.endswith('.npy')]
-#sub_list = get_files_names_in_directory('./data/EEG/') #"./data/Rawf_200Hz/"
+def extract_2s_segment(*, subject, block, concept, repetition, eeg_root="./data/EEG", fs=FS):
+    """Return one raw 2-second EEG segment (62 × 2*fs)."""
+    if subject < 1:
+        raise ValueError("`subject` must be >= 1")
+    if not 0 <= block <= 6:
+        raise ValueError("`block` must be in [0, 6]")
+    if not 0 <= concept < _CONCEPTS_PER_BLOCK:
+        raise ValueError("`concept` must be in [0, 39]")
+    if not 0 <= repetition < _REPS_PER_CONCEPT:
+        raise ValueError("`repetition` must be in [0, 4]")
 
-for subname in sub_list:
-    npydata = np.load('./data/EEG/' + subname) #./data/Rawf_200Hz/'
+    path = os.path.join(eeg_root, f"sub{subject}.npy")
+    if not os.path.exists(path):
+        raise FileNotFoundError(path)
 
-    save_data = np.empty((0, 40, 5, 62, 2*fre))
+    data = np.load(path, mmap_mode="r")
+    block_data = data[block]
 
-    for block_id in range(7):
-        print("block: ", block_id)
-        now_data = npydata[block_id]
-        l = 0
-        block_data = np.empty((0, 5, 62, 2*fre))
-        for class_id in tqdm(range(40)):
-            l += (3 * fre)
-            class_data = np.empty((0, 62, 2*fre))
-            for i in range(5):
-                class_data = np.concatenate((class_data, now_data[:, l : l + 2*fre].reshape(1, 62, 2*fre)))
-                l += (2 * fre)
-            block_data = np.concatenate((block_data, class_data.reshape(1, 5, 62, 2*fre)))
-        save_data = np.concatenate((save_data, block_data.reshape(1, 40, 5, 62, 2*fre)))
+    baseline_len = _BASELINE_SEC * fs
+    video_len = 2 * fs
+    concept_stride = baseline_len + _REPS_PER_CONCEPT * video_len
 
-    np.save('./data/Preprocessing/Segmented_Rawf_200Hz_2s/' + subname, save_data) ## ./data/Preprocessing/Segmented_Rawf_200Hz_2s/
+    start = concept * concept_stride
+    start += baseline_len
+    start += repetition * video_len
+    end = start + video_len
+
+    segment = block_data[:, start:end]
+    if segment.shape[1] != video_len:
+        raise RuntimeError("Segment length mismatch")
+    return segment
+
+
+def segment_all_files(
+    eeg_root="./data/EEG",
+    output_dir="./data/Preprocessing/Segmented_Rawf_200Hz_2s",
+    fs=FS,
+):
+    """Segment all EEG files into (7, 40, 5, 62, 2*fs) arrays."""
+    os.makedirs(output_dir, exist_ok=True)
+    sub_list = [f for f in os.listdir(eeg_root) if f.endswith(".npy")]
+    for subname in sub_list:
+        npydata = np.load(os.path.join(eeg_root, subname))
+        save_data = np.empty((0, 40, 5, 62, 2 * fs))
+        for block_id in range(7):
+            print("block:", block_id)
+            now_data = npydata[block_id]
+            l = 0
+            block_data = np.empty((0, 5, 62, 2 * fs))
+            for class_id in tqdm(range(40)):
+                l += (3 * fs)
+                class_data = np.empty((0, 62, 2 * fs))
+                for i in range(5):
+                    class_data = np.concatenate(
+                        (class_data, now_data[:, l:l + 2 * fs].reshape(1, 62, 2 * fs))
+                    )
+                    l += (2 * fs)
+                block_data = np.concatenate((block_data, class_data.reshape(1, 5, 62, 2 * fs)))
+            save_data = np.concatenate((save_data, block_data.reshape(1, 40, 5, 62, 2 * fs)))
+        np.save(os.path.join(output_dir, subname), save_data)
+
+
+if __name__ == "__main__":
+    segment_all_files()

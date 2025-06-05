@@ -16,6 +16,7 @@ Acronyms used:
     Shapes are : (block, concept, repetition, channel, time).
 
     Script : `EEG_preprocessing/segment_raw_signals_200Hz.py`
+    (also exposes `extract_2s_segment` to grab a single 2‑second window on the fly)
 
 - Second step :
     
