@@ -19,27 +19,39 @@ def load_model(ckpt_path, device):
     return model
 
 
-def inf_seq2seq(embeddings, video_latents, model, device):
+def inf_seq2seq(embeddings, model, device, seq_len=6):
+    """Run autoregressive inference without using ground truth latents.
+
+    Parameters
+    ----------
+    embeddings : np.ndarray
+        EEG embeddings with shape ``(7, 40, 5, 7, 512)``.
+    model : Seq2SeqTransformer
+        Trained seq2seq model.
+    device : torch.device
+        Device on which to run the model.
+    seq_len : int, optional
+        Number of latent frames to generate (default: 6).
+
+    Returns
+    -------
+    np.ndarray
+        Predicted video latents of shape ``(200, seq_len, 4, 36, 64)``.
     """
-    embeddings: np.array shape (7,40,5,7,512)
-    video_latents: np.array shape (200,6,4,36,64)
-    model: loaded Seq2SeqTransformer
-    returns predicted latents np.array shape (200,6,4,36,64)
-    """
-    
-    # flatten concepts & repetitions -> (200,7,512)
-    src = embeddings.reshape(-1, embeddings.shape[2], embeddings.shape[3])  # (200,7,512)
+
+    # flatten concepts & repetitions -> (200, 7, 512)
+    src = embeddings.reshape(-1, embeddings.shape[2], embeddings.shape[3])
     src = torch.from_numpy(src).float().to(device)
 
-    # prepare target latents as teacher input
-    tgt = torch.from_numpy(video_latents).float().to(device)  # (200,6,4,36,64)
-    # flatten spatial dims for decoder input
-    tgt_flat = tgt.reshape(tgt.shape[0], tgt.shape[1], -1)    # (200,6,9216)
+    batch_size = src.size(0)
+    tgt_pred = torch.zeros(batch_size, seq_len, 9216, device=device)
 
     with torch.no_grad():
-        pred_flat = model(src, tgt_flat)  # (200,6,9216)
-    # reshape back to (200,6,4,36,64)
-    pred = pred_flat.view(tgt.shape)
+        for t in range(seq_len):
+            out = model(src, tgt_pred)
+            tgt_pred[:, t] = out[:, t]
+
+    pred = tgt_pred.view(batch_size, seq_len, 4, 36, 64)
     return pred.cpu().numpy()
 
 
@@ -49,9 +61,6 @@ def main():
     parser.add_argument('--emb_path',      type=str,
                         default="./data/GLMNet/EEG_embeddings_sw/sub3.npy",
                         help='Path to embeddings .npy (shape 7*40*5*7,512)')
-    parser.add_argument('--video_dir',     type=str,
-                        default="./data/Seq2Seq/Video_latents",
-                        help='Directory with block{block}_latents.npy (shape 200,6,4,36,64)')
     parser.add_argument('--ckpt_file',      type=str,
                         default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_classic.pth",
                         help='Directory with seq2seq_sw_block{block}.pth')
@@ -72,13 +81,10 @@ def main():
     model = load_model(args.ckpt_file, device)
     for block_id in range(7):
 
-        vid_path = os.path.join(args.video_dir, f'block{block_id}.npy')
-        z0 = np.load(vid_path)  # (200,6,4,36,64)
-
         print(f"Predicting latents for block {block_id}...")
         emb_block = emb_flat[block_id]             # (40,5,7,512)
-        
-        pred = inf_seq2seq(emb_block, z0, model, device)
+
+        pred = inf_seq2seq(emb_block, model, device)
         out_path = os.path.join(args.output_dir, f'block{block_id}.npy')
         
 
