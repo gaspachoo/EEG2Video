@@ -20,7 +20,7 @@ def seed_everything(seed=42):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
         
-def load_semantic_predictor(model_path, device):
+def load_semantic_predictor_from_checkpoint(model_path, device):
     model = CLIP().to(device)
     state = torch.load(model_path, map_location=device)
     model.load_state_dict(state)
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     # load model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
-    model = load_semantic_predictor(args.model_path, device)
+    model = load_semantic_predictor_from_checkpoint(args.model_path, device)
     
     # fit scaler
     eeg = np.load(args.eeg_file)
