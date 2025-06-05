@@ -1,8 +1,10 @@
 from Gaspard.FullPipeline.segment_raw_signals_single import extract_2s_segment
 from EEG_preprocessing.segment_sliding_window import seg_sliding_window
 from EEG_preprocessing.extract_DE_PSD_features_1per500ms import extract_de_psd_sw
+from EEG_preprocessing.extract_DE_PSD_features_1per2s import extract_de_psd_raw
 from Gaspard.GLMNet.inference_glmnet import inf_glmnet, load_glmnet_from_checkpoint
 from Gaspard.Seq2Seq.inference_seq2seq_v2 import inf_seq2seq, load_s2s_from_checkpoint
+from Gaspard.SemanticPredictor.inference_semantic import inf_semantic_predictor, load_semantic_predictor_from_checkpoint
 
 if __name__ == "__main__":
     import argparse
@@ -18,6 +20,7 @@ if __name__ == "__main__":
     # Define models to use
     parser.add_argument("--glmnet_path", type=str, default="./Gaspard/checkpoints/glmnet/sub3_fold0_best.pt", help="Path to GLMNet model checkpoint")
     parser.add_argument("--s2s_path", type=str, default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_classic.pth", help="Path to Seq2Seq model checkpoint")
+    parser.add_argument("--sempred_path", type=str, default="./Gaspard/checkpoints/semantic/eeg2text_clip.pt", help="Path to Semantic Predictor model checkpoint")
     
     args = parser.parse_args()
 
@@ -29,12 +32,18 @@ if __name__ == "__main__":
         eeg_root=args.eeg_root,
     )
     
-    seven_sw = seg_sliding_window(seg, win_s=0.5, step_s=0.25, fs=200)
-    features_seven_sw, _ = extract_de_psd_sw(seven_sw, fs=200, win_sec=0.5)
+    FS = 200
+    
+    features_raw, _ = extract_de_psd_raw(seg,fs=FS)
+    seven_sw = seg_sliding_window(seg, win_s=0.5, step_s=0.25, fs=FS)
+    features_seven_sw, _ = extract_de_psd_sw(seven_sw, fs=FS, win_sec=0.5)
+    
     
     print("Segment shape:", seg.shape)
+    print("Segment features shape", features_raw.shape)
     print("Sliding window shape:", seven_sw.shape)
-    print("Features shape:", features_seven_sw.shape)
+    print("Sliding window features shape:", features_seven_sw.shape)
+    
     
     model_glmnet = load_glmnet_from_checkpoint(args.glmnet_path, device='cuda')
     eeg_embeddings = inf_glmnet(model_glmnet, seven_sw, features_seven_sw, device='cuda')[None, None, None, ...]
@@ -43,4 +52,9 @@ if __name__ == "__main__":
     model_s2s = load_s2s_from_checkpoint(args.s2s_path, device='cuda')
     vid_latents = inf_seq2seq(model_s2s, eeg_embeddings, device='cuda')
     print("Video latents shape:", vid_latents.shape)
+    
+    """model_s2s = load_semantic_predictor_from_checkpoint(args.s2s_path, device='cuda')
+    vid_latents = inf_seq2seq(model_s2s, eeg_embeddings, device='cuda')
+    print("Video latents shape:", vid_latents.shape)
+    """
     
