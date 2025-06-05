@@ -1,8 +1,8 @@
-import os,sys
+import os, sys
 import torch
 import argparse
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+import pickle
 import torch.nn as nn
 from tqdm import tqdm
 
@@ -27,7 +27,12 @@ def load_semantic_predictor_from_checkpoint(model_path, device):
     model.eval()
     return model
 
-def inf_semantic_predictor(model, eeg_data, device='cuda'):
+def load_scaler(path):
+    with open(path, 'rb') as f:
+        return pickle.load(f)
+
+
+def inf_semantic_predictor(model, scaler, eeg_data, device='cuda'):
     """Generate semantic embeddings for EEG data using a pretrained model.
 
     Parameters
@@ -47,8 +52,6 @@ def inf_semantic_predictor(model, eeg_data, device='cuda'):
         Semantic embeddings of shape (blocks, concepts, trials, embedding_dim).
     """
     c, t, ch, w = eeg_data.shape
-    eeg_reshaped = eeg_data.reshape(c * t, ch * w).astype(np.float32)
-    scaler = StandardScaler().fit(eeg_reshaped)
     flat = eeg_data.reshape(-1, ch * w)
     std = scaler.transform(flat)
 
@@ -79,6 +82,8 @@ if __name__ == '__main__':
                         help='Path to pretrained SemanticPredictor (eeg2text_clip.pt)')
     parser.add_argument('--save_dir', type=str, default=default_save,
                         help='Output directory for block-wise embeddings (.npy)')
+    parser.add_argument('--scaler_path', type=str, default="./Gaspard/checkpoints/semantic/scaler.pkl",
+                        help='Path to saved StandardScaler')
     parser.add_argument('--batch_size', type=int, default=64,
                         help='Batch size for inference')
     args = parser.parse_args()
@@ -90,8 +95,8 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     model = load_semantic_predictor_from_checkpoint(args.model_path, device)
-    
-    # fit scaler
+    scaler = load_scaler(args.scaler_path)
+
     eeg = np.load(args.eeg_file)
     if eeg.ndim != 5:
         raise ValueError(f"Expected EEG ndim=5, got {eeg.shape}")
@@ -99,7 +104,7 @@ if __name__ == '__main__':
     # process blocks
     for bi in tqdm(range(eeg.shape[0]), desc="Processing blocks"):
         block = eeg[bi]  # (concepts, trials, ch, w)
-        emb_block = inf_semantic_predictor(model, block, device=device)
+        emb_block = inf_semantic_predictor(model, scaler, block, device=device)
         save_path = os.path.join(args.save_dir, f"block{bi}.npy")
         np.save(save_path, emb_block)
         print(f"Saved block {bi} embeddings to {save_path} with shape {emb_block.shape}")

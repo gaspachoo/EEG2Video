@@ -20,14 +20,35 @@ class GLMNet(nn.Module):
         l_freq = self.freq_local(x_feat[:, self.occipital_idx, :])
         return self.fc(torch.cat([g_raw, l_freq], dim=1))
 
-def standard_scale_features(X):
-    # X: (N, features...)
-    # Flatten to 2D if needed
+def standard_scale_features(X, scaler=None, return_scaler=False):
+    """Scale features with ``StandardScaler``.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        Array of shape ``(N, ...)`` to scale.
+    scaler : sklearn.preprocessing.StandardScaler or None
+        If ``None`` a new scaler is fitted on ``X``. Otherwise ``X`` is
+        transformed using the provided scaler.
+    return_scaler : bool, optional
+        Whether to return the fitted scaler.
+
+    Returns
+    -------
+    np.ndarray
+        Scaled array with the same shape as ``X``.
+    sklearn.preprocessing.StandardScaler, optional
+        Returned only if ``return_scaler`` is ``True``.
+    """
+
     orig_shape = X.shape[1:]
     X_2d = X.reshape(len(X), -1)
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_2d)
-        
-    # Reshape back
-    X_scaled = X_scaled.reshape((len(X),) + orig_shape)
+
+    if scaler is None:
+        scaler = StandardScaler().fit(X_2d)
+
+    X_scaled = scaler.transform(X_2d).reshape((len(X),) + orig_shape)
+
+    if return_scaler:
+        return X_scaled, scaler
     return X_scaled
