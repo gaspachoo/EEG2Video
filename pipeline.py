@@ -48,7 +48,8 @@ if __name__ == "__main__":
         concept=args.concept,
         repetition=args.rep,
         eeg_root=args.eeg_root,
-    )
+    )[None, None, None, ...]  # (1,1,1,62, 400)
+    
     
     FS = 200
     DEVICE = 'cuda'
@@ -56,7 +57,6 @@ if __name__ == "__main__":
     features_raw, _ = extract_de_psd_raw(seg,fs=FS)
     seven_sw = seg_sliding_window(seg, win_s=0.5, step_s=0.25, fs=FS)
     features_seven_sw, _ = extract_de_psd_sw(seven_sw, fs=FS, win_sec=0.5)
-    
     
     print("Segment shape:", seg.shape)
     print("Segment features shape", features_raw.shape)
