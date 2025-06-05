@@ -31,7 +31,6 @@ for subname in range(1,21):
     loaded_data = np.load('./data/Preprocessing/Segmented_Rawf_200Hz_2s/sub'+ str(subname) + '.npy')
     # (7 * 40 * 5 * 62 * 2*fre)
     print("Successfully loaded .npy file.")
-
     DE_data, PSD_data = extract_de_psd_raw(loaded_data,fre)
 
     os.makedirs("./data/Preprocessing/DE_1per2s", exist_ok=True)
