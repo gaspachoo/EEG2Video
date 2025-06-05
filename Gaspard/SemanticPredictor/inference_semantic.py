@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import torch.nn as nn
+from tqdm import tqdm
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )
@@ -26,7 +27,7 @@ def load_semantic_predictor(model_path, device):
     model.eval()
     return model
 
-def inf_semantic_predictor(model, eeg_data, batch_size=64, device='cuda'):
+def inf_semantic_predictor(model, eeg_data, device='cuda'):
     """Generate semantic embeddings for EEG data using a pretrained model.
 
     Parameters
@@ -45,14 +46,16 @@ def inf_semantic_predictor(model, eeg_data, batch_size=64, device='cuda'):
     np.ndarray
         Semantic embeddings of shape (blocks, concepts, trials, embedding_dim).
     """
-    
+    c, t, ch, w = eeg_data.shape
+    eeg_reshaped = eeg_data.reshape(c * t, ch * w).astype(np.float32)
+    scaler = StandardScaler().fit(eeg_reshaped)
     flat = eeg_data.reshape(-1, ch * w)
     std = scaler.transform(flat)
 
     embs = []
     with torch.no_grad():
-        for i in range(0, std.shape[0], batch_size):
-            batch = torch.from_numpy(std[i:i+batch_size]).float().to(device)
+        for i in range(0, std.shape[0]):
+            batch = torch.from_numpy(std[i]).float().to(device)
             out = model(batch)
             embs.append(out.cpu().numpy())
     emb_block = np.vstack(embs)  # (c*t, 77*768)
@@ -92,15 +95,11 @@ if __name__ == '__main__':
     eeg = np.load(args.eeg_file)
     if eeg.ndim != 5:
         raise ValueError(f"Expected EEG ndim=5, got {eeg.shape}")
-    b, c, t, ch, w = eeg.shape
-    
-    all_eeg = eeg.reshape(b * c * t, ch * w).astype(np.float32)
-    scaler = StandardScaler().fit(all_eeg)
 
     # process blocks
-    for bi in range(b):
+    for bi in tqdm(range(eeg.shape[0]), desc="Processing blocks"):
         block = eeg[bi]  # (concepts, trials, ch, w)
-        emb_block = inf_semantic_predictor(model, block, batch_size=args.batch_size, device=device)
+        emb_block = inf_semantic_predictor(model, block, device=device)
         save_path = os.path.join(args.save_dir, f"block{bi}.npy")
         np.save(save_path, emb_block)
         print(f"Saved block {bi} embeddings to {save_path}")
