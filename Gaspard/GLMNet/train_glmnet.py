@@ -5,8 +5,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
-import  wandb
+import wandb
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import pickle
 
 project_root = os.path.dirname(
     os.path.dirname(
@@ -98,7 +99,16 @@ def main():
         X_train, F_train, y_train = get_data(train_blocks)
         X_val, F_val, y_val = get_data([val_block])
         X_test, F_test, y_test = get_data([test_block])
-        F_train_scaled, F_val_scaled, F_test_scaled = standard_scale_features(F_train), standard_scale_features(F_val), standard_scale_features(F_test)
+
+        # Fit scaler on training features and apply to all splits
+        F_train_scaled, scaler = standard_scale_features(F_train, return_scaler=True)
+        F_val_scaled = standard_scale_features(F_val, scaler=scaler)
+        F_test_scaled = standard_scale_features(F_test, scaler=scaler)
+
+        # Save scaler for this fold
+        scaler_path = os.path.join(args.save_dir, f"{subj_name}_fold{test_block}_scaler.pkl")
+        with open(scaler_path, "wb") as f:
+            pickle.dump(scaler, f)
 
 
         # Conversion en tenseurs
