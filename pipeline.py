@@ -82,25 +82,17 @@ if __name__ == "__main__":
     pipe = load_tuneavideo_from_checkpoint(args.tuneavideo_path,args.diffusion_model_path, DEVICE)
     pipe.scheduler.set_timesteps(args.num_inference_steps)
 
-    os.makedirs(args.output_dir, exist_ok=True)
-    B = video_latents.size(0)
-
-    # --- DEBUG inf z0 before any scaling ---
-    #print("[DEBUG inf] video_latents raw:", "shape", video_latents.shape,"mean", video_latents.mean().item(),"std",  video_latents.std().item(),"min",  video_latents.min().item(),"max",  video_latents.max().item())
+    z0 = video_latents[:1]
+    emb = semantic_embeddings[:1]
+    videos = inf_tuneavideo(pipe, emb, z0,args.num_inference_steps, args.guidance_scale, DEVICE)
     
-    # Inférence
-    for i in range(B):
-        z0 = video_latents[i:i+1]
-        emb = semantic_embeddings[i:i+1]
-        videos = inf_tuneavideo(pipe, emb, z0,args.num_inference_steps, args.guidance_scale, DEVICE)
-        
-        os.makedirs(os.path.join(args.output_dir, f'Block{i//200}'), exist_ok=True)
+    os.makedirs(os.path.join(args.output_dir, f'Block{args.block}'), exist_ok=True)
 
-        # Sauvegarde sans double rescale (déjà normalisé)
-        save_videos_grid(
-            videos,
-            os.path.join(args.output_dir,f'Block{i//200}', f'{i%200+1}.gif'),
-            rescale=False
-        )
-        print(f"[INFO] {i%200+1}.gif saved in {args.output_dir}")
+    # Sauvegarde sans double rescale (déjà normalisé)
+    save_videos_grid(
+        videos,
+        os.path.join(args.output_dir,f'Block{args.block}', f'{5*args.concept + args.rep}.gif'),
+        rescale=False
+    )
+    print(f"[INFO] {5*args.concept + args.rep}.gif saved in {args.output_dir}/Block{args.block}")
     
