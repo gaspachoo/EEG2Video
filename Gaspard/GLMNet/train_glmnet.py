@@ -35,7 +35,7 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--raw_dir",  default = "./data/Preprocessing/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
     p.add_argument("--feat_dir", default="./data/Preprocessing/DE_1per1s/", help="directory with .npy files")
-    p.add_argument("--label_dir", default="./data/meta_info/All_video_label.npy", help="Label file")
+    p.add_argument("--label_dir", default="./data/meta_info/All_video_color.npy", help="Label file")
     p.add_argument("--save_dir", default="./Gaspard/checkpoints/glmnet/")
     p.add_argument("--epochs",   type=int, default=50)
     p.add_argument("--bs",       type=int, default=128)
@@ -55,8 +55,13 @@ def split_raw_2s_to_1s(raw2s: np.ndarray) -> np.ndarray:
 
 def reshape_labels(labels: np.ndarray) -> np.ndarray:
     """Convert labels from (7,40) to (7,40,5,2)"""
-    labels = labels[..., None, None]            # (7,40,1,1)
-    labels = np.repeat(labels, 5, axis=2)       # (7,40,5,1)
+    if labels.shape[1] == 40:
+        labels = labels[..., None, None]            # (7,40,1,1)
+        labels = np.repeat(labels, 5, axis=2)       # (7,40,5,1)
+    else:
+        assert labels.shape[1] == 200, "Labels must be (7,40,200) or (7,40)"
+        labels = labels.reshape(-1,40,5)[..., None]              # (7,40,5,1)
+
     labels = np.repeat(labels, 2, axis=3)       # (7,40,5,2)
     assert labels.shape == (7,40,5,2), "Label shape must be (7,40,5,2) after expansion"
     return labels -1 # 0-39 labels
@@ -79,8 +84,10 @@ def main():
     feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,62,5)
     labels = np.load(args.label_dir)                       # (7,40)
     labels = reshape_labels(labels)                        # (7,40,5,2)
+    print(labels.shape)
     num_unique_labels = len(np.unique(labels))
     print("Number of categories:", num_unique_labels)
+    
     raw1s = split_raw_2s_to_1s(raw2s)                      # (7,40,5,2,62,200)
 
     acc_folds = []
