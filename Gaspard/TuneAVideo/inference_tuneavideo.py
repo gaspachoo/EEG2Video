@@ -90,8 +90,8 @@ def load_pairs(seq2seq_dir: str, sem_dir: str, device: torch.device):
     for fname in latent_files:
         # Charger latent vidéo
         lat_path = os.path.join(seq2seq_dir, fname)
-        data = np.load(lat_path) if fname.endswith('.npy') else torch.load(lat_path)
-        lat = torch.from_numpy(data) if isinstance(data, np.ndarray) else data
+        data = np.load(lat_path)
+        lat = torch.from_numpy(data)
         lat = lat.to(device).half()
         lat = rearrange(lat, 'b c f h w -> b f c h w')  # (B_i, F, C, H, W)
         B_i = lat.shape[0]
