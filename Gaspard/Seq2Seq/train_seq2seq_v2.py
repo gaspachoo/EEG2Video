@@ -169,7 +169,7 @@ def train_seq2seq(args):
         if avg_val < best_val:
             best_val = avg_val
             os.makedirs(args.save_path, exist_ok=True)
-            ckpt = os.path.join(args.save_path, 'seq2seq_v2_classic.pth')
+            ckpt = os.path.join(args.save_path, 'seq2seq_v2_color.pth')
             torch.save(model.state_dict(), ckpt)
             print(f"Meilleur modèle sauvegardé -> {ckpt}")
 

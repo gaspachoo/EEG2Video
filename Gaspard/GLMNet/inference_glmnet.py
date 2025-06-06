@@ -59,7 +59,7 @@ def generate_all_embeddings(raw_dir, feat_dir, ckpt_path, scaler_path, output_di
     scaler = load_scaler(scaler_path)
 
     for fname in os.listdir(raw_dir):
-        if not fname.endswith('.npy'):
+        if not (fname.endswith('.npy') and fname.startswith('sub3')):
             continue
         print(f"Processing {fname}...")
         subj = os.path.splitext(fname)[0]
@@ -81,8 +81,8 @@ if __name__ == "__main__":
     
     parser.add_argument('--raw_dir', default="./data/Preprocessing/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
     parser.add_argument('--feat_dir', default="./data/Preprocessing/DE_500ms_sw", help='directory of pre-windowed feature .npy files')
-    parser.add_argument('--checkpoint_path', default="./Gaspard/checkpoints/glmnet/sub3_fold6_color_best.pt", help='path to GLMNet checkpoint')
-    parser.add_argument('--scaler_path', default="./Gaspard/checkpoints/glmnet/sub3_fold6_scaler.pkl", help='path to saved StandardScaler')
+    parser.add_argument('--checkpoint_path', default="./Gaspard/checkpoints/glmnet/sub3_fold0_color_best.pt", help='path to GLMNet checkpoint')
+    parser.add_argument('--scaler_path', default="./Gaspard/checkpoints/glmnet/sub3_fold0_scaler.pkl", help='path to saved StandardScaler')
     parser.add_argument('--output_dir', default="./data/GLMNet/EEG_embeddings_sw", help='where to save concatenated embeddings')
     args = parser.parse_args()
     generate_all_embeddings(args.raw_dir, args.feat_dir, args.checkpoint_path, args.scaler_path, args.output_dir)

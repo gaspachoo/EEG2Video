@@ -60,7 +60,7 @@ def main():
                         default="./data/GLMNet/EEG_embeddings_sw/sub3.npy",
                         help='Path to embeddings .npy (shape 7*40*5*7,512)')
     parser.add_argument('--ckpt_file',      type=str,
-                        default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_classic.pth",
+                        default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_color.pth",
                         help='Directory with seq2seq_sw_block{block}.pth')
     parser.add_argument('--output_dir',    type=str,
                         default="./data/Seq2Seq/Predicted_latents/",
