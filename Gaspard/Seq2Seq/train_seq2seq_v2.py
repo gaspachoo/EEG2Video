@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument('--save_path',     type=str,
                         default="./Gaspard/checkpoints/seq2seq",
                         help='Dossier où sauvegarder le checkpoint final')
+    parser.add_argument('--ckpt_name',     type=str,   default='seq2seq_v2_color.pth',help='Name of the saved checkpoint file')
     parser.add_argument('--use_wandb',     action='store_true',
                         help='Activer la journalisation sur Weights & Biases')
 
@@ -169,7 +170,7 @@ def train_seq2seq(args):
         if avg_val < best_val:
             best_val = avg_val
             os.makedirs(args.save_path, exist_ok=True)
-            ckpt = os.path.join(args.save_path, 'seq2seq_v2_color.pth')
+            ckpt = os.path.join(args.save_path, args.ckpt_name)
             torch.save(model.state_dict(), ckpt)
             print(f"Meilleur modèle sauvegardé -> {ckpt}")
 

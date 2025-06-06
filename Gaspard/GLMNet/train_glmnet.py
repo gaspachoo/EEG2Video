@@ -125,7 +125,7 @@ def main():
         F_test_scaled = standard_scale_features(F_test, scaler=scaler)
 
         # Save scaler for this fold
-        scaler_path = os.path.join(args.save_dir, f"{subj_name}_fold{test_block}_scaler.pkl")
+        scaler_path = os.path.join(args.save_dir, f"{subj_name}_fold{test_block}_{args.category}_scaler.pkl")
         with open(scaler_path, "wb") as f:
             pickle.dump(scaler, f)
 
