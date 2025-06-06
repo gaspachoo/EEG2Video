@@ -35,8 +35,9 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--raw_dir",  default = "./data/Preprocessing/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
     p.add_argument("--feat_dir", default="./data/Preprocessing/DE_1per1s/", help="directory with .npy files")
-    p.add_argument("--label_dir", default="./data/meta_info/All_video_color.npy", help="Label file")
-    p.add_argument("--save_dir", default="./Gaspard/checkpoints/glmnet/")
+    p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
+    p.add_argument("--category", default="label",choices=['color', 'face_appearance', 'human_appearance','label','obj_number','optical_flow_score'], help="Label file")
+    p.add_argument("--save_dir", default="./Gaspard/checkpoints/glmnet")
     p.add_argument("--epochs",   type=int, default=50)
     p.add_argument("--bs",       type=int, default=128)
     p.add_argument("--lr",       type=float, default=1e-4)
@@ -64,10 +65,20 @@ def reshape_labels(labels: np.ndarray) -> np.ndarray:
 
     labels = np.repeat(labels, 2, axis=3)       # (7,40,5,2)
     assert labels.shape == (7,40,5,2), "Label shape must be (7,40,5,2) after expansion"
-    return labels -1 # 0-39 labels
+    return labels 
 
-
-
+def format_labels(labels: np.ndarray, category:str) -> np.ndarray:
+    match category:
+        case "color" | "face_appearance" | "human_appearance" | "object":
+            return labels.astype(np.int64)
+        case "label" | "object_number" :
+            labels = labels-1
+            return labels.astype(np.int64)
+        case "optical_flow_score":
+            threshold = 1.799
+            return (labels > threshold).astype(np.int64)
+        case _:
+            raise ValueError(f"Unknown category: {category}. Must be one of: color, face_appearance, human_appearance, object, label, object_number, optical_flow_score.")
 # ------------------------------ main -------------------------------------
 def main():
     args = parse_args()
@@ -82,8 +93,8 @@ def main():
 
     raw2s = np.load(os.path.join(args.raw_dir, filename))  # (7,40,5,62,400)
     feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,62,5)
-    labels = np.load(args.label_dir)                       # (7,40)
-    labels = reshape_labels(labels)                        # (7,40,5,2)
+    labels = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
+    labels = format_labels(reshape_labels(labels), args.category)                        # (7,40,5,2)
     print(labels.shape)
     num_unique_labels = len(np.unique(labels))
     print("Number of categories:", num_unique_labels)
@@ -143,7 +154,7 @@ def main():
         for ep in tqdm(range(1, args.epochs + 1), desc=f"Fold {test_block}"):
 
             model.train(); tl = ta = 0
-            for xb, xf, yb in tqdm(dl_train, desc=f"Epoch {ep}/{args.epochs}", leave=False):
+            for xb, xf, yb in dl_train:
                 xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
                 opt.zero_grad(); pred = model(xb, xf)
                 loss = criterion(pred, yb); loss.backward(); opt.step()
@@ -161,13 +172,15 @@ def main():
 
             if val_acc > best_val:
                 best_val = val_acc
-                torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_fold{test_block}_best.pt")
+                os.makedirs(args.save_dir, exist_ok=True)
+                torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_fold{test_block}_{args.category}_best.pt")
 
             if args.use_wandb:
                 wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc, "train/loss": tl / len(dl_train), "val/loss": loss.item()})
 
         # Test
-        model.load_state_dict(torch.load(f"{args.save_dir}/{subj_name}_fold{test_block}_best.pt"))
+        
+        model.load_state_dict(torch.load(f"{args.save_dir}/{subj_name}_fold{test_block}_{args.category}_best.pt"))
         model.eval(); test_acc = 0
         with torch.no_grad():
             for xb, xf, yb in dl_test:

@@ -18,7 +18,7 @@ OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
 
 # --- Load the pretrained GLMNet ---
 def load_glmnet_from_checkpoint(ckpt_path, device='cuda'):
-    model = GLMNet(OCCIPITAL_IDX, out_dim=40).to(device)
+    model = GLMNet(OCCIPITAL_IDX, out_dim=7).to(device)
     state = torch.load(ckpt_path, map_location=device)
     model.load_state_dict(state)
     model.eval()
@@ -86,8 +86,8 @@ if __name__ == "__main__":
     
     parser.add_argument('--raw_dir', default="./data/Preprocessing/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
     parser.add_argument('--feat_dir', default="./data/Preprocessing/DE_500ms_sw", help='directory of pre-windowed feature .npy files')
-    parser.add_argument('--checkpoint_path', default="./Gaspard/checkpoints/glmnet/sub3_fold0_best.pt", help='path to GLMNet checkpoint')
-    parser.add_argument('--scaler_path', default="./Gaspard/checkpoints/glmnet/sub3_fold0_scaler.pkl", help='path to saved StandardScaler')
+    parser.add_argument('--checkpoint_path', default="./Gaspard/checkpoints/glmnet/sub3_fold6_color_best.pt", help='path to GLMNet checkpoint')
+    parser.add_argument('--scaler_path', default="./Gaspard/checkpoints/glmnet/sub3_fold6_scaler.pkl", help='path to saved StandardScaler')
     parser.add_argument('--output_dir', default="./data/GLMNet/EEG_embeddings_sw", help='where to save concatenated embeddings')
     args = parser.parse_args()
     generate_all_embeddings(args.raw_dir, args.feat_dir, args.checkpoint_path, args.scaler_path, args.output_dir)
