@@ -94,8 +94,11 @@ def main():
 
     raw2s = np.load(os.path.join(args.raw_dir, filename))  # (7,40,5,62,400)
     feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,62,5)
-    labels = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
-    labels = format_labels(reshape_labels(labels), args.category)                        # (7,40,5,2)
+    labels_raw = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
+    unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
+    label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
+    print("Label distribution:", label_distribution)
+    labels = format_labels(reshape_labels(labels_raw), args.category)                        # (7,40,5,2)
     print(labels.shape)
     num_unique_labels = len(np.unique(labels))
     print("Number of categories:", num_unique_labels)
