@@ -4,21 +4,58 @@ from Gaspard.GLMNet.modules.models_paper import shallownet, mlpnet
 from sklearn.preprocessing import StandardScaler 
 
 class GLMNet(nn.Module):
-    """ShallowNet (raw) + MLP (freq) → concat → FC"""
-    def __init__(self, occipital_idx, out_dim: int = 40, emb_dim: int = 256): ### Use required embedding dim/2 here
+    """ShallowNet (raw) + MLP (freq) → concat → FC."""
+
+    def __init__(self, occipital_idx, out_dim: int = 40, emb_dim: int = 256):
+        """Construct the GLMNet model.
+
+        Parameters
+        ----------
+        occipital_idx : iterable
+            Indexes of occipital channels used for the local branch.
+        out_dim : int
+            Dimension of the classification output.
+        emb_dim : int
+            Dimension of the intermediate embeddings (each branch outputs
+            ``emb_dim`` features).
+        """
         super().__init__()
         self.occipital_idx = list(occipital_idx)
-        
-        self.raw_global  = shallownet(emb_dim, 62, 200)  # (B,1,62,200)
-        self.freq_local  = mlpnet(emb_dim, len(self.occipital_idx) * 5)  # (B,1,len(occipital*5)
+
+        # Global branch processing raw EEG
+        self.raw_global = shallownet(emb_dim, 62, 200)
+        # Local branch processing spectral features
+        self.freq_local = mlpnet(emb_dim, len(self.occipital_idx) * 5)
+
+        # Final classification head
         self.fc = nn.Sequential(
-            nn.Linear(emb_dim * 2, emb_dim), nn.GELU(), nn.Linear(emb_dim, out_dim)
+            nn.Linear(emb_dim * 2, emb_dim),
+            nn.GELU(),
+            nn.Linear(emb_dim, out_dim),
         )
 
-    def forward(self, x_raw, x_feat):
-        g_raw  = self.raw_global(x_raw)  # (B,emb)
+    def forward(self, x_raw, x_feat, return_features: bool = False):
+        """Forward pass of the network.
+
+        Parameters
+        ----------
+        x_raw : torch.Tensor
+            Raw EEG of shape ``(B, 1, 62, 200)``.
+        x_feat : torch.Tensor
+            Spectral features of shape ``(B, 62, 5)``.
+        return_features : bool, optional
+            If ``True`` returns the concatenated features before the final
+            projection layer. Defaults to ``False``.
+        """
+
+        g_raw = self.raw_global(x_raw)
         l_freq = self.freq_local(x_feat[:, self.occipital_idx, :])
-        return self.fc(torch.cat([g_raw, l_freq], dim=1))
+        features = torch.cat([g_raw, l_freq], dim=1)
+
+        if return_features:
+            return features
+
+        return self.fc(features)
 
 def standard_scale_features(X, scaler=None, return_scaler=False):
     """Scale features with ``StandardScaler``.

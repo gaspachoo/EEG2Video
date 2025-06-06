@@ -13,7 +13,6 @@ if project_root not in sys.path:
 from Gaspard.GLMNet.modules.utils_glmnet import GLMNet, standard_scale_features
 
 
-
 OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
 
 # --- Load the pretrained GLMNet ---
@@ -45,15 +44,11 @@ def inf_glmnet(model, scaler, raw_sw, feat_sw, device='cuda'):
     embeddings = []
     with torch.no_grad():
         for raw_seg, feat_seg in zip(raw_flat, feat_scaled):
-            x_raw = torch.tensor(raw_seg, dtype=torch.float32)
-            x_raw = x_raw.unsqueeze(0).unsqueeze(0).to(device)  # (1,1,62,100)
-            x_feat = torch.tensor(feat_seg, dtype=torch.float32)
-            x_feat = x_feat.unsqueeze(0).to(device)            # (1,62,5)
+            x_raw = torch.tensor(raw_seg, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(device)
+            x_feat = torch.tensor(feat_seg, dtype=torch.float32).unsqueeze(0).to(device)
 
-            g = model.raw_global(x_raw)                # (1, emb_dim)
-            l = model.freq_local(x_feat[:, OCCIPITAL_IDX, :])  # (1, emb_dim)
-            z = torch.cat([g, l], dim=1).squeeze(0).cpu().numpy()
-            embeddings.append(z)
+            z = model(x_raw, x_feat, return_features=True)
+            embeddings.append(z.squeeze(0).cpu().numpy())
 
     return np.stack(embeddings)  # shape: (N_segments, emb_dim*2)
 
