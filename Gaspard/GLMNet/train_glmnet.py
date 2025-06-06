@@ -8,6 +8,7 @@ from tqdm import tqdm
 import wandb
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import pickle
+from sklearn.metrics import confusion_matrix
 
 project_root = os.path.dirname(
     os.path.dirname(
@@ -182,14 +183,27 @@ def main():
         
         model.load_state_dict(torch.load(f"{args.save_dir}/{subj_name}_fold{test_block}_{args.category}_best.pt"))
         model.eval(); test_acc = 0
+        preds, labels_test = [], []
         with torch.no_grad():
             for xb, xf, yb in dl_test:
                 xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
-                pred = model(xb, xf); test_acc += (pred.argmax(1) == yb).sum().item()
+                out = model(xb, xf)
+                pred_labels = out.argmax(1)
+                test_acc += (pred_labels == yb).sum().item()
+                preds.append(pred_labels.cpu())
+                labels_test.append(yb.cpu())
+        preds = torch.cat(preds).numpy()
+        labels_test = torch.cat(labels_test).numpy()
+        cm = confusion_matrix(labels_test, preds)
         test_acc /= len(ds_test)
         acc_folds.append(test_acc)
         print(f"[{subj_name}-Fold{test_block}] BEST test_acc={test_acc:.3f}")
-        if args.use_wandb: wandb.log({"test/acc": test_acc}); wandb.finish()
+        print("Confusion matrix:\n", cm)
+        if args.use_wandb:
+            class_names = [str(c) for c in np.unique(labels)]
+            cm_plot = wandb.plot.confusion_matrix(probs=None, y_true=labels_test, preds=preds, class_names=class_names)
+            wandb.log({"test/acc": test_acc, "test/confusion_matrix": cm_plot})
+            wandb.finish()
 
     print(f"Subject {subj_name}: mean±std test acc = {np.mean(acc_folds):.3f} ± {np.std(acc_folds):.3f}")
 
