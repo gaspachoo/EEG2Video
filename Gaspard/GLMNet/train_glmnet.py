@@ -172,7 +172,7 @@ def main():
                     xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
                     pred = model(xb, xf); va += (pred.argmax(1) == yb).sum().item()
             val_acc = va / len(ds_val)
-            scheduler.step(train_acc)
+            scheduler.step(val_acc)
 
             if val_acc > best_val:
                 best_val = val_acc
