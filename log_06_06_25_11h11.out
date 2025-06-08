@@ -1,12 +1,868 @@
 Using device: cuda
 Label distribution: {0: 49, 1: 28, 2: 21, 3: 28, 4: 21, 5: 42, 6: 35, 7: 21, 8: 35}
+Block 0 distribution: {0: 7, 1: 4, 2: 3, 3: 4, 4: 3, 5: 6, 6: 5, 7: 3, 8: 5}
+Block 1 distribution: {0: 7, 1: 4, 2: 3, 3: 4, 4: 3, 5: 6, 6: 5, 7: 3, 8: 5}
+Block 2 distribution: {0: 7, 1: 4, 2: 3, 3: 4, 4: 3, 5: 6, 6: 5, 7: 3, 8: 5}
+Block 3 distribution: {0: 7, 1: 4, 2: 3, 3: 4, 4: 3, 5: 6, 6: 5, 7: 3, 8: 5}
+Block 4 distribution: {0: 7, 1: 4, 2: 3, 3: 4, 4: 3, 5: 6, 6: 5, 7: 3, 8: 5}
+Block 5 distribution: {0: 7, 1: 4, 2: 3, 3: 4, 4: 3, 5: 6, 6: 5, 7: 3, 8: 5}
+Block 6 distribution: {0: 7, 1: 4, 2: 3, 3: 4, 4: 3, 5: 6, 6: 5, 7: 3, 8: 5}
 (7, 40, 5, 2)
 Number of categories: 9
-Epoch 00015: reducing learning rate of group 0 to 4.0000e-05.
-Epoch 00026: reducing learning rate of group 0 to 3.2000e-05.
-Epoch 00037: reducing learning rate of group 0 to 2.5600e-05.
-Epoch 00048: reducing learning rate of group 0 to 2.0480e-05.
-[sub3-Fold0] BEST test_acc=0.175
+Fold 0 | Epoch 01 - train_acc: 0.172, train_loss: 2.195, val_acc: 0.175, val_loss: 2.194
+Fold 0 | Epoch 02 - train_acc: 0.175, train_loss: 2.193, val_acc: 0.175, val_loss: 2.192
+Fold 0 | Epoch 03 - train_acc: 0.175, train_loss: 2.190, val_acc: 0.175, val_loss: 2.190
+Fold 0 | Epoch 04 - train_acc: 0.175, train_loss: 2.188, val_acc: 0.175, val_loss: 2.187
+Fold 0 | Epoch 05 - train_acc: 0.175, train_loss: 2.186, val_acc: 0.175, val_loss: 2.185
+Fold 0 | Epoch 06 - train_acc: 0.175, train_loss: 2.183, val_acc: 0.175, val_loss: 2.182
+Fold 0 | Epoch 07 - train_acc: 0.175, train_loss: 2.181, val_acc: 0.175, val_loss: 2.178
+Fold 0 | Epoch 08 - train_acc: 0.175, train_loss: 2.178, val_acc: 0.175, val_loss: 2.172
+Fold 0 | Epoch 09 - train_acc: 0.176, train_loss: 2.175, val_acc: 0.175, val_loss: 2.166
+Fold 0 | Epoch 10 - train_acc: 0.175, train_loss: 2.172, val_acc: 0.175, val_loss: 2.160
+Fold 0 | Epoch 11 - train_acc: 0.176, train_loss: 2.169, val_acc: 0.175, val_loss: 2.155
+Epoch 00012: reducing learning rate of group 0 to 4.0000e-05.
+Fold 0 | Epoch 12 - train_acc: 0.178, train_loss: 2.165, val_acc: 0.175, val_loss: 2.156
+Fold 0 | Epoch 13 - train_acc: 0.179, train_loss: 2.162, val_acc: 0.175, val_loss: 2.165
+Fold 0 | Epoch 14 - train_acc: 0.181, train_loss: 2.159, val_acc: 0.175, val_loss: 2.184
+Fold 0 | Epoch 15 - train_acc: 0.182, train_loss: 2.156, val_acc: 0.175, val_loss: 2.223
+Fold 0 | Epoch 16 - train_acc: 0.183, train_loss: 2.153, val_acc: 0.175, val_loss: 2.327
+Fold 0 | Epoch 17 - train_acc: 0.184, train_loss: 2.150, val_acc: 0.175, val_loss: 2.485
+Fold 0 | Epoch 18 - train_acc: 0.184, train_loss: 2.148, val_acc: 0.175, val_loss: 2.789
+Fold 0 | Epoch 19 - train_acc: 0.187, train_loss: 2.146, val_acc: 0.175, val_loss: 3.201
+Fold 0 | Epoch 20 - train_acc: 0.190, train_loss: 2.143, val_acc: 0.175, val_loss: 3.596
+Fold 0 | Epoch 21 - train_acc: 0.192, train_loss: 2.141, val_acc: 0.175, val_loss: 4.292
+Fold 0 | Epoch 22 - train_acc: 0.192, train_loss: 2.139, val_acc: 0.175, val_loss: 5.275
+Epoch 00023: reducing learning rate of group 0 to 3.2000e-05.
+Fold 0 | Epoch 23 - train_acc: 0.191, train_loss: 2.138, val_acc: 0.175, val_loss: 6.504
+Fold 0 | Epoch 24 - train_acc: 0.193, train_loss: 2.136, val_acc: 0.175, val_loss: 8.232
+Fold 0 | Epoch 25 - train_acc: 0.192, train_loss: 2.135, val_acc: 0.175, val_loss: 9.277
+Fold 0 | Epoch 26 - train_acc: 0.192, train_loss: 2.133, val_acc: 0.175, val_loss: 9.364
+Fold 0 | Epoch 27 - train_acc: 0.189, train_loss: 2.132, val_acc: 0.175, val_loss: 8.775
+Fold 0 | Epoch 28 - train_acc: 0.190, train_loss: 2.131, val_acc: 0.175, val_loss: 10.073
+Fold 0 | Epoch 29 - train_acc: 0.189, train_loss: 2.130, val_acc: 0.175, val_loss: 11.742
+Fold 0 | Epoch 30 - train_acc: 0.190, train_loss: 2.128, val_acc: 0.175, val_loss: 12.561
+Fold 0 | Epoch 31 - train_acc: 0.190, train_loss: 2.127, val_acc: 0.175, val_loss: 13.387
+Fold 0 | Epoch 32 - train_acc: 0.193, train_loss: 2.126, val_acc: 0.175, val_loss: 15.348
+Fold 0 | Epoch 33 - train_acc: 0.193, train_loss: 2.125, val_acc: 0.175, val_loss: 17.158
+Epoch 00034: reducing learning rate of group 0 to 2.5600e-05.
+Fold 0 | Epoch 34 - train_acc: 0.195, train_loss: 2.124, val_acc: 0.175, val_loss: 20.077
+Fold 0 | Epoch 35 - train_acc: 0.195, train_loss: 2.122, val_acc: 0.175, val_loss: 20.125
+Fold 0 | Epoch 36 - train_acc: 0.194, train_loss: 2.122, val_acc: 0.175, val_loss: 20.405
+Fold 0 | Epoch 37 - train_acc: 0.194, train_loss: 2.121, val_acc: 0.175, val_loss: 20.525
+Fold 0 | Epoch 38 - train_acc: 0.192, train_loss: 2.120, val_acc: 0.175, val_loss: 20.532
+Fold 0 | Epoch 39 - train_acc: 0.192, train_loss: 2.119, val_acc: 0.175, val_loss: 19.437
+Fold 0 | Epoch 40 - train_acc: 0.192, train_loss: 2.118, val_acc: 0.175, val_loss: 18.238
+Fold 0 | Epoch 41 - train_acc: 0.192, train_loss: 2.117, val_acc: 0.175, val_loss: 16.753
+Fold 0 | Epoch 42 - train_acc: 0.192, train_loss: 2.116, val_acc: 0.175, val_loss: 17.493
+Fold 0 | Epoch 43 - train_acc: 0.192, train_loss: 2.115, val_acc: 0.175, val_loss: 16.414
+Fold 0 | Epoch 44 - train_acc: 0.194, train_loss: 2.114, val_acc: 0.175, val_loss: 16.931
+Epoch 00045: reducing learning rate of group 0 to 2.0480e-05.
+Fold 0 | Epoch 45 - train_acc: 0.194, train_loss: 2.113, val_acc: 0.175, val_loss: 13.884
+Fold 0 | Epoch 46 - train_acc: 0.193, train_loss: 2.113, val_acc: 0.175, val_loss: 11.540
+Fold 0 | Epoch 47 - train_acc: 0.191, train_loss: 2.112, val_acc: 0.175, val_loss: 10.618
+Fold 0 | Epoch 48 - train_acc: 0.190, train_loss: 2.111, val_acc: 0.175, val_loss: 7.663
+Fold 0 | Epoch 49 - train_acc: 0.192, train_loss: 2.111, val_acc: 0.175, val_loss: 5.713
+Fold 0 | Epoch 50 - train_acc: 0.192, train_loss: 2.110, val_acc: 0.175, val_loss: 4.347
+Fold 0 | Epoch 51 - train_acc: 0.192, train_loss: 2.109, val_acc: 0.142, val_loss: 2.599
+Fold 0 | Epoch 52 - train_acc: 0.191, train_loss: 2.109, val_acc: 0.150, val_loss: 2.975
+Fold 0 | Epoch 53 - train_acc: 0.190, train_loss: 2.108, val_acc: 0.140, val_loss: 3.188
+Fold 0 | Epoch 54 - train_acc: 0.191, train_loss: 2.107, val_acc: 0.152, val_loss: 3.619
+Fold 0 | Epoch 55 - train_acc: 0.191, train_loss: 2.106, val_acc: 0.175, val_loss: 4.702
+Epoch 00056: reducing learning rate of group 0 to 1.6384e-05.
+Fold 0 | Epoch 56 - train_acc: 0.191, train_loss: 2.106, val_acc: 0.175, val_loss: 5.888
+Fold 0 | Epoch 57 - train_acc: 0.192, train_loss: 2.105, val_acc: 0.135, val_loss: 5.441
+Fold 0 | Epoch 58 - train_acc: 0.192, train_loss: 2.105, val_acc: 0.138, val_loss: 5.871
+Fold 0 | Epoch 59 - train_acc: 0.191, train_loss: 2.104, val_acc: 0.138, val_loss: 5.596
+Fold 0 | Epoch 60 - train_acc: 0.191, train_loss: 2.104, val_acc: 0.135, val_loss: 4.565
+Fold 0 | Epoch 61 - train_acc: 0.189, train_loss: 2.103, val_acc: 0.175, val_loss: 6.002
+Fold 0 | Epoch 62 - train_acc: 0.189, train_loss: 2.102, val_acc: 0.175, val_loss: 6.969
+Fold 0 | Epoch 63 - train_acc: 0.190, train_loss: 2.102, val_acc: 0.175, val_loss: 6.966
+Fold 0 | Epoch 64 - train_acc: 0.191, train_loss: 2.101, val_acc: 0.175, val_loss: 8.047
+Fold 0 | Epoch 65 - train_acc: 0.191, train_loss: 2.101, val_acc: 0.175, val_loss: 6.158
+Fold 0 | Epoch 66 - train_acc: 0.194, train_loss: 2.100, val_acc: 0.175, val_loss: 3.715
+Epoch 00067: reducing learning rate of group 0 to 1.3107e-05.
+Fold 0 | Epoch 67 - train_acc: 0.195, train_loss: 2.100, val_acc: 0.168, val_loss: 2.923
+Fold 0 | Epoch 68 - train_acc: 0.196, train_loss: 2.099, val_acc: 0.177, val_loss: 2.925
+Fold 0 | Epoch 69 - train_acc: 0.195, train_loss: 2.099, val_acc: 0.135, val_loss: 2.205
+Fold 0 | Epoch 70 - train_acc: 0.196, train_loss: 2.098, val_acc: 0.095, val_loss: 2.309
+Fold 0 | Epoch 71 - train_acc: 0.197, train_loss: 2.098, val_acc: 0.170, val_loss: 2.264
+Fold 0 | Epoch 72 - train_acc: 0.196, train_loss: 2.098, val_acc: 0.177, val_loss: 2.384
+Fold 0 | Epoch 73 - train_acc: 0.198, train_loss: 2.097, val_acc: 0.175, val_loss: 3.377
+Fold 0 | Epoch 74 - train_acc: 0.197, train_loss: 2.097, val_acc: 0.175, val_loss: 4.085
+Fold 0 | Epoch 75 - train_acc: 0.197, train_loss: 2.096, val_acc: 0.175, val_loss: 3.740
+Fold 0 | Epoch 76 - train_acc: 0.197, train_loss: 2.096, val_acc: 0.138, val_loss: 2.273
+Fold 0 | Epoch 77 - train_acc: 0.198, train_loss: 2.095, val_acc: 0.142, val_loss: 2.317
+Fold 0 | Epoch 78 - train_acc: 0.199, train_loss: 2.095, val_acc: 0.147, val_loss: 2.445
+Epoch 00079: reducing learning rate of group 0 to 1.0486e-05.
+Fold 0 | Epoch 79 - train_acc: 0.200, train_loss: 2.095, val_acc: 0.128, val_loss: 2.998
+Fold 0 | Epoch 80 - train_acc: 0.199, train_loss: 2.094, val_acc: 0.142, val_loss: 3.188
+Fold 0 | Epoch 81 - train_acc: 0.199, train_loss: 2.094, val_acc: 0.138, val_loss: 3.209
+Fold 0 | Epoch 82 - train_acc: 0.200, train_loss: 2.094, val_acc: 0.138, val_loss: 2.480
+Fold 0 | Epoch 83 - train_acc: 0.201, train_loss: 2.093, val_acc: 0.120, val_loss: 2.235
+Fold 0 | Epoch 84 - train_acc: 0.200, train_loss: 2.093, val_acc: 0.083, val_loss: 2.388
+Fold 0 | Epoch 85 - train_acc: 0.200, train_loss: 2.093, val_acc: 0.085, val_loss: 2.335
+Fold 0 | Epoch 86 - train_acc: 0.200, train_loss: 2.092, val_acc: 0.117, val_loss: 2.203
+Fold 0 | Epoch 87 - train_acc: 0.200, train_loss: 2.092, val_acc: 0.140, val_loss: 2.376
+Fold 0 | Epoch 88 - train_acc: 0.201, train_loss: 2.092, val_acc: 0.142, val_loss: 2.313
+Fold 0 | Epoch 89 - train_acc: 0.200, train_loss: 2.091, val_acc: 0.135, val_loss: 2.377
+Epoch 00090: reducing learning rate of group 0 to 8.3886e-06.
+Fold 0 | Epoch 90 - train_acc: 0.201, train_loss: 2.091, val_acc: 0.135, val_loss: 2.402
+Fold 0 | Epoch 91 - train_acc: 0.201, train_loss: 2.091, val_acc: 0.133, val_loss: 2.647
+Fold 0 | Epoch 92 - train_acc: 0.200, train_loss: 2.091, val_acc: 0.133, val_loss: 3.179
+Fold 0 | Epoch 93 - train_acc: 0.200, train_loss: 2.090, val_acc: 0.170, val_loss: 3.454
+Fold 0 | Epoch 94 - train_acc: 0.201, train_loss: 2.090, val_acc: 0.175, val_loss: 3.331
+Fold 0 | Epoch 95 - train_acc: 0.200, train_loss: 2.090, val_acc: 0.175, val_loss: 2.797
+Fold 0 | Epoch 96 - train_acc: 0.201, train_loss: 2.089, val_acc: 0.175, val_loss: 2.941
+Fold 0 | Epoch 97 - train_acc: 0.201, train_loss: 2.089, val_acc: 0.175, val_loss: 3.271
+Fold 0 | Epoch 98 - train_acc: 0.199, train_loss: 2.089, val_acc: 0.175, val_loss: 3.454
+Fold 0 | Epoch 99 - train_acc: 0.200, train_loss: 2.089, val_acc: 0.175, val_loss: 3.684
+Fold 0 | Epoch 100 - train_acc: 0.200, train_loss: 2.088, val_acc: 0.175, val_loss: 4.012
+Epoch 00101: reducing learning rate of group 0 to 6.7109e-06.
+Fold 0 | Epoch 101 - train_acc: 0.200, train_loss: 2.088, val_acc: 0.175, val_loss: 3.862
+Fold 0 | Epoch 102 - train_acc: 0.200, train_loss: 2.088, val_acc: 0.175, val_loss: 3.707
+Fold 0 | Epoch 103 - train_acc: 0.200, train_loss: 2.088, val_acc: 0.175, val_loss: 3.488
+Fold 0 | Epoch 104 - train_acc: 0.200, train_loss: 2.088, val_acc: 0.175, val_loss: 3.600
+Fold 0 | Epoch 105 - train_acc: 0.199, train_loss: 2.087, val_acc: 0.175, val_loss: 3.554
+Fold 0 | Epoch 106 - train_acc: 0.199, train_loss: 2.087, val_acc: 0.175, val_loss: 3.291
+Fold 0 | Epoch 107 - train_acc: 0.200, train_loss: 2.087, val_acc: 0.175, val_loss: 2.879
+Fold 0 | Epoch 108 - train_acc: 0.200, train_loss: 2.087, val_acc: 0.135, val_loss: 2.192
+Fold 0 | Epoch 109 - train_acc: 0.199, train_loss: 2.087, val_acc: 0.115, val_loss: 2.191
+Fold 0 | Epoch 110 - train_acc: 0.199, train_loss: 2.086, val_acc: 0.125, val_loss: 2.199
+Fold 0 | Epoch 111 - train_acc: 0.199, train_loss: 2.086, val_acc: 0.120, val_loss: 2.209
+Epoch 00112: reducing learning rate of group 0 to 5.3687e-06.
+Fold 0 | Epoch 112 - train_acc: 0.199, train_loss: 2.086, val_acc: 0.135, val_loss: 2.218
+Fold 0 | Epoch 113 - train_acc: 0.198, train_loss: 2.086, val_acc: 0.117, val_loss: 2.283
+Fold 0 | Epoch 114 - train_acc: 0.199, train_loss: 2.086, val_acc: 0.102, val_loss: 2.250
+Fold 0 | Epoch 115 - train_acc: 0.200, train_loss: 2.085, val_acc: 0.113, val_loss: 2.204
+Fold 0 | Epoch 116 - train_acc: 0.198, train_loss: 2.085, val_acc: 0.122, val_loss: 2.239
+Fold 0 | Epoch 117 - train_acc: 0.199, train_loss: 2.085, val_acc: 0.133, val_loss: 2.318
+Fold 0 | Epoch 118 - train_acc: 0.199, train_loss: 2.085, val_acc: 0.133, val_loss: 2.226
+Fold 0 | Epoch 119 - train_acc: 0.198, train_loss: 2.085, val_acc: 0.142, val_loss: 2.240
+Fold 0 | Epoch 120 - train_acc: 0.198, train_loss: 2.084, val_acc: 0.145, val_loss: 2.225
+Fold 0 | Epoch 121 - train_acc: 0.199, train_loss: 2.084, val_acc: 0.122, val_loss: 2.202
+Fold 0 | Epoch 122 - train_acc: 0.198, train_loss: 2.084, val_acc: 0.117, val_loss: 2.229
+Epoch 00123: reducing learning rate of group 0 to 4.2950e-06.
+Fold 0 | Epoch 123 - train_acc: 0.199, train_loss: 2.084, val_acc: 0.122, val_loss: 2.215
+Fold 0 | Epoch 124 - train_acc: 0.199, train_loss: 2.084, val_acc: 0.115, val_loss: 2.230
+Fold 0 | Epoch 125 - train_acc: 0.199, train_loss: 2.084, val_acc: 0.072, val_loss: 2.316
+Fold 0 | Epoch 126 - train_acc: 0.199, train_loss: 2.084, val_acc: 0.120, val_loss: 2.261
+Fold 0 | Epoch 127 - train_acc: 0.199, train_loss: 2.083, val_acc: 0.095, val_loss: 2.362
+Fold 0 | Epoch 128 - train_acc: 0.199, train_loss: 2.083, val_acc: 0.138, val_loss: 2.253
+Fold 0 | Epoch 129 - train_acc: 0.197, train_loss: 2.083, val_acc: 0.095, val_loss: 2.403
+Fold 0 | Epoch 130 - train_acc: 0.199, train_loss: 2.083, val_acc: 0.125, val_loss: 2.318
+Fold 0 | Epoch 131 - train_acc: 0.197, train_loss: 2.083, val_acc: 0.125, val_loss: 2.284
+Fold 0 | Epoch 132 - train_acc: 0.199, train_loss: 2.083, val_acc: 0.117, val_loss: 2.283
+Fold 0 | Epoch 133 - train_acc: 0.199, train_loss: 2.083, val_acc: 0.120, val_loss: 2.262
+Epoch 00134: reducing learning rate of group 0 to 3.4360e-06.
+Fold 0 | Epoch 134 - train_acc: 0.199, train_loss: 2.083, val_acc: 0.115, val_loss: 2.270
+Fold 0 | Epoch 135 - train_acc: 0.201, train_loss: 2.082, val_acc: 0.133, val_loss: 2.227
+Fold 0 | Epoch 136 - train_acc: 0.200, train_loss: 2.082, val_acc: 0.142, val_loss: 2.202
+Fold 0 | Epoch 137 - train_acc: 0.200, train_loss: 2.082, val_acc: 0.147, val_loss: 2.218
+Fold 0 | Epoch 138 - train_acc: 0.200, train_loss: 2.082, val_acc: 0.145, val_loss: 2.294
+Fold 0 | Epoch 139 - train_acc: 0.199, train_loss: 2.082, val_acc: 0.150, val_loss: 2.392
+Fold 0 | Epoch 140 - train_acc: 0.198, train_loss: 2.082, val_acc: 0.135, val_loss: 2.528
+Fold 0 | Epoch 141 - train_acc: 0.200, train_loss: 2.082, val_acc: 0.133, val_loss: 2.597
+Fold 0 | Epoch 142 - train_acc: 0.201, train_loss: 2.082, val_acc: 0.128, val_loss: 2.691
+Fold 0 | Epoch 143 - train_acc: 0.199, train_loss: 2.082, val_acc: 0.133, val_loss: 2.800
+Fold 0 | Epoch 144 - train_acc: 0.200, train_loss: 2.081, val_acc: 0.135, val_loss: 2.578
+Epoch 00145: reducing learning rate of group 0 to 2.7488e-06.
+Fold 0 | Epoch 145 - train_acc: 0.201, train_loss: 2.082, val_acc: 0.140, val_loss: 2.353
+Fold 0 | Epoch 146 - train_acc: 0.199, train_loss: 2.081, val_acc: 0.122, val_loss: 2.265
+Fold 0 | Epoch 147 - train_acc: 0.199, train_loss: 2.081, val_acc: 0.117, val_loss: 2.243
+Fold 0 | Epoch 148 - train_acc: 0.200, train_loss: 2.081, val_acc: 0.120, val_loss: 2.235
+Fold 0 | Epoch 149 - train_acc: 0.201, train_loss: 2.081, val_acc: 0.130, val_loss: 2.222
+Fold 0 | Epoch 150 - train_acc: 0.199, train_loss: 2.081, val_acc: 0.125, val_loss: 2.240
+[sub3-Fold0] BEST test_acc=0.172
+Confusion matrix:
+ [[69  0  0  0  0  1  0  0  0]
+ [40  0  0  0  0  0  0  0  0]
+ [30  0  0  0  0  0  0  0  0]
+ [40  0  0  0  0  0  0  0  0]
+ [30  0  0  0  0  0  0  0  0]
+ [60  0  0  0  0  0  0  0  0]
+ [50  0  0  0  0  0  0  0  0]
+ [30  0  0  0  0  0  0  0  0]
+ [50  0  0  0  0  0  0  0  0]]
+Fold 1 | Epoch 01 - train_acc: 0.076, train_loss: 2.196, val_acc: 0.072, val_loss: 2.195
+Fold 1 | Epoch 02 - train_acc: 0.086, train_loss: 2.194, val_acc: 0.122, val_loss: 2.193
+Fold 1 | Epoch 03 - train_acc: 0.134, train_loss: 2.191, val_acc: 0.175, val_loss: 2.190
+Fold 1 | Epoch 04 - train_acc: 0.172, train_loss: 2.189, val_acc: 0.175, val_loss: 2.188
+Fold 1 | Epoch 05 - train_acc: 0.174, train_loss: 2.187, val_acc: 0.175, val_loss: 2.185
+Fold 1 | Epoch 06 - train_acc: 0.174, train_loss: 2.185, val_acc: 0.175, val_loss: 2.181
+Fold 1 | Epoch 07 - train_acc: 0.174, train_loss: 2.182, val_acc: 0.175, val_loss: 2.175
+Fold 1 | Epoch 08 - train_acc: 0.175, train_loss: 2.180, val_acc: 0.175, val_loss: 2.167
+Fold 1 | Epoch 09 - train_acc: 0.177, train_loss: 2.177, val_acc: 0.175, val_loss: 2.158
+Fold 1 | Epoch 10 - train_acc: 0.177, train_loss: 2.174, val_acc: 0.175, val_loss: 2.153
+Fold 1 | Epoch 11 - train_acc: 0.178, train_loss: 2.171, val_acc: 0.175, val_loss: 2.153
+Fold 1 | Epoch 12 - train_acc: 0.178, train_loss: 2.167, val_acc: 0.175, val_loss: 2.158
+Fold 1 | Epoch 13 - train_acc: 0.179, train_loss: 2.164, val_acc: 0.175, val_loss: 2.163
+Epoch 00014: reducing learning rate of group 0 to 4.0000e-05.
+Fold 1 | Epoch 14 - train_acc: 0.180, train_loss: 2.160, val_acc: 0.175, val_loss: 2.165
+Fold 1 | Epoch 15 - train_acc: 0.180, train_loss: 2.157, val_acc: 0.175, val_loss: 2.164
+Fold 1 | Epoch 16 - train_acc: 0.181, train_loss: 2.154, val_acc: 0.175, val_loss: 2.172
+Fold 1 | Epoch 17 - train_acc: 0.182, train_loss: 2.152, val_acc: 0.175, val_loss: 2.197
+Fold 1 | Epoch 18 - train_acc: 0.184, train_loss: 2.149, val_acc: 0.175, val_loss: 2.438
+Fold 1 | Epoch 19 - train_acc: 0.184, train_loss: 2.147, val_acc: 0.175, val_loss: 3.452
+Fold 1 | Epoch 20 - train_acc: 0.186, train_loss: 2.145, val_acc: 0.175, val_loss: 5.036
+Fold 1 | Epoch 21 - train_acc: 0.186, train_loss: 2.143, val_acc: 0.175, val_loss: 6.475
+Fold 1 | Epoch 22 - train_acc: 0.186, train_loss: 2.141, val_acc: 0.175, val_loss: 7.996
+Fold 1 | Epoch 23 - train_acc: 0.188, train_loss: 2.139, val_acc: 0.175, val_loss: 8.226
+Fold 1 | Epoch 24 - train_acc: 0.186, train_loss: 2.137, val_acc: 0.175, val_loss: 9.679
+Epoch 00025: reducing learning rate of group 0 to 3.2000e-05.
+Fold 1 | Epoch 25 - train_acc: 0.184, train_loss: 2.136, val_acc: 0.175, val_loss: 8.712
+Fold 1 | Epoch 26 - train_acc: 0.186, train_loss: 2.134, val_acc: 0.175, val_loss: 8.902
+Fold 1 | Epoch 27 - train_acc: 0.185, train_loss: 2.133, val_acc: 0.175, val_loss: 11.444
+Fold 1 | Epoch 28 - train_acc: 0.186, train_loss: 2.132, val_acc: 0.175, val_loss: 15.091
+Fold 1 | Epoch 29 - train_acc: 0.186, train_loss: 2.131, val_acc: 0.175, val_loss: 18.664
+Fold 1 | Epoch 30 - train_acc: 0.186, train_loss: 2.129, val_acc: 0.175, val_loss: 19.781
+Fold 1 | Epoch 31 - train_acc: 0.185, train_loss: 2.128, val_acc: 0.175, val_loss: 20.030
+Fold 1 | Epoch 32 - train_acc: 0.184, train_loss: 2.127, val_acc: 0.175, val_loss: 19.377
+Fold 1 | Epoch 33 - train_acc: 0.185, train_loss: 2.126, val_acc: 0.175, val_loss: 14.890
+Fold 1 | Epoch 34 - train_acc: 0.185, train_loss: 2.125, val_acc: 0.175, val_loss: 12.409
+Fold 1 | Epoch 35 - train_acc: 0.186, train_loss: 2.124, val_acc: 0.175, val_loss: 11.115
+Epoch 00036: reducing learning rate of group 0 to 2.5600e-05.
+Fold 1 | Epoch 36 - train_acc: 0.185, train_loss: 2.123, val_acc: 0.175, val_loss: 12.677
+Fold 1 | Epoch 37 - train_acc: 0.186, train_loss: 2.122, val_acc: 0.175, val_loss: 11.433
+Fold 1 | Epoch 38 - train_acc: 0.186, train_loss: 2.122, val_acc: 0.175, val_loss: 9.985
+Fold 1 | Epoch 39 - train_acc: 0.186, train_loss: 2.121, val_acc: 0.175, val_loss: 12.621
+Fold 1 | Epoch 40 - train_acc: 0.186, train_loss: 2.120, val_acc: 0.175, val_loss: 12.296
+Fold 1 | Epoch 41 - train_acc: 0.187, train_loss: 2.119, val_acc: 0.175, val_loss: 10.704
+Fold 1 | Epoch 42 - train_acc: 0.188, train_loss: 2.119, val_acc: 0.175, val_loss: 10.066
+Fold 1 | Epoch 43 - train_acc: 0.187, train_loss: 2.118, val_acc: 0.175, val_loss: 9.373
+Fold 1 | Epoch 44 - train_acc: 0.188, train_loss: 2.117, val_acc: 0.175, val_loss: 10.224
+Fold 1 | Epoch 45 - train_acc: 0.187, train_loss: 2.116, val_acc: 0.175, val_loss: 11.548
+Fold 1 | Epoch 46 - train_acc: 0.189, train_loss: 2.116, val_acc: 0.175, val_loss: 10.251
+Epoch 00047: reducing learning rate of group 0 to 2.0480e-05.
+Fold 1 | Epoch 47 - train_acc: 0.190, train_loss: 2.115, val_acc: 0.175, val_loss: 6.106
+Fold 1 | Epoch 48 - train_acc: 0.192, train_loss: 2.114, val_acc: 0.175, val_loss: 8.511
+Fold 1 | Epoch 49 - train_acc: 0.192, train_loss: 2.114, val_acc: 0.175, val_loss: 10.932
+Fold 1 | Epoch 50 - train_acc: 0.192, train_loss: 2.113, val_acc: 0.175, val_loss: 11.183
+Fold 1 | Epoch 51 - train_acc: 0.195, train_loss: 2.112, val_acc: 0.175, val_loss: 7.159
+Fold 1 | Epoch 52 - train_acc: 0.193, train_loss: 2.112, val_acc: 0.175, val_loss: 8.374
+Fold 1 | Epoch 53 - train_acc: 0.195, train_loss: 2.111, val_acc: 0.175, val_loss: 8.312
+Fold 1 | Epoch 54 - train_acc: 0.197, train_loss: 2.111, val_acc: 0.175, val_loss: 4.910
+Fold 1 | Epoch 55 - train_acc: 0.197, train_loss: 2.110, val_acc: 0.175, val_loss: 3.146
+Fold 1 | Epoch 56 - train_acc: 0.197, train_loss: 2.109, val_acc: 0.175, val_loss: 2.596
+Fold 1 | Epoch 57 - train_acc: 0.197, train_loss: 2.109, val_acc: 0.175, val_loss: 4.870
+Epoch 00058: reducing learning rate of group 0 to 1.6384e-05.
+Fold 1 | Epoch 58 - train_acc: 0.197, train_loss: 2.108, val_acc: 0.175, val_loss: 7.973
+Fold 1 | Epoch 59 - train_acc: 0.197, train_loss: 2.108, val_acc: 0.175, val_loss: 10.309
+Fold 1 | Epoch 60 - train_acc: 0.198, train_loss: 2.107, val_acc: 0.175, val_loss: 10.358
+Fold 1 | Epoch 61 - train_acc: 0.199, train_loss: 2.107, val_acc: 0.175, val_loss: 8.633
+Fold 1 | Epoch 62 - train_acc: 0.200, train_loss: 2.106, val_acc: 0.175, val_loss: 6.332
+Fold 1 | Epoch 63 - train_acc: 0.198, train_loss: 2.106, val_acc: 0.175, val_loss: 4.929
+Fold 1 | Epoch 64 - train_acc: 0.199, train_loss: 2.105, val_acc: 0.175, val_loss: 3.390
+Fold 1 | Epoch 65 - train_acc: 0.197, train_loss: 2.105, val_acc: 0.175, val_loss: 3.502
+Fold 1 | Epoch 66 - train_acc: 0.199, train_loss: 2.104, val_acc: 0.177, val_loss: 2.519
+Fold 1 | Epoch 67 - train_acc: 0.201, train_loss: 2.104, val_acc: 0.105, val_loss: 2.506
+Fold 1 | Epoch 68 - train_acc: 0.199, train_loss: 2.103, val_acc: 0.075, val_loss: 3.426
+Fold 1 | Epoch 69 - train_acc: 0.200, train_loss: 2.103, val_acc: 0.075, val_loss: 4.666
+Fold 1 | Epoch 70 - train_acc: 0.200, train_loss: 2.102, val_acc: 0.075, val_loss: 5.032
+Fold 1 | Epoch 71 - train_acc: 0.199, train_loss: 2.102, val_acc: 0.075, val_loss: 5.043
+Fold 1 | Epoch 72 - train_acc: 0.200, train_loss: 2.101, val_acc: 0.075, val_loss: 5.637
+Fold 1 | Epoch 73 - train_acc: 0.199, train_loss: 2.101, val_acc: 0.075, val_loss: 6.690
+Fold 1 | Epoch 74 - train_acc: 0.200, train_loss: 2.100, val_acc: 0.075, val_loss: 7.754
+Fold 1 | Epoch 75 - train_acc: 0.202, train_loss: 2.100, val_acc: 0.075, val_loss: 7.253
+Fold 1 | Epoch 76 - train_acc: 0.200, train_loss: 2.099, val_acc: 0.075, val_loss: 6.042
+Epoch 00077: reducing learning rate of group 0 to 1.3107e-05.
+Fold 1 | Epoch 77 - train_acc: 0.200, train_loss: 2.099, val_acc: 0.075, val_loss: 4.191
+Fold 1 | Epoch 78 - train_acc: 0.199, train_loss: 2.098, val_acc: 0.102, val_loss: 2.940
+Fold 1 | Epoch 79 - train_acc: 0.201, train_loss: 2.098, val_acc: 0.110, val_loss: 2.245
+Fold 1 | Epoch 80 - train_acc: 0.203, train_loss: 2.098, val_acc: 0.160, val_loss: 2.322
+Fold 1 | Epoch 81 - train_acc: 0.203, train_loss: 2.097, val_acc: 0.175, val_loss: 3.866
+Fold 1 | Epoch 82 - train_acc: 0.201, train_loss: 2.097, val_acc: 0.175, val_loss: 8.312
+Fold 1 | Epoch 83 - train_acc: 0.203, train_loss: 2.096, val_acc: 0.175, val_loss: 7.111
+Fold 1 | Epoch 84 - train_acc: 0.203, train_loss: 2.096, val_acc: 0.175, val_loss: 6.537
+Fold 1 | Epoch 85 - train_acc: 0.202, train_loss: 2.096, val_acc: 0.175, val_loss: 5.517
+Fold 1 | Epoch 86 - train_acc: 0.203, train_loss: 2.095, val_acc: 0.175, val_loss: 3.221
+Fold 1 | Epoch 87 - train_acc: 0.203, train_loss: 2.095, val_acc: 0.182, val_loss: 2.188
+Fold 1 | Epoch 88 - train_acc: 0.203, train_loss: 2.095, val_acc: 0.083, val_loss: 2.400
+Fold 1 | Epoch 89 - train_acc: 0.203, train_loss: 2.094, val_acc: 0.075, val_loss: 2.574
+Fold 1 | Epoch 90 - train_acc: 0.203, train_loss: 2.094, val_acc: 0.075, val_loss: 2.847
+Fold 1 | Epoch 91 - train_acc: 0.203, train_loss: 2.093, val_acc: 0.075, val_loss: 4.295
+Fold 1 | Epoch 92 - train_acc: 0.205, train_loss: 2.093, val_acc: 0.075, val_loss: 5.581
+Fold 1 | Epoch 93 - train_acc: 0.204, train_loss: 2.093, val_acc: 0.075, val_loss: 6.912
+Fold 1 | Epoch 94 - train_acc: 0.204, train_loss: 2.092, val_acc: 0.075, val_loss: 7.728
+Fold 1 | Epoch 95 - train_acc: 0.205, train_loss: 2.092, val_acc: 0.075, val_loss: 8.272
+Fold 1 | Epoch 96 - train_acc: 0.206, train_loss: 2.091, val_acc: 0.075, val_loss: 9.466
+Fold 1 | Epoch 97 - train_acc: 0.204, train_loss: 2.091, val_acc: 0.075, val_loss: 11.077
+Epoch 00098: reducing learning rate of group 0 to 1.0486e-05.
+Fold 1 | Epoch 98 - train_acc: 0.204, train_loss: 2.090, val_acc: 0.075, val_loss: 11.821
+Fold 1 | Epoch 99 - train_acc: 0.205, train_loss: 2.090, val_acc: 0.075, val_loss: 10.938
+Fold 1 | Epoch 100 - train_acc: 0.207, train_loss: 2.090, val_acc: 0.075, val_loss: 9.683
+Fold 1 | Epoch 101 - train_acc: 0.206, train_loss: 2.089, val_acc: 0.075, val_loss: 8.364
+Fold 1 | Epoch 102 - train_acc: 0.206, train_loss: 2.089, val_acc: 0.075, val_loss: 7.731
+Fold 1 | Epoch 103 - train_acc: 0.206, train_loss: 2.089, val_acc: 0.075, val_loss: 6.100
+Fold 1 | Epoch 104 - train_acc: 0.206, train_loss: 2.088, val_acc: 0.075, val_loss: 4.384
+Fold 1 | Epoch 105 - train_acc: 0.205, train_loss: 2.088, val_acc: 0.075, val_loss: 4.034
+Fold 1 | Epoch 106 - train_acc: 0.206, train_loss: 2.088, val_acc: 0.075, val_loss: 3.814
+Fold 1 | Epoch 107 - train_acc: 0.208, train_loss: 2.087, val_acc: 0.075, val_loss: 3.100
+Fold 1 | Epoch 108 - train_acc: 0.207, train_loss: 2.087, val_acc: 0.075, val_loss: 3.419
+Epoch 00109: reducing learning rate of group 0 to 8.3886e-06.
+Fold 1 | Epoch 109 - train_acc: 0.207, train_loss: 2.087, val_acc: 0.080, val_loss: 2.587
+Fold 1 | Epoch 110 - train_acc: 0.208, train_loss: 2.087, val_acc: 0.095, val_loss: 2.256
+Fold 1 | Epoch 111 - train_acc: 0.206, train_loss: 2.086, val_acc: 0.087, val_loss: 2.232
+Fold 1 | Epoch 112 - train_acc: 0.207, train_loss: 2.086, val_acc: 0.180, val_loss: 2.250
+Fold 1 | Epoch 113 - train_acc: 0.206, train_loss: 2.086, val_acc: 0.175, val_loss: 3.008
+Fold 1 | Epoch 114 - train_acc: 0.208, train_loss: 2.085, val_acc: 0.182, val_loss: 2.390
+Fold 1 | Epoch 115 - train_acc: 0.208, train_loss: 2.085, val_acc: 0.172, val_loss: 2.174
+Fold 1 | Epoch 116 - train_acc: 0.208, train_loss: 2.085, val_acc: 0.175, val_loss: 2.962
+Fold 1 | Epoch 117 - train_acc: 0.206, train_loss: 2.085, val_acc: 0.180, val_loss: 2.348
+Fold 1 | Epoch 118 - train_acc: 0.209, train_loss: 2.084, val_acc: 0.185, val_loss: 2.222
+Fold 1 | Epoch 119 - train_acc: 0.208, train_loss: 2.084, val_acc: 0.117, val_loss: 2.193
+Fold 1 | Epoch 120 - train_acc: 0.210, train_loss: 2.084, val_acc: 0.098, val_loss: 2.297
+Fold 1 | Epoch 121 - train_acc: 0.208, train_loss: 2.083, val_acc: 0.087, val_loss: 2.489
+Fold 1 | Epoch 122 - train_acc: 0.207, train_loss: 2.083, val_acc: 0.077, val_loss: 2.765
+Fold 1 | Epoch 123 - train_acc: 0.209, train_loss: 2.083, val_acc: 0.117, val_loss: 2.247
+Fold 1 | Epoch 124 - train_acc: 0.209, train_loss: 2.083, val_acc: 0.188, val_loss: 2.168
+Fold 1 | Epoch 125 - train_acc: 0.209, train_loss: 2.083, val_acc: 0.188, val_loss: 2.256
+Fold 1 | Epoch 126 - train_acc: 0.209, train_loss: 2.082, val_acc: 0.195, val_loss: 2.208
+Fold 1 | Epoch 127 - train_acc: 0.209, train_loss: 2.082, val_acc: 0.087, val_loss: 2.282
+Fold 1 | Epoch 128 - train_acc: 0.207, train_loss: 2.082, val_acc: 0.075, val_loss: 2.764
+Fold 1 | Epoch 129 - train_acc: 0.209, train_loss: 2.081, val_acc: 0.075, val_loss: 3.179
+Fold 1 | Epoch 130 - train_acc: 0.209, train_loss: 2.081, val_acc: 0.075, val_loss: 3.202
+Fold 1 | Epoch 131 - train_acc: 0.210, train_loss: 2.081, val_acc: 0.075, val_loss: 3.569
+Fold 1 | Epoch 132 - train_acc: 0.211, train_loss: 2.081, val_acc: 0.075, val_loss: 3.438
+Fold 1 | Epoch 133 - train_acc: 0.209, train_loss: 2.080, val_acc: 0.075, val_loss: 3.171
+Fold 1 | Epoch 134 - train_acc: 0.211, train_loss: 2.080, val_acc: 0.075, val_loss: 2.827
+Fold 1 | Epoch 135 - train_acc: 0.212, train_loss: 2.080, val_acc: 0.077, val_loss: 2.596
+Fold 1 | Epoch 136 - train_acc: 0.212, train_loss: 2.079, val_acc: 0.075, val_loss: 3.008
+Epoch 00137: reducing learning rate of group 0 to 6.7109e-06.
+Fold 1 | Epoch 137 - train_acc: 0.214, train_loss: 2.079, val_acc: 0.075, val_loss: 4.424
+Fold 1 | Epoch 138 - train_acc: 0.213, train_loss: 2.079, val_acc: 0.075, val_loss: 4.473
+Fold 1 | Epoch 139 - train_acc: 0.213, train_loss: 2.079, val_acc: 0.075, val_loss: 4.630
+Fold 1 | Epoch 140 - train_acc: 0.213, train_loss: 2.079, val_acc: 0.075, val_loss: 5.035
+Fold 1 | Epoch 141 - train_acc: 0.213, train_loss: 2.078, val_acc: 0.075, val_loss: 4.685
+Fold 1 | Epoch 142 - train_acc: 0.215, train_loss: 2.078, val_acc: 0.075, val_loss: 4.041
+Fold 1 | Epoch 143 - train_acc: 0.214, train_loss: 2.078, val_acc: 0.075, val_loss: 3.548
+Fold 1 | Epoch 144 - train_acc: 0.215, train_loss: 2.078, val_acc: 0.075, val_loss: 2.984
+Fold 1 | Epoch 145 - train_acc: 0.216, train_loss: 2.077, val_acc: 0.080, val_loss: 2.539
+Fold 1 | Epoch 146 - train_acc: 0.213, train_loss: 2.077, val_acc: 0.077, val_loss: 2.510
+Fold 1 | Epoch 147 - train_acc: 0.217, train_loss: 2.077, val_acc: 0.080, val_loss: 2.436
+Epoch 00148: reducing learning rate of group 0 to 5.3687e-06.
+Fold 1 | Epoch 148 - train_acc: 0.215, train_loss: 2.077, val_acc: 0.085, val_loss: 2.321
+Fold 1 | Epoch 149 - train_acc: 0.214, train_loss: 2.077, val_acc: 0.182, val_loss: 2.189
+Fold 1 | Epoch 150 - train_acc: 0.216, train_loss: 2.076, val_acc: 0.182, val_loss: 2.506
+[sub3-Fold1] BEST test_acc=0.170
+Confusion matrix:
+ [[58  0  2  2  0  0  8  0  0]
+ [31  0  0  2  0  0  7  0  0]
+ [27  0  0  0  0  0  3  0  0]
+ [32  0  0  0  0  0  8  0  0]
+ [25  0  0  0  0  0  5  0  0]
+ [49  0  0  0  0  0 11  0  0]
+ [40  0  0  0  0  0 10  0  0]
+ [27  0  0  0  0  0  3  0  0]
+ [47  0  0  0  0  0  3  0  0]]
+Fold 2 | Epoch 01 - train_acc: 0.101, train_loss: 2.195, val_acc: 0.125, val_loss: 2.192
+Fold 2 | Epoch 02 - train_acc: 0.104, train_loss: 2.193, val_acc: 0.138, val_loss: 2.189
+Fold 2 | Epoch 03 - train_acc: 0.119, train_loss: 2.191, val_acc: 0.188, val_loss: 2.187
+Fold 2 | Epoch 04 - train_acc: 0.136, train_loss: 2.189, val_acc: 0.185, val_loss: 2.184
+Fold 2 | Epoch 05 - train_acc: 0.173, train_loss: 2.187, val_acc: 0.175, val_loss: 2.180
+Fold 2 | Epoch 06 - train_acc: 0.177, train_loss: 2.185, val_acc: 0.175, val_loss: 2.176
+Fold 2 | Epoch 07 - train_acc: 0.182, train_loss: 2.182, val_acc: 0.175, val_loss: 2.170
+Fold 2 | Epoch 08 - train_acc: 0.185, train_loss: 2.180, val_acc: 0.175, val_loss: 2.163
+Fold 2 | Epoch 09 - train_acc: 0.190, train_loss: 2.177, val_acc: 0.175, val_loss: 2.157
+Fold 2 | Epoch 10 - train_acc: 0.184, train_loss: 2.175, val_acc: 0.175, val_loss: 2.148
+Fold 2 | Epoch 11 - train_acc: 0.181, train_loss: 2.172, val_acc: 0.175, val_loss: 2.145
+Fold 2 | Epoch 12 - train_acc: 0.180, train_loss: 2.168, val_acc: 0.175, val_loss: 2.170
+Fold 2 | Epoch 13 - train_acc: 0.176, train_loss: 2.165, val_acc: 0.175, val_loss: 2.277
+Epoch 00014: reducing learning rate of group 0 to 4.0000e-05.
+Fold 2 | Epoch 14 - train_acc: 0.175, train_loss: 2.161, val_acc: 0.175, val_loss: 2.572
+Fold 2 | Epoch 15 - train_acc: 0.175, train_loss: 2.158, val_acc: 0.175, val_loss: 2.912
+Fold 2 | Epoch 16 - train_acc: 0.175, train_loss: 2.155, val_acc: 0.175, val_loss: 3.172
+Fold 2 | Epoch 17 - train_acc: 0.175, train_loss: 2.152, val_acc: 0.175, val_loss: 3.631
+Fold 2 | Epoch 18 - train_acc: 0.175, train_loss: 2.150, val_acc: 0.175, val_loss: 4.218
+Fold 2 | Epoch 19 - train_acc: 0.175, train_loss: 2.147, val_acc: 0.175, val_loss: 5.423
+Fold 2 | Epoch 20 - train_acc: 0.175, train_loss: 2.145, val_acc: 0.175, val_loss: 6.462
+Fold 2 | Epoch 21 - train_acc: 0.175, train_loss: 2.143, val_acc: 0.175, val_loss: 8.194
+Fold 2 | Epoch 22 - train_acc: 0.175, train_loss: 2.141, val_acc: 0.175, val_loss: 10.200
+Fold 2 | Epoch 23 - train_acc: 0.176, train_loss: 2.140, val_acc: 0.175, val_loss: 11.107
+Fold 2 | Epoch 24 - train_acc: 0.177, train_loss: 2.138, val_acc: 0.175, val_loss: 12.714
+Epoch 00025: reducing learning rate of group 0 to 3.2000e-05.
+Fold 2 | Epoch 25 - train_acc: 0.179, train_loss: 2.137, val_acc: 0.175, val_loss: 15.362
+Fold 2 | Epoch 26 - train_acc: 0.180, train_loss: 2.135, val_acc: 0.175, val_loss: 20.065
+Fold 2 | Epoch 27 - train_acc: 0.183, train_loss: 2.134, val_acc: 0.175, val_loss: 23.927
+Fold 2 | Epoch 28 - train_acc: 0.189, train_loss: 2.133, val_acc: 0.175, val_loss: 27.022
+Fold 2 | Epoch 29 - train_acc: 0.188, train_loss: 2.132, val_acc: 0.175, val_loss: 29.832
+Fold 2 | Epoch 30 - train_acc: 0.188, train_loss: 2.131, val_acc: 0.175, val_loss: 32.998
+Fold 2 | Epoch 31 - train_acc: 0.190, train_loss: 2.130, val_acc: 0.175, val_loss: 32.363
+Fold 2 | Epoch 32 - train_acc: 0.190, train_loss: 2.129, val_acc: 0.175, val_loss: 32.331
+Fold 2 | Epoch 33 - train_acc: 0.189, train_loss: 2.127, val_acc: 0.175, val_loss: 32.072
+Fold 2 | Epoch 34 - train_acc: 0.191, train_loss: 2.126, val_acc: 0.175, val_loss: 30.015
+Fold 2 | Epoch 35 - train_acc: 0.190, train_loss: 2.125, val_acc: 0.175, val_loss: 31.817
+Epoch 00036: reducing learning rate of group 0 to 2.5600e-05.
+Fold 2 | Epoch 36 - train_acc: 0.194, train_loss: 2.124, val_acc: 0.175, val_loss: 31.253
+Fold 2 | Epoch 37 - train_acc: 0.194, train_loss: 2.123, val_acc: 0.175, val_loss: 26.972
+Fold 2 | Epoch 38 - train_acc: 0.193, train_loss: 2.123, val_acc: 0.175, val_loss: 26.281
+Fold 2 | Epoch 39 - train_acc: 0.193, train_loss: 2.122, val_acc: 0.175, val_loss: 23.370
+Fold 2 | Epoch 40 - train_acc: 0.194, train_loss: 2.121, val_acc: 0.175, val_loss: 23.424
+Fold 2 | Epoch 41 - train_acc: 0.194, train_loss: 2.120, val_acc: 0.175, val_loss: 22.479
+Fold 2 | Epoch 42 - train_acc: 0.196, train_loss: 2.120, val_acc: 0.175, val_loss: 16.986
+Fold 2 | Epoch 43 - train_acc: 0.197, train_loss: 2.119, val_acc: 0.175, val_loss: 12.835
+Fold 2 | Epoch 44 - train_acc: 0.198, train_loss: 2.118, val_acc: 0.175, val_loss: 11.509
+Fold 2 | Epoch 45 - train_acc: 0.198, train_loss: 2.117, val_acc: 0.175, val_loss: 12.383
+Fold 2 | Epoch 46 - train_acc: 0.201, train_loss: 2.117, val_acc: 0.175, val_loss: 14.113
+Epoch 00047: reducing learning rate of group 0 to 2.0480e-05.
+Fold 2 | Epoch 47 - train_acc: 0.200, train_loss: 2.116, val_acc: 0.175, val_loss: 13.832
+Fold 2 | Epoch 48 - train_acc: 0.200, train_loss: 2.115, val_acc: 0.175, val_loss: 13.756
+Fold 2 | Epoch 49 - train_acc: 0.200, train_loss: 2.115, val_acc: 0.175, val_loss: 13.934
+Fold 2 | Epoch 50 - train_acc: 0.200, train_loss: 2.114, val_acc: 0.175, val_loss: 13.085
+Fold 2 | Epoch 51 - train_acc: 0.199, train_loss: 2.113, val_acc: 0.175, val_loss: 13.804
+Fold 2 | Epoch 52 - train_acc: 0.199, train_loss: 2.113, val_acc: 0.175, val_loss: 13.305
+Fold 2 | Epoch 53 - train_acc: 0.199, train_loss: 2.112, val_acc: 0.175, val_loss: 9.103
+Fold 2 | Epoch 54 - train_acc: 0.198, train_loss: 2.111, val_acc: 0.175, val_loss: 4.298
+Fold 2 | Epoch 55 - train_acc: 0.200, train_loss: 2.111, val_acc: 0.175, val_loss: 3.872
+Fold 2 | Epoch 56 - train_acc: 0.200, train_loss: 2.110, val_acc: 0.175, val_loss: 3.641
+Fold 2 | Epoch 57 - train_acc: 0.200, train_loss: 2.110, val_acc: 0.175, val_loss: 3.888
+Epoch 00058: reducing learning rate of group 0 to 1.6384e-05.
+Fold 2 | Epoch 58 - train_acc: 0.201, train_loss: 2.109, val_acc: 0.175, val_loss: 4.407
+Fold 2 | Epoch 59 - train_acc: 0.202, train_loss: 2.108, val_acc: 0.175, val_loss: 4.443
+Fold 2 | Epoch 60 - train_acc: 0.201, train_loss: 2.108, val_acc: 0.175, val_loss: 3.364
+Fold 2 | Epoch 61 - train_acc: 0.201, train_loss: 2.108, val_acc: 0.180, val_loss: 2.464
+Fold 2 | Epoch 62 - train_acc: 0.202, train_loss: 2.107, val_acc: 0.180, val_loss: 2.151
+Fold 2 | Epoch 63 - train_acc: 0.204, train_loss: 2.107, val_acc: 0.175, val_loss: 2.199
+Fold 2 | Epoch 64 - train_acc: 0.203, train_loss: 2.106, val_acc: 0.175, val_loss: 3.306
+Fold 2 | Epoch 65 - train_acc: 0.204, train_loss: 2.106, val_acc: 0.175, val_loss: 3.747
+Fold 2 | Epoch 66 - train_acc: 0.203, train_loss: 2.105, val_acc: 0.175, val_loss: 8.196
+Fold 2 | Epoch 67 - train_acc: 0.202, train_loss: 2.105, val_acc: 0.175, val_loss: 12.076
+Fold 2 | Epoch 68 - train_acc: 0.201, train_loss: 2.104, val_acc: 0.175, val_loss: 14.655
+Epoch 00069: reducing learning rate of group 0 to 1.3107e-05.
+Fold 2 | Epoch 69 - train_acc: 0.203, train_loss: 2.104, val_acc: 0.175, val_loss: 12.840
+Fold 2 | Epoch 70 - train_acc: 0.203, train_loss: 2.103, val_acc: 0.175, val_loss: 11.819
+Fold 2 | Epoch 71 - train_acc: 0.205, train_loss: 2.103, val_acc: 0.175, val_loss: 11.680
+Fold 2 | Epoch 72 - train_acc: 0.205, train_loss: 2.103, val_acc: 0.175, val_loss: 11.390
+Fold 2 | Epoch 73 - train_acc: 0.204, train_loss: 2.102, val_acc: 0.175, val_loss: 10.760
+Fold 2 | Epoch 74 - train_acc: 0.204, train_loss: 2.102, val_acc: 0.175, val_loss: 9.785
+Fold 2 | Epoch 75 - train_acc: 0.204, train_loss: 2.102, val_acc: 0.175, val_loss: 8.272
+Fold 2 | Epoch 76 - train_acc: 0.203, train_loss: 2.101, val_acc: 0.175, val_loss: 8.418
+Fold 2 | Epoch 77 - train_acc: 0.203, train_loss: 2.101, val_acc: 0.175, val_loss: 9.472
+Fold 2 | Epoch 78 - train_acc: 0.204, train_loss: 2.101, val_acc: 0.175, val_loss: 9.347
+Fold 2 | Epoch 79 - train_acc: 0.204, train_loss: 2.100, val_acc: 0.175, val_loss: 10.384
+Epoch 00080: reducing learning rate of group 0 to 1.0486e-05.
+Fold 2 | Epoch 80 - train_acc: 0.204, train_loss: 2.100, val_acc: 0.175, val_loss: 9.521
+Fold 2 | Epoch 81 - train_acc: 0.205, train_loss: 2.099, val_acc: 0.175, val_loss: 7.852
+Fold 2 | Epoch 82 - train_acc: 0.205, train_loss: 2.099, val_acc: 0.175, val_loss: 7.820
+Fold 2 | Epoch 83 - train_acc: 0.205, train_loss: 2.099, val_acc: 0.175, val_loss: 6.676
+Fold 2 | Epoch 84 - train_acc: 0.205, train_loss: 2.099, val_acc: 0.175, val_loss: 5.458
+Fold 2 | Epoch 85 - train_acc: 0.205, train_loss: 2.098, val_acc: 0.175, val_loss: 4.991
+Fold 2 | Epoch 86 - train_acc: 0.205, train_loss: 2.098, val_acc: 0.175, val_loss: 4.254
+Fold 2 | Epoch 87 - train_acc: 0.205, train_loss: 2.098, val_acc: 0.175, val_loss: 4.053
+Fold 2 | Epoch 88 - train_acc: 0.207, train_loss: 2.097, val_acc: 0.175, val_loss: 3.800
+Fold 2 | Epoch 89 - train_acc: 0.207, train_loss: 2.097, val_acc: 0.175, val_loss: 4.529
+Fold 2 | Epoch 90 - train_acc: 0.206, train_loss: 2.097, val_acc: 0.175, val_loss: 5.441
+Epoch 00091: reducing learning rate of group 0 to 8.3886e-06.
+Fold 2 | Epoch 91 - train_acc: 0.205, train_loss: 2.097, val_acc: 0.175, val_loss: 7.035
+Fold 2 | Epoch 92 - train_acc: 0.204, train_loss: 2.096, val_acc: 0.175, val_loss: 7.255
+Fold 2 | Epoch 93 - train_acc: 0.203, train_loss: 2.096, val_acc: 0.175, val_loss: 7.698
+Fold 2 | Epoch 94 - train_acc: 0.203, train_loss: 2.096, val_acc: 0.175, val_loss: 6.767
+Fold 2 | Epoch 95 - train_acc: 0.204, train_loss: 2.095, val_acc: 0.175, val_loss: 5.916
+Fold 2 | Epoch 96 - train_acc: 0.206, train_loss: 2.095, val_acc: 0.175, val_loss: 5.549
+Fold 2 | Epoch 97 - train_acc: 0.203, train_loss: 2.095, val_acc: 0.175, val_loss: 5.759
+Fold 2 | Epoch 98 - train_acc: 0.205, train_loss: 2.095, val_acc: 0.175, val_loss: 5.001
+Fold 2 | Epoch 99 - train_acc: 0.205, train_loss: 2.095, val_acc: 0.175, val_loss: 4.335
+Fold 2 | Epoch 100 - train_acc: 0.204, train_loss: 2.094, val_acc: 0.175, val_loss: 3.661
+Fold 2 | Epoch 101 - train_acc: 0.205, train_loss: 2.094, val_acc: 0.175, val_loss: 4.444
+Epoch 00102: reducing learning rate of group 0 to 6.7109e-06.
+Fold 2 | Epoch 102 - train_acc: 0.204, train_loss: 2.094, val_acc: 0.175, val_loss: 6.327
+Fold 2 | Epoch 103 - train_acc: 0.205, train_loss: 2.094, val_acc: 0.175, val_loss: 6.011
+Fold 2 | Epoch 104 - train_acc: 0.207, train_loss: 2.093, val_acc: 0.175, val_loss: 5.580
+Fold 2 | Epoch 105 - train_acc: 0.206, train_loss: 2.093, val_acc: 0.175, val_loss: 5.187
+Fold 2 | Epoch 106 - train_acc: 0.208, train_loss: 2.093, val_acc: 0.175, val_loss: 5.126
+Fold 2 | Epoch 107 - train_acc: 0.205, train_loss: 2.093, val_acc: 0.175, val_loss: 5.042
+Fold 2 | Epoch 108 - train_acc: 0.207, train_loss: 2.093, val_acc: 0.175, val_loss: 3.958
+Fold 2 | Epoch 109 - train_acc: 0.207, train_loss: 2.092, val_acc: 0.175, val_loss: 2.941
+Fold 2 | Epoch 110 - train_acc: 0.208, train_loss: 2.092, val_acc: 0.175, val_loss: 2.696
+Fold 2 | Epoch 111 - train_acc: 0.209, train_loss: 2.092, val_acc: 0.185, val_loss: 2.414
+Fold 2 | Epoch 112 - train_acc: 0.208, train_loss: 2.092, val_acc: 0.180, val_loss: 2.586
+Epoch 00113: reducing learning rate of group 0 to 5.3687e-06.
+Fold 2 | Epoch 113 - train_acc: 0.206, train_loss: 2.092, val_acc: 0.175, val_loss: 2.997
+Fold 2 | Epoch 114 - train_acc: 0.210, train_loss: 2.091, val_acc: 0.175, val_loss: 3.981
+Fold 2 | Epoch 115 - train_acc: 0.208, train_loss: 2.091, val_acc: 0.175, val_loss: 3.491
+Fold 2 | Epoch 116 - train_acc: 0.209, train_loss: 2.091, val_acc: 0.175, val_loss: 3.259
+Fold 2 | Epoch 117 - train_acc: 0.209, train_loss: 2.091, val_acc: 0.177, val_loss: 2.716
+Fold 2 | Epoch 118 - train_acc: 0.210, train_loss: 2.091, val_acc: 0.175, val_loss: 3.058
+Fold 2 | Epoch 119 - train_acc: 0.211, train_loss: 2.091, val_acc: 0.175, val_loss: 2.918
+Fold 2 | Epoch 120 - train_acc: 0.209, train_loss: 2.091, val_acc: 0.175, val_loss: 2.877
+Fold 2 | Epoch 121 - train_acc: 0.208, train_loss: 2.091, val_acc: 0.175, val_loss: 3.536
+Fold 2 | Epoch 122 - train_acc: 0.209, train_loss: 2.090, val_acc: 0.175, val_loss: 2.917
+Fold 2 | Epoch 123 - train_acc: 0.210, train_loss: 2.090, val_acc: 0.175, val_loss: 2.703
+Epoch 00124: reducing learning rate of group 0 to 4.2950e-06.
+Fold 2 | Epoch 124 - train_acc: 0.210, train_loss: 2.090, val_acc: 0.175, val_loss: 2.778
+Fold 2 | Epoch 125 - train_acc: 0.211, train_loss: 2.090, val_acc: 0.175, val_loss: 3.085
+Fold 2 | Epoch 126 - train_acc: 0.210, train_loss: 2.090, val_acc: 0.175, val_loss: 3.586
+Fold 2 | Epoch 127 - train_acc: 0.210, train_loss: 2.090, val_acc: 0.175, val_loss: 3.904
+Fold 2 | Epoch 128 - train_acc: 0.212, train_loss: 2.089, val_acc: 0.175, val_loss: 4.231
+Fold 2 | Epoch 129 - train_acc: 0.210, train_loss: 2.089, val_acc: 0.175, val_loss: 4.213
+Fold 2 | Epoch 130 - train_acc: 0.210, train_loss: 2.089, val_acc: 0.175, val_loss: 4.724
+Fold 2 | Epoch 131 - train_acc: 0.209, train_loss: 2.089, val_acc: 0.175, val_loss: 5.315
+Fold 2 | Epoch 132 - train_acc: 0.211, train_loss: 2.089, val_acc: 0.175, val_loss: 5.881
+Fold 2 | Epoch 133 - train_acc: 0.210, train_loss: 2.089, val_acc: 0.175, val_loss: 5.606
+Fold 2 | Epoch 134 - train_acc: 0.210, train_loss: 2.089, val_acc: 0.175, val_loss: 4.676
+Epoch 00135: reducing learning rate of group 0 to 3.4360e-06.
+Fold 2 | Epoch 135 - train_acc: 0.210, train_loss: 2.089, val_acc: 0.175, val_loss: 4.401
+Fold 2 | Epoch 136 - train_acc: 0.210, train_loss: 2.089, val_acc: 0.175, val_loss: 4.834
+Fold 2 | Epoch 137 - train_acc: 0.211, train_loss: 2.088, val_acc: 0.175, val_loss: 3.981
+Fold 2 | Epoch 138 - train_acc: 0.211, train_loss: 2.088, val_acc: 0.175, val_loss: 3.738
+Fold 2 | Epoch 139 - train_acc: 0.209, train_loss: 2.088, val_acc: 0.175, val_loss: 3.841
+Fold 2 | Epoch 140 - train_acc: 0.211, train_loss: 2.088, val_acc: 0.175, val_loss: 3.739
+Fold 2 | Epoch 141 - train_acc: 0.210, train_loss: 2.088, val_acc: 0.175, val_loss: 5.650
+Fold 2 | Epoch 142 - train_acc: 0.210, train_loss: 2.088, val_acc: 0.175, val_loss: 6.096
+Fold 2 | Epoch 143 - train_acc: 0.211, train_loss: 2.088, val_acc: 0.175, val_loss: 6.680
+Fold 2 | Epoch 144 - train_acc: 0.210, train_loss: 2.088, val_acc: 0.175, val_loss: 6.478
+Fold 2 | Epoch 145 - train_acc: 0.211, train_loss: 2.088, val_acc: 0.175, val_loss: 7.008
+Epoch 00146: reducing learning rate of group 0 to 2.7488e-06.
+Fold 2 | Epoch 146 - train_acc: 0.210, train_loss: 2.088, val_acc: 0.175, val_loss: 7.109
+Fold 2 | Epoch 147 - train_acc: 0.211, train_loss: 2.088, val_acc: 0.175, val_loss: 6.060
+Fold 2 | Epoch 148 - train_acc: 0.211, train_loss: 2.087, val_acc: 0.175, val_loss: 5.750
+Fold 2 | Epoch 149 - train_acc: 0.209, train_loss: 2.087, val_acc: 0.175, val_loss: 5.645
+Fold 2 | Epoch 150 - train_acc: 0.210, train_loss: 2.087, val_acc: 0.175, val_loss: 5.413
+[sub3-Fold2] BEST test_acc=0.130
+Confusion matrix:
+ [[12 20  0  0  0  0 16  0 22]
+ [ 9 13  0  0  0  0  9  0  9]
+ [ 8  7  0  0  0  0  7  0  8]
+ [ 7  9  0  0  0  0 15  0  9]
+ [ 5  6  0  0  0  0 18  0  1]
+ [17 14  0  0  0  0 14  0 15]
+ [ 8 13  0  0  0  0 17  0 12]
+ [ 6 17  0  0  0  0  3  0  4]
+ [ 9 18  0  0  0  0 13  0 10]]
+Fold 3 | Epoch 01 - train_acc: 0.128, train_loss: 2.199, val_acc: 0.117, val_loss: 2.196
+Fold 3 | Epoch 02 - train_acc: 0.132, train_loss: 2.196, val_acc: 0.113, val_loss: 2.194
+Fold 3 | Epoch 03 - train_acc: 0.140, train_loss: 2.194, val_acc: 0.102, val_loss: 2.192
+Fold 3 | Epoch 04 - train_acc: 0.146, train_loss: 2.191, val_acc: 0.107, val_loss: 2.189
+Fold 3 | Epoch 05 - train_acc: 0.153, train_loss: 2.189, val_acc: 0.102, val_loss: 2.186
+Fold 3 | Epoch 06 - train_acc: 0.160, train_loss: 2.186, val_acc: 0.120, val_loss: 2.182
+Fold 3 | Epoch 07 - train_acc: 0.156, train_loss: 2.184, val_acc: 0.147, val_loss: 2.177
+Fold 3 | Epoch 08 - train_acc: 0.158, train_loss: 2.181, val_acc: 0.170, val_loss: 2.171
+Fold 3 | Epoch 09 - train_acc: 0.163, train_loss: 2.178, val_acc: 0.165, val_loss: 2.166
+Fold 3 | Epoch 10 - train_acc: 0.165, train_loss: 2.174, val_acc: 0.172, val_loss: 2.160
+Fold 3 | Epoch 11 - train_acc: 0.172, train_loss: 2.171, val_acc: 0.175, val_loss: 2.156
+Fold 3 | Epoch 12 - train_acc: 0.172, train_loss: 2.167, val_acc: 0.175, val_loss: 2.157
+Fold 3 | Epoch 13 - train_acc: 0.171, train_loss: 2.163, val_acc: 0.175, val_loss: 2.165
+Fold 3 | Epoch 14 - train_acc: 0.175, train_loss: 2.159, val_acc: 0.175, val_loss: 2.194
+Fold 3 | Epoch 15 - train_acc: 0.176, train_loss: 2.155, val_acc: 0.175, val_loss: 2.253
+Fold 3 | Epoch 16 - train_acc: 0.176, train_loss: 2.151, val_acc: 0.175, val_loss: 2.376
+Fold 3 | Epoch 17 - train_acc: 0.179, train_loss: 2.148, val_acc: 0.175, val_loss: 2.618
+Fold 3 | Epoch 18 - train_acc: 0.181, train_loss: 2.145, val_acc: 0.175, val_loss: 3.342
+Fold 3 | Epoch 19 - train_acc: 0.184, train_loss: 2.142, val_acc: 0.175, val_loss: 4.299
+Fold 3 | Epoch 20 - train_acc: 0.185, train_loss: 2.140, val_acc: 0.175, val_loss: 5.864
+Fold 3 | Epoch 21 - train_acc: 0.183, train_loss: 2.138, val_acc: 0.175, val_loss: 7.660
+Epoch 00022: reducing learning rate of group 0 to 4.0000e-05.
+Fold 3 | Epoch 22 - train_acc: 0.183, train_loss: 2.136, val_acc: 0.175, val_loss: 9.452
+Fold 3 | Epoch 23 - train_acc: 0.187, train_loss: 2.134, val_acc: 0.175, val_loss: 9.516
+Fold 3 | Epoch 24 - train_acc: 0.187, train_loss: 2.132, val_acc: 0.175, val_loss: 10.670
+Fold 3 | Epoch 25 - train_acc: 0.189, train_loss: 2.131, val_acc: 0.175, val_loss: 12.398
+Fold 3 | Epoch 26 - train_acc: 0.185, train_loss: 2.129, val_acc: 0.175, val_loss: 14.942
+Fold 3 | Epoch 27 - train_acc: 0.184, train_loss: 2.128, val_acc: 0.175, val_loss: 16.685
+Fold 3 | Epoch 28 - train_acc: 0.183, train_loss: 2.127, val_acc: 0.175, val_loss: 15.877
+Fold 3 | Epoch 29 - train_acc: 0.184, train_loss: 2.126, val_acc: 0.175, val_loss: 15.799
+Fold 3 | Epoch 30 - train_acc: 0.189, train_loss: 2.125, val_acc: 0.175, val_loss: 13.772
+Fold 3 | Epoch 31 - train_acc: 0.189, train_loss: 2.123, val_acc: 0.175, val_loss: 14.977
+Fold 3 | Epoch 32 - train_acc: 0.189, train_loss: 2.122, val_acc: 0.175, val_loss: 16.727
+Epoch 00033: reducing learning rate of group 0 to 3.2000e-05.
+Fold 3 | Epoch 33 - train_acc: 0.191, train_loss: 2.121, val_acc: 0.175, val_loss: 16.691
+Fold 3 | Epoch 34 - train_acc: 0.192, train_loss: 2.120, val_acc: 0.175, val_loss: 17.624
+Fold 3 | Epoch 35 - train_acc: 0.190, train_loss: 2.119, val_acc: 0.175, val_loss: 20.965
+Fold 3 | Epoch 36 - train_acc: 0.190, train_loss: 2.118, val_acc: 0.175, val_loss: 24.442
+Fold 3 | Epoch 37 - train_acc: 0.190, train_loss: 2.117, val_acc: 0.175, val_loss: 26.751
+Fold 3 | Epoch 38 - train_acc: 0.190, train_loss: 2.116, val_acc: 0.175, val_loss: 29.312
+Fold 3 | Epoch 39 - train_acc: 0.189, train_loss: 2.115, val_acc: 0.175, val_loss: 27.371
+Fold 3 | Epoch 40 - train_acc: 0.191, train_loss: 2.114, val_acc: 0.175, val_loss: 25.810
+Fold 3 | Epoch 41 - train_acc: 0.194, train_loss: 2.113, val_acc: 0.175, val_loss: 22.427
+Fold 3 | Epoch 42 - train_acc: 0.193, train_loss: 2.112, val_acc: 0.175, val_loss: 16.859
+Fold 3 | Epoch 43 - train_acc: 0.194, train_loss: 2.112, val_acc: 0.175, val_loss: 17.340
+Epoch 00044: reducing learning rate of group 0 to 2.5600e-05.
+Fold 3 | Epoch 44 - train_acc: 0.193, train_loss: 2.111, val_acc: 0.175, val_loss: 19.347
+Fold 3 | Epoch 45 - train_acc: 0.194, train_loss: 2.110, val_acc: 0.175, val_loss: 17.633
+Fold 3 | Epoch 46 - train_acc: 0.195, train_loss: 2.109, val_acc: 0.175, val_loss: 16.623
+Fold 3 | Epoch 47 - train_acc: 0.196, train_loss: 2.108, val_acc: 0.175, val_loss: 16.022
+Fold 3 | Epoch 48 - train_acc: 0.196, train_loss: 2.108, val_acc: 0.175, val_loss: 13.344
+Fold 3 | Epoch 49 - train_acc: 0.196, train_loss: 2.107, val_acc: 0.175, val_loss: 7.928
+Fold 3 | Epoch 50 - train_acc: 0.196, train_loss: 2.106, val_acc: 0.175, val_loss: 7.032
+Fold 3 | Epoch 51 - train_acc: 0.198, train_loss: 2.105, val_acc: 0.175, val_loss: 5.732
+Fold 3 | Epoch 52 - train_acc: 0.197, train_loss: 2.105, val_acc: 0.175, val_loss: 6.892
+Fold 3 | Epoch 53 - train_acc: 0.197, train_loss: 2.104, val_acc: 0.175, val_loss: 4.962
+Fold 3 | Epoch 54 - train_acc: 0.200, train_loss: 2.103, val_acc: 0.075, val_loss: 4.853
+Epoch 00055: reducing learning rate of group 0 to 2.0480e-05.
+Fold 3 | Epoch 55 - train_acc: 0.202, train_loss: 2.102, val_acc: 0.075, val_loss: 7.541
+Fold 3 | Epoch 56 - train_acc: 0.201, train_loss: 2.102, val_acc: 0.075, val_loss: 6.552
+Fold 3 | Epoch 57 - train_acc: 0.201, train_loss: 2.101, val_acc: 0.075, val_loss: 4.454
+Fold 3 | Epoch 58 - train_acc: 0.201, train_loss: 2.101, val_acc: 0.083, val_loss: 2.963
+Fold 3 | Epoch 59 - train_acc: 0.201, train_loss: 2.100, val_acc: 0.087, val_loss: 3.125
+Fold 3 | Epoch 60 - train_acc: 0.202, train_loss: 2.099, val_acc: 0.075, val_loss: 4.244
+Fold 3 | Epoch 61 - train_acc: 0.203, train_loss: 2.099, val_acc: 0.075, val_loss: 5.536
+Fold 3 | Epoch 62 - train_acc: 0.203, train_loss: 2.098, val_acc: 0.075, val_loss: 6.049
+Fold 3 | Epoch 63 - train_acc: 0.204, train_loss: 2.098, val_acc: 0.075, val_loss: 5.273
+Fold 3 | Epoch 64 - train_acc: 0.203, train_loss: 2.097, val_acc: 0.075, val_loss: 4.899
+Fold 3 | Epoch 65 - train_acc: 0.203, train_loss: 2.096, val_acc: 0.075, val_loss: 5.348
+Epoch 00066: reducing learning rate of group 0 to 1.6384e-05.
+Fold 3 | Epoch 66 - train_acc: 0.202, train_loss: 2.096, val_acc: 0.075, val_loss: 4.005
+Fold 3 | Epoch 67 - train_acc: 0.204, train_loss: 2.095, val_acc: 0.087, val_loss: 2.704
+Fold 3 | Epoch 68 - train_acc: 0.203, train_loss: 2.095, val_acc: 0.083, val_loss: 2.546
+Fold 3 | Epoch 69 - train_acc: 0.203, train_loss: 2.095, val_acc: 0.085, val_loss: 2.535
+Fold 3 | Epoch 70 - train_acc: 0.204, train_loss: 2.094, val_acc: 0.072, val_loss: 2.465
+Fold 3 | Epoch 71 - train_acc: 0.204, train_loss: 2.094, val_acc: 0.070, val_loss: 2.618
+Fold 3 | Epoch 72 - train_acc: 0.203, train_loss: 2.093, val_acc: 0.075, val_loss: 3.316
+Fold 3 | Epoch 73 - train_acc: 0.206, train_loss: 2.093, val_acc: 0.075, val_loss: 3.942
+Fold 3 | Epoch 74 - train_acc: 0.207, train_loss: 2.092, val_acc: 0.068, val_loss: 2.933
+Fold 3 | Epoch 75 - train_acc: 0.207, train_loss: 2.092, val_acc: 0.075, val_loss: 2.908
+Fold 3 | Epoch 76 - train_acc: 0.207, train_loss: 2.091, val_acc: 0.075, val_loss: 2.782
+Epoch 00077: reducing learning rate of group 0 to 1.3107e-05.
+Fold 3 | Epoch 77 - train_acc: 0.206, train_loss: 2.091, val_acc: 0.062, val_loss: 2.997
+Fold 3 | Epoch 78 - train_acc: 0.207, train_loss: 2.090, val_acc: 0.098, val_loss: 2.601
+Fold 3 | Epoch 79 - train_acc: 0.209, train_loss: 2.090, val_acc: 0.145, val_loss: 2.425
+Fold 3 | Epoch 80 - train_acc: 0.212, train_loss: 2.090, val_acc: 0.175, val_loss: 4.598
+Fold 3 | Epoch 81 - train_acc: 0.209, train_loss: 2.089, val_acc: 0.175, val_loss: 5.689
+Fold 3 | Epoch 82 - train_acc: 0.211, train_loss: 2.089, val_acc: 0.175, val_loss: 8.016
+Fold 3 | Epoch 83 - train_acc: 0.210, train_loss: 2.089, val_acc: 0.175, val_loss: 10.614
+Fold 3 | Epoch 84 - train_acc: 0.209, train_loss: 2.088, val_acc: 0.175, val_loss: 8.611
+Fold 3 | Epoch 85 - train_acc: 0.211, train_loss: 2.088, val_acc: 0.175, val_loss: 2.450
+Fold 3 | Epoch 86 - train_acc: 0.211, train_loss: 2.087, val_acc: 0.075, val_loss: 2.932
+Fold 3 | Epoch 87 - train_acc: 0.211, train_loss: 2.087, val_acc: 0.058, val_loss: 2.494
+Epoch 00088: reducing learning rate of group 0 to 1.0486e-05.
+Fold 3 | Epoch 88 - train_acc: 0.210, train_loss: 2.086, val_acc: 0.077, val_loss: 2.430
+Fold 3 | Epoch 89 - train_acc: 0.211, train_loss: 2.086, val_acc: 0.075, val_loss: 3.178
+Fold 3 | Epoch 90 - train_acc: 0.211, train_loss: 2.086, val_acc: 0.075, val_loss: 3.375
+Fold 3 | Epoch 91 - train_acc: 0.211, train_loss: 2.086, val_acc: 0.075, val_loss: 3.277
+Fold 3 | Epoch 92 - train_acc: 0.212, train_loss: 2.085, val_acc: 0.075, val_loss: 2.940
+Fold 3 | Epoch 93 - train_acc: 0.212, train_loss: 2.085, val_acc: 0.122, val_loss: 2.302
+Fold 3 | Epoch 94 - train_acc: 0.212, train_loss: 2.085, val_acc: 0.175, val_loss: 3.298
+Fold 3 | Epoch 95 - train_acc: 0.211, train_loss: 2.084, val_acc: 0.175, val_loss: 3.123
+Fold 3 | Epoch 96 - train_acc: 0.212, train_loss: 2.084, val_acc: 0.175, val_loss: 5.141
+Fold 3 | Epoch 97 - train_acc: 0.212, train_loss: 2.084, val_acc: 0.175, val_loss: 3.556
+Fold 3 | Epoch 98 - train_acc: 0.215, train_loss: 2.083, val_acc: 0.168, val_loss: 2.259
+Epoch 00099: reducing learning rate of group 0 to 8.3886e-06.
+Fold 3 | Epoch 99 - train_acc: 0.213, train_loss: 2.083, val_acc: 0.080, val_loss: 2.889
+Fold 3 | Epoch 100 - train_acc: 0.212, train_loss: 2.083, val_acc: 0.075, val_loss: 2.936
+Fold 3 | Epoch 101 - train_acc: 0.213, train_loss: 2.083, val_acc: 0.077, val_loss: 2.864
+Fold 3 | Epoch 102 - train_acc: 0.214, train_loss: 2.082, val_acc: 0.077, val_loss: 2.901
+Fold 3 | Epoch 103 - train_acc: 0.214, train_loss: 2.082, val_acc: 0.077, val_loss: 2.889
+Fold 3 | Epoch 104 - train_acc: 0.215, train_loss: 2.082, val_acc: 0.075, val_loss: 3.150
+Fold 3 | Epoch 105 - train_acc: 0.215, train_loss: 2.081, val_acc: 0.075, val_loss: 3.596
+Fold 3 | Epoch 106 - train_acc: 0.215, train_loss: 2.081, val_acc: 0.075, val_loss: 3.012
+Fold 3 | Epoch 107 - train_acc: 0.216, train_loss: 2.081, val_acc: 0.072, val_loss: 2.444
+Fold 3 | Epoch 108 - train_acc: 0.217, train_loss: 2.081, val_acc: 0.165, val_loss: 2.342
+Fold 3 | Epoch 109 - train_acc: 0.216, train_loss: 2.081, val_acc: 0.177, val_loss: 2.586
+Fold 3 | Epoch 110 - train_acc: 0.216, train_loss: 2.080, val_acc: 0.175, val_loss: 3.055
+Fold 3 | Epoch 111 - train_acc: 0.217, train_loss: 2.080, val_acc: 0.182, val_loss: 2.370
+Fold 3 | Epoch 112 - train_acc: 0.219, train_loss: 2.080, val_acc: 0.180, val_loss: 2.264
+Fold 3 | Epoch 113 - train_acc: 0.218, train_loss: 2.079, val_acc: 0.180, val_loss: 2.307
+Fold 3 | Epoch 114 - train_acc: 0.217, train_loss: 2.079, val_acc: 0.180, val_loss: 2.454
+Fold 3 | Epoch 115 - train_acc: 0.217, train_loss: 2.079, val_acc: 0.087, val_loss: 2.263
+Fold 3 | Epoch 116 - train_acc: 0.218, train_loss: 2.079, val_acc: 0.075, val_loss: 2.809
+Fold 3 | Epoch 117 - train_acc: 0.218, train_loss: 2.078, val_acc: 0.075, val_loss: 2.988
+Fold 3 | Epoch 118 - train_acc: 0.220, train_loss: 2.078, val_acc: 0.075, val_loss: 3.563
+Fold 3 | Epoch 119 - train_acc: 0.217, train_loss: 2.078, val_acc: 0.075, val_loss: 4.521
+Fold 3 | Epoch 120 - train_acc: 0.217, train_loss: 2.078, val_acc: 0.075, val_loss: 5.357
+Fold 3 | Epoch 121 - train_acc: 0.216, train_loss: 2.078, val_acc: 0.075, val_loss: 5.622
+Epoch 00122: reducing learning rate of group 0 to 6.7109e-06.
+Fold 3 | Epoch 122 - train_acc: 0.217, train_loss: 2.077, val_acc: 0.075, val_loss: 4.718
+Fold 3 | Epoch 123 - train_acc: 0.217, train_loss: 2.077, val_acc: 0.075, val_loss: 4.386
+Fold 3 | Epoch 124 - train_acc: 0.217, train_loss: 2.077, val_acc: 0.075, val_loss: 3.796
+Fold 3 | Epoch 125 - train_acc: 0.216, train_loss: 2.077, val_acc: 0.075, val_loss: 4.296
+Fold 3 | Epoch 126 - train_acc: 0.216, train_loss: 2.076, val_acc: 0.075, val_loss: 4.424
+Fold 3 | Epoch 127 - train_acc: 0.217, train_loss: 2.076, val_acc: 0.075, val_loss: 3.461
+Fold 3 | Epoch 128 - train_acc: 0.217, train_loss: 2.076, val_acc: 0.075, val_loss: 2.939
+Fold 3 | Epoch 129 - train_acc: 0.217, train_loss: 2.076, val_acc: 0.075, val_loss: 2.899
+Fold 3 | Epoch 130 - train_acc: 0.216, train_loss: 2.076, val_acc: 0.075, val_loss: 3.222
+Fold 3 | Epoch 131 - train_acc: 0.217, train_loss: 2.076, val_acc: 0.075, val_loss: 3.277
+Fold 3 | Epoch 132 - train_acc: 0.218, train_loss: 2.075, val_acc: 0.075, val_loss: 2.992
+Epoch 00133: reducing learning rate of group 0 to 5.3687e-06.
+Fold 3 | Epoch 133 - train_acc: 0.217, train_loss: 2.075, val_acc: 0.075, val_loss: 2.864
+Fold 3 | Epoch 134 - train_acc: 0.218, train_loss: 2.075, val_acc: 0.075, val_loss: 2.923
+Fold 3 | Epoch 135 - train_acc: 0.216, train_loss: 2.075, val_acc: 0.075, val_loss: 2.805
+Fold 3 | Epoch 136 - train_acc: 0.218, train_loss: 2.075, val_acc: 0.075, val_loss: 2.975
+Fold 3 | Epoch 137 - train_acc: 0.218, train_loss: 2.074, val_acc: 0.075, val_loss: 3.143
+Fold 3 | Epoch 138 - train_acc: 0.220, train_loss: 2.074, val_acc: 0.072, val_loss: 2.617
+Fold 3 | Epoch 139 - train_acc: 0.220, train_loss: 2.074, val_acc: 0.080, val_loss: 2.463
+Fold 3 | Epoch 140 - train_acc: 0.218, train_loss: 2.074, val_acc: 0.090, val_loss: 2.367
+Fold 3 | Epoch 141 - train_acc: 0.220, train_loss: 2.074, val_acc: 0.070, val_loss: 2.629
+Fold 3 | Epoch 142 - train_acc: 0.219, train_loss: 2.074, val_acc: 0.075, val_loss: 2.830
+Fold 3 | Epoch 143 - train_acc: 0.220, train_loss: 2.074, val_acc: 0.068, val_loss: 2.502
+Epoch 00144: reducing learning rate of group 0 to 4.2950e-06.
+Fold 3 | Epoch 144 - train_acc: 0.219, train_loss: 2.073, val_acc: 0.068, val_loss: 2.391
+Fold 3 | Epoch 145 - train_acc: 0.221, train_loss: 2.073, val_acc: 0.077, val_loss: 2.523
+Fold 3 | Epoch 146 - train_acc: 0.218, train_loss: 2.073, val_acc: 0.087, val_loss: 2.278
+Fold 3 | Epoch 147 - train_acc: 0.220, train_loss: 2.073, val_acc: 0.087, val_loss: 2.322
+Fold 3 | Epoch 148 - train_acc: 0.220, train_loss: 2.073, val_acc: 0.098, val_loss: 2.342
+Fold 3 | Epoch 149 - train_acc: 0.218, train_loss: 2.073, val_acc: 0.090, val_loss: 2.322
+Fold 3 | Epoch 150 - train_acc: 0.220, train_loss: 2.072, val_acc: 0.070, val_loss: 2.427
+[sub3-Fold3] BEST test_acc=0.175
+Confusion matrix:
+ [[69  0  0  0  0  0  1  0  0]
+ [40  0  0  0  0  0  0  0  0]
+ [30  0  0  0  0  0  0  0  0]
+ [40  0  0  0  0  0  0  0  0]
+ [28  0  0  0  0  0  2  0  0]
+ [59  0  0  0  0  0  1  0  0]
+ [48  0  0  1  0  0  1  0  0]
+ [30  0  0  0  0  0  0  0  0]
+ [50  0  0  0  0  0  0  0  0]]
+Fold 4 | Epoch 01 - train_acc: 0.078, train_loss: 2.206, val_acc: 0.070, val_loss: 2.205
+Fold 4 | Epoch 02 - train_acc: 0.100, train_loss: 2.203, val_acc: 0.087, val_loss: 2.203
+Fold 4 | Epoch 03 - train_acc: 0.118, train_loss: 2.200, val_acc: 0.085, val_loss: 2.201
+Fold 4 | Epoch 04 - train_acc: 0.123, train_loss: 2.198, val_acc: 0.098, val_loss: 2.198
+Fold 4 | Epoch 05 - train_acc: 0.131, train_loss: 2.195, val_acc: 0.110, val_loss: 2.194
+Fold 4 | Epoch 06 - train_acc: 0.137, train_loss: 2.192, val_acc: 0.160, val_loss: 2.190
+Fold 4 | Epoch 07 - train_acc: 0.148, train_loss: 2.189, val_acc: 0.177, val_loss: 2.185
+Fold 4 | Epoch 08 - train_acc: 0.160, train_loss: 2.186, val_acc: 0.180, val_loss: 2.181
+Fold 4 | Epoch 09 - train_acc: 0.169, train_loss: 2.182, val_acc: 0.177, val_loss: 2.175
+Fold 4 | Epoch 10 - train_acc: 0.170, train_loss: 2.178, val_acc: 0.180, val_loss: 2.173
+Fold 4 | Epoch 11 - train_acc: 0.174, train_loss: 2.174, val_acc: 0.177, val_loss: 2.168
+Fold 4 | Epoch 12 - train_acc: 0.177, train_loss: 2.169, val_acc: 0.180, val_loss: 2.164
+Fold 4 | Epoch 13 - train_acc: 0.181, train_loss: 2.164, val_acc: 0.180, val_loss: 2.166
+Fold 4 | Epoch 14 - train_acc: 0.180, train_loss: 2.160, val_acc: 0.177, val_loss: 2.180
+Fold 4 | Epoch 15 - train_acc: 0.186, train_loss: 2.155, val_acc: 0.175, val_loss: 2.240
+Fold 4 | Epoch 16 - train_acc: 0.187, train_loss: 2.150, val_acc: 0.135, val_loss: 2.456
+Fold 4 | Epoch 17 - train_acc: 0.186, train_loss: 2.147, val_acc: 0.145, val_loss: 2.862
+Fold 4 | Epoch 18 - train_acc: 0.190, train_loss: 2.143, val_acc: 0.147, val_loss: 3.602
+Epoch 00019: reducing learning rate of group 0 to 4.0000e-05.
+Fold 4 | Epoch 19 - train_acc: 0.191, train_loss: 2.140, val_acc: 0.150, val_loss: 4.938
+Fold 4 | Epoch 20 - train_acc: 0.190, train_loss: 2.137, val_acc: 0.150, val_loss: 6.377
+Fold 4 | Epoch 21 - train_acc: 0.190, train_loss: 2.135, val_acc: 0.150, val_loss: 8.378
+Fold 4 | Epoch 22 - train_acc: 0.190, train_loss: 2.132, val_acc: 0.150, val_loss: 10.639
+Fold 4 | Epoch 23 - train_acc: 0.190, train_loss: 2.130, val_acc: 0.150, val_loss: 12.694
+Fold 4 | Epoch 24 - train_acc: 0.193, train_loss: 2.128, val_acc: 0.150, val_loss: 15.050
+Fold 4 | Epoch 25 - train_acc: 0.193, train_loss: 2.126, val_acc: 0.150, val_loss: 19.327
+Fold 4 | Epoch 26 - train_acc: 0.193, train_loss: 2.124, val_acc: 0.150, val_loss: 23.152
+Fold 4 | Epoch 27 - train_acc: 0.196, train_loss: 2.122, val_acc: 0.150, val_loss: 25.740
+Fold 4 | Epoch 28 - train_acc: 0.197, train_loss: 2.120, val_acc: 0.150, val_loss: 25.290
+Fold 4 | Epoch 29 - train_acc: 0.197, train_loss: 2.119, val_acc: 0.150, val_loss: 24.276
+Epoch 00030: reducing learning rate of group 0 to 3.2000e-05.
+Fold 4 | Epoch 30 - train_acc: 0.197, train_loss: 2.118, val_acc: 0.150, val_loss: 23.812
+Fold 4 | Epoch 31 - train_acc: 0.197, train_loss: 2.116, val_acc: 0.150, val_loss: 23.820
+Fold 4 | Epoch 32 - train_acc: 0.198, train_loss: 2.115, val_acc: 0.150, val_loss: 25.454
+Fold 4 | Epoch 33 - train_acc: 0.198, train_loss: 2.114, val_acc: 0.150, val_loss: 26.921
+Fold 4 | Epoch 34 - train_acc: 0.197, train_loss: 2.113, val_acc: 0.150, val_loss: 26.432
+Fold 4 | Epoch 35 - train_acc: 0.197, train_loss: 2.112, val_acc: 0.150, val_loss: 28.289
+Fold 4 | Epoch 36 - train_acc: 0.197, train_loss: 2.111, val_acc: 0.150, val_loss: 29.802
+Fold 4 | Epoch 37 - train_acc: 0.196, train_loss: 2.111, val_acc: 0.150, val_loss: 26.642
+Fold 4 | Epoch 38 - train_acc: 0.196, train_loss: 2.110, val_acc: 0.150, val_loss: 23.083
+Fold 4 | Epoch 39 - train_acc: 0.196, train_loss: 2.109, val_acc: 0.150, val_loss: 19.770
+Fold 4 | Epoch 40 - train_acc: 0.197, train_loss: 2.108, val_acc: 0.150, val_loss: 18.275
+Epoch 00041: reducing learning rate of group 0 to 2.5600e-05.
+Fold 4 | Epoch 41 - train_acc: 0.197, train_loss: 2.107, val_acc: 0.150, val_loss: 15.913
+Fold 4 | Epoch 42 - train_acc: 0.196, train_loss: 2.106, val_acc: 0.150, val_loss: 13.688
+Fold 4 | Epoch 43 - train_acc: 0.196, train_loss: 2.105, val_acc: 0.150, val_loss: 10.062
+Fold 4 | Epoch 44 - train_acc: 0.197, train_loss: 2.105, val_acc: 0.150, val_loss: 7.514
+Fold 4 | Epoch 45 - train_acc: 0.197, train_loss: 2.104, val_acc: 0.150, val_loss: 5.870
+Fold 4 | Epoch 46 - train_acc: 0.196, train_loss: 2.104, val_acc: 0.152, val_loss: 3.448
+Fold 4 | Epoch 47 - train_acc: 0.196, train_loss: 2.103, val_acc: 0.152, val_loss: 4.690
+Fold 4 | Epoch 48 - train_acc: 0.199, train_loss: 2.102, val_acc: 0.150, val_loss: 8.019
+Fold 4 | Epoch 49 - train_acc: 0.200, train_loss: 2.101, val_acc: 0.150, val_loss: 10.410
+Fold 4 | Epoch 50 - train_acc: 0.200, train_loss: 2.101, val_acc: 0.150, val_loss: 11.715
+Fold 4 | Epoch 51 - train_acc: 0.201, train_loss: 2.100, val_acc: 0.140, val_loss: 9.695
+Epoch 00052: reducing learning rate of group 0 to 2.0480e-05.
+Fold 4 | Epoch 52 - train_acc: 0.203, train_loss: 2.099, val_acc: 0.142, val_loss: 8.765
+Fold 4 | Epoch 53 - train_acc: 0.203, train_loss: 2.099, val_acc: 0.138, val_loss: 8.033
+Fold 4 | Epoch 54 - train_acc: 0.203, train_loss: 2.098, val_acc: 0.138, val_loss: 6.624
+Fold 4 | Epoch 55 - train_acc: 0.204, train_loss: 2.098, val_acc: 0.138, val_loss: 9.857
+Fold 4 | Epoch 56 - train_acc: 0.204, train_loss: 2.097, val_acc: 0.175, val_loss: 11.808
+Fold 4 | Epoch 57 - train_acc: 0.205, train_loss: 2.096, val_acc: 0.172, val_loss: 12.409
+Fold 4 | Epoch 58 - train_acc: 0.205, train_loss: 2.096, val_acc: 0.175, val_loss: 9.898
+Fold 4 | Epoch 59 - train_acc: 0.206, train_loss: 2.095, val_acc: 0.175, val_loss: 6.616
+Fold 4 | Epoch 60 - train_acc: 0.206, train_loss: 2.095, val_acc: 0.177, val_loss: 3.440
+Fold 4 | Epoch 61 - train_acc: 0.205, train_loss: 2.094, val_acc: 0.165, val_loss: 2.979
+Fold 4 | Epoch 62 - train_acc: 0.205, train_loss: 2.094, val_acc: 0.170, val_loss: 2.282
+Epoch 00063: reducing learning rate of group 0 to 1.6384e-05.
+Fold 4 | Epoch 63 - train_acc: 0.207, train_loss: 2.093, val_acc: 0.165, val_loss: 2.170
+Fold 4 | Epoch 64 - train_acc: 0.207, train_loss: 2.093, val_acc: 0.105, val_loss: 2.279
+Fold 4 | Epoch 65 - train_acc: 0.207, train_loss: 2.092, val_acc: 0.080, val_loss: 3.047
+Fold 4 | Epoch 66 - train_acc: 0.206, train_loss: 2.092, val_acc: 0.098, val_loss: 2.492
+Fold 4 | Epoch 67 - train_acc: 0.208, train_loss: 2.091, val_acc: 0.177, val_loss: 3.200
+Fold 4 | Epoch 68 - train_acc: 0.208, train_loss: 2.091, val_acc: 0.145, val_loss: 6.586
+Fold 4 | Epoch 69 - train_acc: 0.207, train_loss: 2.090, val_acc: 0.152, val_loss: 5.955
+Fold 4 | Epoch 70 - train_acc: 0.208, train_loss: 2.090, val_acc: 0.152, val_loss: 7.386
+Fold 4 | Epoch 71 - train_acc: 0.209, train_loss: 2.089, val_acc: 0.147, val_loss: 7.241
+Fold 4 | Epoch 72 - train_acc: 0.209, train_loss: 2.089, val_acc: 0.142, val_loss: 4.773
+Fold 4 | Epoch 73 - train_acc: 0.209, train_loss: 2.088, val_acc: 0.110, val_loss: 2.494
+Epoch 00074: reducing learning rate of group 0 to 1.3107e-05.
+Fold 4 | Epoch 74 - train_acc: 0.209, train_loss: 2.088, val_acc: 0.075, val_loss: 8.152
+Fold 4 | Epoch 75 - train_acc: 0.211, train_loss: 2.087, val_acc: 0.075, val_loss: 9.570
+Fold 4 | Epoch 76 - train_acc: 0.210, train_loss: 2.087, val_acc: 0.075, val_loss: 7.344
+Fold 4 | Epoch 77 - train_acc: 0.211, train_loss: 2.087, val_acc: 0.075, val_loss: 7.538
+Fold 4 | Epoch 78 - train_acc: 0.211, train_loss: 2.086, val_acc: 0.075, val_loss: 6.162
+Fold 4 | Epoch 79 - train_acc: 0.211, train_loss: 2.086, val_acc: 0.077, val_loss: 4.647
+Fold 4 | Epoch 80 - train_acc: 0.211, train_loss: 2.085, val_acc: 0.077, val_loss: 4.828
+Fold 4 | Epoch 81 - train_acc: 0.211, train_loss: 2.085, val_acc: 0.075, val_loss: 5.606
+Fold 4 | Epoch 82 - train_acc: 0.211, train_loss: 2.085, val_acc: 0.075, val_loss: 5.804
+Fold 4 | Epoch 83 - train_acc: 0.211, train_loss: 2.084, val_acc: 0.075, val_loss: 5.453
+Fold 4 | Epoch 84 - train_acc: 0.212, train_loss: 2.084, val_acc: 0.077, val_loss: 4.398
+Epoch 00085: reducing learning rate of group 0 to 1.0486e-05.
+Fold 4 | Epoch 85 - train_acc: 0.212, train_loss: 2.084, val_acc: 0.077, val_loss: 3.718
+Fold 4 | Epoch 86 - train_acc: 0.214, train_loss: 2.083, val_acc: 0.077, val_loss: 3.369
+Fold 4 | Epoch 87 - train_acc: 0.213, train_loss: 2.083, val_acc: 0.077, val_loss: 3.167
+Fold 4 | Epoch 88 - train_acc: 0.214, train_loss: 2.083, val_acc: 0.077, val_loss: 3.506
+Fold 4 | Epoch 89 - train_acc: 0.213, train_loss: 2.082, val_acc: 0.077, val_loss: 4.202
+Fold 4 | Epoch 90 - train_acc: 0.214, train_loss: 2.082, val_acc: 0.075, val_loss: 5.550
+Fold 4 | Epoch 91 - train_acc: 0.214, train_loss: 2.082, val_acc: 0.075, val_loss: 6.009
+Fold 4 | Epoch 92 - train_acc: 0.212, train_loss: 2.081, val_acc: 0.075, val_loss: 6.130
+Fold 4 | Epoch 93 - train_acc: 0.213, train_loss: 2.081, val_acc: 0.080, val_loss: 3.265
+Fold 4 | Epoch 94 - train_acc: 0.213, train_loss: 2.081, val_acc: 0.080, val_loss: 2.659
+Fold 4 | Epoch 95 - train_acc: 0.213, train_loss: 2.080, val_acc: 0.080, val_loss: 2.314
+Epoch 00096: reducing learning rate of group 0 to 8.3886e-06.
+Fold 4 | Epoch 96 - train_acc: 0.213, train_loss: 2.080, val_acc: 0.128, val_loss: 2.203
+Fold 4 | Epoch 97 - train_acc: 0.214, train_loss: 2.080, val_acc: 0.145, val_loss: 3.002
+Fold 4 | Epoch 98 - train_acc: 0.214, train_loss: 2.079, val_acc: 0.142, val_loss: 3.697
+Fold 4 | Epoch 99 - train_acc: 0.214, train_loss: 2.079, val_acc: 0.140, val_loss: 3.923
+Fold 4 | Epoch 100 - train_acc: 0.216, train_loss: 2.079, val_acc: 0.138, val_loss: 3.375
+Fold 4 | Epoch 101 - train_acc: 0.215, train_loss: 2.079, val_acc: 0.142, val_loss: 2.250
+Fold 4 | Epoch 102 - train_acc: 0.216, train_loss: 2.078, val_acc: 0.152, val_loss: 2.178
+Fold 4 | Epoch 103 - train_acc: 0.215, train_loss: 2.078, val_acc: 0.087, val_loss: 2.781
+Fold 4 | Epoch 104 - train_acc: 0.216, train_loss: 2.078, val_acc: 0.083, val_loss: 3.146
+Fold 4 | Epoch 105 - train_acc: 0.216, train_loss: 2.078, val_acc: 0.077, val_loss: 3.617
+Fold 4 | Epoch 106 - train_acc: 0.216, train_loss: 2.077, val_acc: 0.080, val_loss: 4.023
+Epoch 00107: reducing learning rate of group 0 to 6.7109e-06.
+Fold 4 | Epoch 107 - train_acc: 0.215, train_loss: 2.077, val_acc: 0.083, val_loss: 3.726
+Fold 4 | Epoch 108 - train_acc: 0.216, train_loss: 2.077, val_acc: 0.087, val_loss: 2.863
+Fold 4 | Epoch 109 - train_acc: 0.216, train_loss: 2.077, val_acc: 0.085, val_loss: 2.707
+Fold 4 | Epoch 110 - train_acc: 0.214, train_loss: 2.077, val_acc: 0.087, val_loss: 2.681
+Fold 4 | Epoch 111 - train_acc: 0.216, train_loss: 2.076, val_acc: 0.085, val_loss: 2.782
+Fold 4 | Epoch 112 - train_acc: 0.215, train_loss: 2.076, val_acc: 0.090, val_loss: 2.665
+Fold 4 | Epoch 113 - train_acc: 0.215, train_loss: 2.076, val_acc: 0.090, val_loss: 2.542
+Fold 4 | Epoch 114 - train_acc: 0.216, train_loss: 2.076, val_acc: 0.090, val_loss: 2.856
+Fold 4 | Epoch 115 - train_acc: 0.214, train_loss: 2.075, val_acc: 0.098, val_loss: 2.425
+Fold 4 | Epoch 116 - train_acc: 0.215, train_loss: 2.075, val_acc: 0.090, val_loss: 2.617
+Fold 4 | Epoch 117 - train_acc: 0.218, train_loss: 2.075, val_acc: 0.090, val_loss: 2.535
+Epoch 00118: reducing learning rate of group 0 to 5.3687e-06.
+Fold 4 | Epoch 118 - train_acc: 0.216, train_loss: 2.075, val_acc: 0.085, val_loss: 2.715
+Fold 4 | Epoch 119 - train_acc: 0.216, train_loss: 2.075, val_acc: 0.083, val_loss: 2.852
+Fold 4 | Epoch 120 - train_acc: 0.216, train_loss: 2.075, val_acc: 0.085, val_loss: 2.931
+Fold 4 | Epoch 121 - train_acc: 0.217, train_loss: 2.074, val_acc: 0.105, val_loss: 2.423
+Fold 4 | Epoch 122 - train_acc: 0.217, train_loss: 2.074, val_acc: 0.180, val_loss: 2.176
+Fold 4 | Epoch 123 - train_acc: 0.218, train_loss: 2.074, val_acc: 0.172, val_loss: 2.299
+Fold 4 | Epoch 124 - train_acc: 0.218, train_loss: 2.074, val_acc: 0.165, val_loss: 2.439
+Fold 4 | Epoch 125 - train_acc: 0.218, train_loss: 2.074, val_acc: 0.160, val_loss: 2.355
+Fold 4 | Epoch 126 - train_acc: 0.217, train_loss: 2.074, val_acc: 0.163, val_loss: 2.380
+Fold 4 | Epoch 127 - train_acc: 0.219, train_loss: 2.073, val_acc: 0.163, val_loss: 2.287
+Fold 4 | Epoch 128 - train_acc: 0.220, train_loss: 2.073, val_acc: 0.165, val_loss: 2.201
+Epoch 00129: reducing learning rate of group 0 to 4.2950e-06.
+Fold 4 | Epoch 129 - train_acc: 0.217, train_loss: 2.073, val_acc: 0.107, val_loss: 2.262
+Fold 4 | Epoch 130 - train_acc: 0.218, train_loss: 2.073, val_acc: 0.098, val_loss: 2.402
+Fold 4 | Epoch 131 - train_acc: 0.217, train_loss: 2.073, val_acc: 0.095, val_loss: 2.535
+Fold 4 | Epoch 132 - train_acc: 0.218, train_loss: 2.073, val_acc: 0.085, val_loss: 2.795
+Fold 4 | Epoch 133 - train_acc: 0.216, train_loss: 2.072, val_acc: 0.085, val_loss: 2.853
+Fold 4 | Epoch 134 - train_acc: 0.218, train_loss: 2.072, val_acc: 0.090, val_loss: 2.537
+Fold 4 | Epoch 135 - train_acc: 0.217, train_loss: 2.072, val_acc: 0.092, val_loss: 2.234
+Fold 4 | Epoch 136 - train_acc: 0.218, train_loss: 2.072, val_acc: 0.092, val_loss: 2.376
+Fold 4 | Epoch 137 - train_acc: 0.217, train_loss: 2.072, val_acc: 0.085, val_loss: 2.646
+Fold 4 | Epoch 138 - train_acc: 0.219, train_loss: 2.072, val_acc: 0.080, val_loss: 2.829
+Fold 4 | Epoch 139 - train_acc: 0.219, train_loss: 2.072, val_acc: 0.085, val_loss: 2.678
+Epoch 00140: reducing learning rate of group 0 to 3.4360e-06.
+Fold 4 | Epoch 140 - train_acc: 0.220, train_loss: 2.071, val_acc: 0.092, val_loss: 2.437
+Fold 4 | Epoch 141 - train_acc: 0.218, train_loss: 2.071, val_acc: 0.085, val_loss: 2.523
+Fold 4 | Epoch 142 - train_acc: 0.219, train_loss: 2.071, val_acc: 0.085, val_loss: 2.475
+Fold 4 | Epoch 143 - train_acc: 0.218, train_loss: 2.071, val_acc: 0.092, val_loss: 2.536
+Fold 4 | Epoch 144 - train_acc: 0.218, train_loss: 2.071, val_acc: 0.090, val_loss: 2.474
+Fold 4 | Epoch 145 - train_acc: 0.220, train_loss: 2.071, val_acc: 0.090, val_loss: 2.455
+Fold 4 | Epoch 146 - train_acc: 0.220, train_loss: 2.071, val_acc: 0.092, val_loss: 2.555
+Fold 4 | Epoch 147 - train_acc: 0.218, train_loss: 2.071, val_acc: 0.085, val_loss: 2.562
+Fold 4 | Epoch 148 - train_acc: 0.218, train_loss: 2.071, val_acc: 0.087, val_loss: 2.490
+Fold 4 | Epoch 149 - train_acc: 0.220, train_loss: 2.071, val_acc: 0.087, val_loss: 2.563
+Fold 4 | Epoch 150 - train_acc: 0.219, train_loss: 2.070, val_acc: 0.087, val_loss: 2.629
+[sub3-Fold4] BEST test_acc=0.175
 Confusion matrix:
  [[70  0  0  0  0  0  0  0  0]
  [40  0  0  0  0  0  0  0  0]
@@ -17,68 +873,168 @@ Confusion matrix:
  [50  0  0  0  0  0  0  0  0]
  [30  0  0  0  0  0  0  0  0]
  [50  0  0  0  0  0  0  0  0]]
-Epoch 00017: reducing learning rate of group 0 to 4.0000e-05.
-Epoch 00028: reducing learning rate of group 0 to 3.2000e-05.
-Epoch 00039: reducing learning rate of group 0 to 2.5600e-05.
-Epoch 00050: reducing learning rate of group 0 to 2.0480e-05.
-[sub3-Fold1] BEST test_acc=0.170
-Confusion matrix:
- [[56  0  0  0  0  0 14  0  0]
- [33  0  0  0  0  0  7  0  0]
- [26  0  0  0  0  0  4  0  0]
- [30  0  0  0  0  0 10  0  0]
- [24  0  0  0  0  0  6  0  0]
- [48  0  0  0  0  0 12  0  0]
- [38  0  0  0  0  0 12  0  0]
- [22  0  0  0  0  0  8  0  0]
- [45  0  0  0  0  0  5  0  0]]
-Epoch 00014: reducing learning rate of group 0 to 4.0000e-05.
-Epoch 00025: reducing learning rate of group 0 to 3.2000e-05.
-Epoch 00036: reducing learning rate of group 0 to 2.5600e-05.
-Epoch 00047: reducing learning rate of group 0 to 2.0480e-05.
-[sub3-Fold2] BEST test_acc=0.175
-Confusion matrix:
- [[70  0  0  0  0  0  0  0  0]
- [39  0  1  0  0  0  0  0  0]
- [30  0  0  0  0  0  0  0  0]
- [40  0  0  0  0  0  0  0  0]
- [30  0  0  0  0  0  0  0  0]
- [60  0  0  0  0  0  0  0  0]
- [49  0  1  0  0  0  0  0  0]
- [30  0  0  0  0  0  0  0  0]
- [50  0  0  0  0  0  0  0  0]]
-Epoch 00018: reducing learning rate of group 0 to 4.0000e-05.
-Epoch 00029: reducing learning rate of group 0 to 3.2000e-05.
-Epoch 00040: reducing learning rate of group 0 to 2.5600e-05.
-[sub3-Fold3] BEST test_acc=0.152
-Confusion matrix:
- [[ 7  0  0  0  0 63  0  0  0]
- [ 4  0  0  0  0 36  0  0  0]
- [ 3  0  0  0  0 27  0  0  0]
- [ 4  0  0  0  0 33  3  0  0]
- [ 4  0  0  0  0 25  1  0  0]
- [11  0  0  0  0 47  2  0  0]
- [ 9  0  0  0  0 34  7  0  0]
- [ 7  0  0  0  0 23  0  0  0]
- [12  0  0  0  0 34  4  0  0]]
-Epoch 00020: reducing learning rate of group 0 to 4.0000e-05.
-Epoch 00031: reducing learning rate of group 0 to 3.2000e-05.
-Epoch 00042: reducing learning rate of group 0 to 2.5600e-05.
-[sub3-Fold4] BEST test_acc=0.163
-Confusion matrix:
- [[61  0  0  0  0  6  3  0  0]
- [40  0  0  0  0  0  0  0  0]
- [24  0  0  0  0  6  0  0  0]
- [36  0  0  0  0  2  2  0  0]
- [27  0  0  0  0  2  1  0  0]
- [56  0  0  0  0  4  0  0  0]
- [48  0  0  0  0  2  0  0  0]
- [28  0  0  0  0  1  1  0  0]
- [46  0  0  0  0  3  1  0  0]]
-Epoch 00012: reducing learning rate of group 0 to 4.0000e-05.
-Epoch 00023: reducing learning rate of group 0 to 3.2000e-05.
-Epoch 00034: reducing learning rate of group 0 to 2.5600e-05.
-Epoch 00045: reducing learning rate of group 0 to 2.0480e-05.
+Fold 5 | Epoch 01 - train_acc: 0.097, train_loss: 2.198, val_acc: 0.098, val_loss: 2.199
+Fold 5 | Epoch 02 - train_acc: 0.109, train_loss: 2.196, val_acc: 0.095, val_loss: 2.197
+Fold 5 | Epoch 03 - train_acc: 0.124, train_loss: 2.193, val_acc: 0.128, val_loss: 2.195
+Fold 5 | Epoch 04 - train_acc: 0.143, train_loss: 2.191, val_acc: 0.140, val_loss: 2.193
+Fold 5 | Epoch 05 - train_acc: 0.146, train_loss: 2.188, val_acc: 0.147, val_loss: 2.190
+Fold 5 | Epoch 06 - train_acc: 0.152, train_loss: 2.186, val_acc: 0.152, val_loss: 2.187
+Fold 5 | Epoch 07 - train_acc: 0.161, train_loss: 2.183, val_acc: 0.152, val_loss: 2.183
+Fold 5 | Epoch 08 - train_acc: 0.168, train_loss: 2.180, val_acc: 0.138, val_loss: 2.177
+Fold 5 | Epoch 09 - train_acc: 0.172, train_loss: 2.177, val_acc: 0.165, val_loss: 2.170
+Fold 5 | Epoch 10 - train_acc: 0.178, train_loss: 2.173, val_acc: 0.175, val_loss: 2.164
+Fold 5 | Epoch 11 - train_acc: 0.184, train_loss: 2.169, val_acc: 0.175, val_loss: 2.165
+Fold 5 | Epoch 12 - train_acc: 0.190, train_loss: 2.165, val_acc: 0.175, val_loss: 2.183
+Fold 5 | Epoch 13 - train_acc: 0.186, train_loss: 2.161, val_acc: 0.175, val_loss: 2.221
+Fold 5 | Epoch 14 - train_acc: 0.185, train_loss: 2.157, val_acc: 0.175, val_loss: 2.299
+Fold 5 | Epoch 15 - train_acc: 0.192, train_loss: 2.153, val_acc: 0.175, val_loss: 2.395
+Fold 5 | Epoch 16 - train_acc: 0.194, train_loss: 2.148, val_acc: 0.175, val_loss: 2.677
+Fold 5 | Epoch 17 - train_acc: 0.189, train_loss: 2.144, val_acc: 0.175, val_loss: 3.150
+Fold 5 | Epoch 18 - train_acc: 0.189, train_loss: 2.141, val_acc: 0.175, val_loss: 4.289
+Fold 5 | Epoch 19 - train_acc: 0.188, train_loss: 2.138, val_acc: 0.175, val_loss: 6.521
+Fold 5 | Epoch 20 - train_acc: 0.188, train_loss: 2.135, val_acc: 0.175, val_loss: 8.619
+Epoch 00021: reducing learning rate of group 0 to 4.0000e-05.
+Fold 5 | Epoch 21 - train_acc: 0.189, train_loss: 2.132, val_acc: 0.175, val_loss: 10.489
+Fold 5 | Epoch 22 - train_acc: 0.187, train_loss: 2.130, val_acc: 0.175, val_loss: 11.053
+Fold 5 | Epoch 23 - train_acc: 0.189, train_loss: 2.128, val_acc: 0.175, val_loss: 11.493
+Fold 5 | Epoch 24 - train_acc: 0.190, train_loss: 2.126, val_acc: 0.175, val_loss: 14.638
+Fold 5 | Epoch 25 - train_acc: 0.190, train_loss: 2.124, val_acc: 0.175, val_loss: 19.609
+Fold 5 | Epoch 26 - train_acc: 0.192, train_loss: 2.123, val_acc: 0.175, val_loss: 23.569
+Fold 5 | Epoch 27 - train_acc: 0.193, train_loss: 2.121, val_acc: 0.175, val_loss: 25.426
+Fold 5 | Epoch 28 - train_acc: 0.193, train_loss: 2.120, val_acc: 0.175, val_loss: 23.421
+Fold 5 | Epoch 29 - train_acc: 0.193, train_loss: 2.118, val_acc: 0.175, val_loss: 21.753
+Fold 5 | Epoch 30 - train_acc: 0.193, train_loss: 2.117, val_acc: 0.175, val_loss: 23.212
+Fold 5 | Epoch 31 - train_acc: 0.193, train_loss: 2.116, val_acc: 0.175, val_loss: 25.332
+Epoch 00032: reducing learning rate of group 0 to 3.2000e-05.
+Fold 5 | Epoch 32 - train_acc: 0.194, train_loss: 2.114, val_acc: 0.175, val_loss: 28.522
+Fold 5 | Epoch 33 - train_acc: 0.195, train_loss: 2.113, val_acc: 0.175, val_loss: 30.107
+Fold 5 | Epoch 34 - train_acc: 0.196, train_loss: 2.112, val_acc: 0.175, val_loss: 31.879
+Fold 5 | Epoch 35 - train_acc: 0.195, train_loss: 2.111, val_acc: 0.175, val_loss: 30.861
+Fold 5 | Epoch 36 - train_acc: 0.196, train_loss: 2.110, val_acc: 0.175, val_loss: 31.866
+Fold 5 | Epoch 37 - train_acc: 0.198, train_loss: 2.109, val_acc: 0.175, val_loss: 31.221
+Fold 5 | Epoch 38 - train_acc: 0.196, train_loss: 2.108, val_acc: 0.175, val_loss: 34.790
+Fold 5 | Epoch 39 - train_acc: 0.197, train_loss: 2.107, val_acc: 0.175, val_loss: 34.809
+Fold 5 | Epoch 40 - train_acc: 0.196, train_loss: 2.107, val_acc: 0.175, val_loss: 33.599
+Fold 5 | Epoch 41 - train_acc: 0.198, train_loss: 2.105, val_acc: 0.175, val_loss: 30.642
+Fold 5 | Epoch 42 - train_acc: 0.198, train_loss: 2.105, val_acc: 0.175, val_loss: 23.733
+Epoch 00043: reducing learning rate of group 0 to 2.5600e-05.
+Fold 5 | Epoch 43 - train_acc: 0.198, train_loss: 2.104, val_acc: 0.175, val_loss: 18.592
+Fold 5 | Epoch 44 - train_acc: 0.200, train_loss: 2.103, val_acc: 0.175, val_loss: 19.420
+Fold 5 | Epoch 45 - train_acc: 0.199, train_loss: 2.102, val_acc: 0.175, val_loss: 21.234
+Fold 5 | Epoch 46 - train_acc: 0.201, train_loss: 2.101, val_acc: 0.175, val_loss: 19.739
+Fold 5 | Epoch 47 - train_acc: 0.199, train_loss: 2.100, val_acc: 0.175, val_loss: 17.863
+Fold 5 | Epoch 48 - train_acc: 0.199, train_loss: 2.100, val_acc: 0.175, val_loss: 20.427
+Fold 5 | Epoch 49 - train_acc: 0.200, train_loss: 2.099, val_acc: 0.175, val_loss: 26.043
+Fold 5 | Epoch 50 - train_acc: 0.199, train_loss: 2.098, val_acc: 0.175, val_loss: 24.476
+Fold 5 | Epoch 51 - train_acc: 0.200, train_loss: 2.097, val_acc: 0.175, val_loss: 22.212
+Fold 5 | Epoch 52 - train_acc: 0.200, train_loss: 2.097, val_acc: 0.175, val_loss: 22.305
+Fold 5 | Epoch 53 - train_acc: 0.200, train_loss: 2.096, val_acc: 0.175, val_loss: 19.590
+Epoch 00054: reducing learning rate of group 0 to 2.0480e-05.
+Fold 5 | Epoch 54 - train_acc: 0.202, train_loss: 2.095, val_acc: 0.175, val_loss: 20.329
+Fold 5 | Epoch 55 - train_acc: 0.203, train_loss: 2.094, val_acc: 0.175, val_loss: 18.182
+Fold 5 | Epoch 56 - train_acc: 0.203, train_loss: 2.094, val_acc: 0.175, val_loss: 16.147
+Fold 5 | Epoch 57 - train_acc: 0.203, train_loss: 2.093, val_acc: 0.175, val_loss: 12.937
+Fold 5 | Epoch 58 - train_acc: 0.203, train_loss: 2.092, val_acc: 0.175, val_loss: 13.183
+Fold 5 | Epoch 59 - train_acc: 0.205, train_loss: 2.092, val_acc: 0.175, val_loss: 12.801
+Fold 5 | Epoch 60 - train_acc: 0.206, train_loss: 2.091, val_acc: 0.175, val_loss: 12.110
+Fold 5 | Epoch 61 - train_acc: 0.205, train_loss: 2.090, val_acc: 0.175, val_loss: 12.005
+Fold 5 | Epoch 62 - train_acc: 0.205, train_loss: 2.090, val_acc: 0.175, val_loss: 8.170
+Fold 5 | Epoch 63 - train_acc: 0.206, train_loss: 2.089, val_acc: 0.175, val_loss: 6.280
+Fold 5 | Epoch 64 - train_acc: 0.205, train_loss: 2.088, val_acc: 0.175, val_loss: 5.641
+Epoch 00065: reducing learning rate of group 0 to 1.6384e-05.
+Fold 5 | Epoch 65 - train_acc: 0.206, train_loss: 2.088, val_acc: 0.175, val_loss: 5.758
+Fold 5 | Epoch 66 - train_acc: 0.207, train_loss: 2.087, val_acc: 0.175, val_loss: 4.347
+Fold 5 | Epoch 67 - train_acc: 0.206, train_loss: 2.086, val_acc: 0.175, val_loss: 3.783
+Fold 5 | Epoch 68 - train_acc: 0.206, train_loss: 2.086, val_acc: 0.175, val_loss: 5.877
+Fold 5 | Epoch 69 - train_acc: 0.210, train_loss: 2.085, val_acc: 0.175, val_loss: 5.733
+Fold 5 | Epoch 70 - train_acc: 0.209, train_loss: 2.085, val_acc: 0.175, val_loss: 6.472
+Fold 5 | Epoch 71 - train_acc: 0.210, train_loss: 2.084, val_acc: 0.175, val_loss: 7.566
+Fold 5 | Epoch 72 - train_acc: 0.211, train_loss: 2.084, val_acc: 0.175, val_loss: 10.068
+Fold 5 | Epoch 73 - train_acc: 0.209, train_loss: 2.083, val_acc: 0.175, val_loss: 11.965
+Fold 5 | Epoch 74 - train_acc: 0.211, train_loss: 2.083, val_acc: 0.175, val_loss: 13.003
+Fold 5 | Epoch 75 - train_acc: 0.211, train_loss: 2.082, val_acc: 0.175, val_loss: 12.796
+Epoch 00076: reducing learning rate of group 0 to 1.3107e-05.
+Fold 5 | Epoch 76 - train_acc: 0.213, train_loss: 2.081, val_acc: 0.175, val_loss: 14.080
+Fold 5 | Epoch 77 - train_acc: 0.211, train_loss: 2.081, val_acc: 0.175, val_loss: 11.773
+Fold 5 | Epoch 78 - train_acc: 0.213, train_loss: 2.080, val_acc: 0.175, val_loss: 8.007
+Fold 5 | Epoch 79 - train_acc: 0.213, train_loss: 2.080, val_acc: 0.175, val_loss: 4.025
+Fold 5 | Epoch 80 - train_acc: 0.217, train_loss: 2.079, val_acc: 0.172, val_loss: 2.444
+Fold 5 | Epoch 81 - train_acc: 0.215, train_loss: 2.079, val_acc: 0.175, val_loss: 3.796
+Fold 5 | Epoch 82 - train_acc: 0.217, train_loss: 2.078, val_acc: 0.175, val_loss: 4.526
+Fold 5 | Epoch 83 - train_acc: 0.217, train_loss: 2.078, val_acc: 0.175, val_loss: 3.855
+Fold 5 | Epoch 84 - train_acc: 0.216, train_loss: 2.078, val_acc: 0.175, val_loss: 5.222
+Fold 5 | Epoch 85 - train_acc: 0.217, train_loss: 2.077, val_acc: 0.175, val_loss: 5.635
+Fold 5 | Epoch 86 - train_acc: 0.218, train_loss: 2.077, val_acc: 0.175, val_loss: 4.671
+Epoch 00087: reducing learning rate of group 0 to 1.0486e-05.
+Fold 5 | Epoch 87 - train_acc: 0.218, train_loss: 2.076, val_acc: 0.172, val_loss: 2.645
+Fold 5 | Epoch 88 - train_acc: 0.218, train_loss: 2.076, val_acc: 0.175, val_loss: 3.551
+Fold 5 | Epoch 89 - train_acc: 0.218, train_loss: 2.076, val_acc: 0.175, val_loss: 4.702
+Fold 5 | Epoch 90 - train_acc: 0.217, train_loss: 2.075, val_acc: 0.175, val_loss: 4.276
+Fold 5 | Epoch 91 - train_acc: 0.217, train_loss: 2.075, val_acc: 0.175, val_loss: 4.423
+Fold 5 | Epoch 92 - train_acc: 0.216, train_loss: 2.074, val_acc: 0.175, val_loss: 3.435
+Fold 5 | Epoch 93 - train_acc: 0.215, train_loss: 2.074, val_acc: 0.168, val_loss: 2.324
+Fold 5 | Epoch 94 - train_acc: 0.217, train_loss: 2.074, val_acc: 0.100, val_loss: 2.242
+Fold 5 | Epoch 95 - train_acc: 0.217, train_loss: 2.073, val_acc: 0.077, val_loss: 2.635
+Fold 5 | Epoch 96 - train_acc: 0.218, train_loss: 2.073, val_acc: 0.090, val_loss: 3.557
+Fold 5 | Epoch 97 - train_acc: 0.218, train_loss: 2.072, val_acc: 0.087, val_loss: 5.419
+Epoch 00098: reducing learning rate of group 0 to 8.3886e-06.
+Fold 5 | Epoch 98 - train_acc: 0.218, train_loss: 2.072, val_acc: 0.090, val_loss: 4.863
+Fold 5 | Epoch 99 - train_acc: 0.218, train_loss: 2.072, val_acc: 0.087, val_loss: 4.686
+Fold 5 | Epoch 100 - train_acc: 0.218, train_loss: 2.071, val_acc: 0.090, val_loss: 4.514
+Fold 5 | Epoch 101 - train_acc: 0.220, train_loss: 2.071, val_acc: 0.087, val_loss: 5.182
+Fold 5 | Epoch 102 - train_acc: 0.219, train_loss: 2.071, val_acc: 0.087, val_loss: 4.350
+Fold 5 | Epoch 103 - train_acc: 0.220, train_loss: 2.071, val_acc: 0.090, val_loss: 3.820
+Fold 5 | Epoch 104 - train_acc: 0.217, train_loss: 2.070, val_acc: 0.087, val_loss: 2.829
+Fold 5 | Epoch 105 - train_acc: 0.220, train_loss: 2.070, val_acc: 0.158, val_loss: 2.228
+Fold 5 | Epoch 106 - train_acc: 0.219, train_loss: 2.070, val_acc: 0.175, val_loss: 2.606
+Fold 5 | Epoch 107 - train_acc: 0.220, train_loss: 2.069, val_acc: 0.175, val_loss: 4.756
+Fold 5 | Epoch 108 - train_acc: 0.219, train_loss: 2.069, val_acc: 0.175, val_loss: 8.041
+Epoch 00109: reducing learning rate of group 0 to 6.7109e-06.
+Fold 5 | Epoch 109 - train_acc: 0.218, train_loss: 2.069, val_acc: 0.175, val_loss: 8.759
+Fold 5 | Epoch 110 - train_acc: 0.221, train_loss: 2.069, val_acc: 0.175, val_loss: 7.607
+Fold 5 | Epoch 111 - train_acc: 0.220, train_loss: 2.068, val_acc: 0.175, val_loss: 6.114
+Fold 5 | Epoch 112 - train_acc: 0.220, train_loss: 2.068, val_acc: 0.175, val_loss: 4.400
+Fold 5 | Epoch 113 - train_acc: 0.221, train_loss: 2.068, val_acc: 0.175, val_loss: 3.254
+Fold 5 | Epoch 114 - train_acc: 0.220, train_loss: 2.068, val_acc: 0.175, val_loss: 3.418
+Fold 5 | Epoch 115 - train_acc: 0.222, train_loss: 2.067, val_acc: 0.175, val_loss: 3.441
+Fold 5 | Epoch 116 - train_acc: 0.222, train_loss: 2.067, val_acc: 0.175, val_loss: 3.949
+Fold 5 | Epoch 117 - train_acc: 0.222, train_loss: 2.067, val_acc: 0.175, val_loss: 4.897
+Fold 5 | Epoch 118 - train_acc: 0.223, train_loss: 2.067, val_acc: 0.175, val_loss: 3.612
+Fold 5 | Epoch 119 - train_acc: 0.222, train_loss: 2.066, val_acc: 0.175, val_loss: 3.060
+Epoch 00120: reducing learning rate of group 0 to 5.3687e-06.
+Fold 5 | Epoch 120 - train_acc: 0.222, train_loss: 2.066, val_acc: 0.175, val_loss: 2.771
+Fold 5 | Epoch 121 - train_acc: 0.222, train_loss: 2.066, val_acc: 0.172, val_loss: 2.496
+Fold 5 | Epoch 122 - train_acc: 0.223, train_loss: 2.066, val_acc: 0.175, val_loss: 2.561
+Fold 5 | Epoch 123 - train_acc: 0.224, train_loss: 2.066, val_acc: 0.175, val_loss: 3.573
+Fold 5 | Epoch 124 - train_acc: 0.223, train_loss: 2.066, val_acc: 0.175, val_loss: 4.473
+Fold 5 | Epoch 125 - train_acc: 0.223, train_loss: 2.065, val_acc: 0.175, val_loss: 3.497
+Fold 5 | Epoch 126 - train_acc: 0.224, train_loss: 2.065, val_acc: 0.172, val_loss: 2.546
+Fold 5 | Epoch 127 - train_acc: 0.224, train_loss: 2.065, val_acc: 0.163, val_loss: 2.250
+Fold 5 | Epoch 128 - train_acc: 0.225, train_loss: 2.065, val_acc: 0.105, val_loss: 2.235
+Fold 5 | Epoch 129 - train_acc: 0.223, train_loss: 2.064, val_acc: 0.083, val_loss: 2.403
+Fold 5 | Epoch 130 - train_acc: 0.224, train_loss: 2.064, val_acc: 0.090, val_loss: 2.853
+Epoch 00131: reducing learning rate of group 0 to 4.2950e-06.
+Fold 5 | Epoch 131 - train_acc: 0.223, train_loss: 2.064, val_acc: 0.085, val_loss: 3.481
+Fold 5 | Epoch 132 - train_acc: 0.223, train_loss: 2.064, val_acc: 0.087, val_loss: 3.679
+Fold 5 | Epoch 133 - train_acc: 0.224, train_loss: 2.064, val_acc: 0.087, val_loss: 4.030
+Fold 5 | Epoch 134 - train_acc: 0.223, train_loss: 2.064, val_acc: 0.090, val_loss: 4.114
+Fold 5 | Epoch 135 - train_acc: 0.225, train_loss: 2.063, val_acc: 0.087, val_loss: 3.828
+Fold 5 | Epoch 136 - train_acc: 0.224, train_loss: 2.063, val_acc: 0.083, val_loss: 3.385
+Fold 5 | Epoch 137 - train_acc: 0.224, train_loss: 2.063, val_acc: 0.087, val_loss: 3.114
+Fold 5 | Epoch 138 - train_acc: 0.225, train_loss: 2.063, val_acc: 0.087, val_loss: 3.049
+Fold 5 | Epoch 139 - train_acc: 0.224, train_loss: 2.063, val_acc: 0.085, val_loss: 3.045
+Fold 5 | Epoch 140 - train_acc: 0.225, train_loss: 2.063, val_acc: 0.085, val_loss: 3.089
+Fold 5 | Epoch 141 - train_acc: 0.224, train_loss: 2.063, val_acc: 0.085, val_loss: 3.075
+Epoch 00142: reducing learning rate of group 0 to 3.4360e-06.
+Fold 5 | Epoch 142 - train_acc: 0.226, train_loss: 2.062, val_acc: 0.085, val_loss: 2.515
+Fold 5 | Epoch 143 - train_acc: 0.224, train_loss: 2.062, val_acc: 0.077, val_loss: 2.380
+Fold 5 | Epoch 144 - train_acc: 0.226, train_loss: 2.062, val_acc: 0.150, val_loss: 2.217
+Fold 5 | Epoch 145 - train_acc: 0.226, train_loss: 2.062, val_acc: 0.152, val_loss: 2.228
+Fold 5 | Epoch 146 - train_acc: 0.226, train_loss: 2.062, val_acc: 0.152, val_loss: 2.272
+Fold 5 | Epoch 147 - train_acc: 0.226, train_loss: 2.062, val_acc: 0.152, val_loss: 2.229
+Fold 5 | Epoch 148 - train_acc: 0.226, train_loss: 2.062, val_acc: 0.152, val_loss: 2.225
+Fold 5 | Epoch 149 - train_acc: 0.226, train_loss: 2.062, val_acc: 0.170, val_loss: 2.416
+Fold 5 | Epoch 150 - train_acc: 0.226, train_loss: 2.062, val_acc: 0.172, val_loss: 2.589
 [sub3-Fold5] BEST test_acc=0.175
 Confusion matrix:
  [[70  0  0  0  0  0  0  0  0]
@@ -90,19 +1046,178 @@ Confusion matrix:
  [50  0  0  0  0  0  0  0  0]
  [30  0  0  0  0  0  0  0  0]
  [50  0  0  0  0  0  0  0  0]]
-Epoch 00012: reducing learning rate of group 0 to 4.0000e-05.
-Epoch 00023: reducing learning rate of group 0 to 3.2000e-05.
-Epoch 00034: reducing learning rate of group 0 to 2.5600e-05.
-Epoch 00045: reducing learning rate of group 0 to 2.0480e-05.
-[sub3-Fold6] BEST test_acc=0.175
+Fold 6 | Epoch 01 - train_acc: 0.131, train_loss: 2.194, val_acc: 0.170, val_loss: 2.194
+Fold 6 | Epoch 02 - train_acc: 0.151, train_loss: 2.192, val_acc: 0.193, val_loss: 2.191
+Fold 6 | Epoch 03 - train_acc: 0.169, train_loss: 2.189, val_acc: 0.185, val_loss: 2.189
+Fold 6 | Epoch 04 - train_acc: 0.179, train_loss: 2.187, val_acc: 0.182, val_loss: 2.186
+Fold 6 | Epoch 05 - train_acc: 0.180, train_loss: 2.185, val_acc: 0.180, val_loss: 2.182
+Fold 6 | Epoch 06 - train_acc: 0.182, train_loss: 2.183, val_acc: 0.175, val_loss: 2.178
+Fold 6 | Epoch 07 - train_acc: 0.184, train_loss: 2.180, val_acc: 0.175, val_loss: 2.174
+Fold 6 | Epoch 08 - train_acc: 0.182, train_loss: 2.178, val_acc: 0.175, val_loss: 2.169
+Fold 6 | Epoch 09 - train_acc: 0.180, train_loss: 2.175, val_acc: 0.175, val_loss: 2.164
+Fold 6 | Epoch 10 - train_acc: 0.178, train_loss: 2.172, val_acc: 0.175, val_loss: 2.160
+Fold 6 | Epoch 11 - train_acc: 0.176, train_loss: 2.169, val_acc: 0.175, val_loss: 2.156
+Fold 6 | Epoch 12 - train_acc: 0.175, train_loss: 2.165, val_acc: 0.175, val_loss: 2.152
+Epoch 00013: reducing learning rate of group 0 to 4.0000e-05.
+Fold 6 | Epoch 13 - train_acc: 0.175, train_loss: 2.162, val_acc: 0.175, val_loss: 2.170
+Fold 6 | Epoch 14 - train_acc: 0.175, train_loss: 2.159, val_acc: 0.175, val_loss: 2.233
+Fold 6 | Epoch 15 - train_acc: 0.175, train_loss: 2.156, val_acc: 0.175, val_loss: 2.406
+Fold 6 | Epoch 16 - train_acc: 0.175, train_loss: 2.154, val_acc: 0.175, val_loss: 2.789
+Fold 6 | Epoch 17 - train_acc: 0.175, train_loss: 2.151, val_acc: 0.175, val_loss: 3.151
+Fold 6 | Epoch 18 - train_acc: 0.175, train_loss: 2.149, val_acc: 0.175, val_loss: 3.556
+Fold 6 | Epoch 19 - train_acc: 0.175, train_loss: 2.146, val_acc: 0.175, val_loss: 4.470
+Fold 6 | Epoch 20 - train_acc: 0.175, train_loss: 2.144, val_acc: 0.175, val_loss: 6.079
+Fold 6 | Epoch 21 - train_acc: 0.175, train_loss: 2.142, val_acc: 0.175, val_loss: 8.116
+Fold 6 | Epoch 22 - train_acc: 0.175, train_loss: 2.140, val_acc: 0.175, val_loss: 9.859
+Fold 6 | Epoch 23 - train_acc: 0.175, train_loss: 2.138, val_acc: 0.175, val_loss: 11.757
+Epoch 00024: reducing learning rate of group 0 to 3.2000e-05.
+Fold 6 | Epoch 24 - train_acc: 0.176, train_loss: 2.136, val_acc: 0.175, val_loss: 12.925
+Fold 6 | Epoch 25 - train_acc: 0.180, train_loss: 2.134, val_acc: 0.175, val_loss: 14.026
+Fold 6 | Epoch 26 - train_acc: 0.185, train_loss: 2.133, val_acc: 0.175, val_loss: 17.184
+Fold 6 | Epoch 27 - train_acc: 0.189, train_loss: 2.132, val_acc: 0.175, val_loss: 19.117
+Fold 6 | Epoch 28 - train_acc: 0.190, train_loss: 2.130, val_acc: 0.175, val_loss: 21.688
+Fold 6 | Epoch 29 - train_acc: 0.191, train_loss: 2.129, val_acc: 0.175, val_loss: 25.575
+Fold 6 | Epoch 30 - train_acc: 0.195, train_loss: 2.127, val_acc: 0.175, val_loss: 35.345
+Fold 6 | Epoch 31 - train_acc: 0.195, train_loss: 2.126, val_acc: 0.175, val_loss: 40.805
+Fold 6 | Epoch 32 - train_acc: 0.195, train_loss: 2.124, val_acc: 0.175, val_loss: 43.213
+Fold 6 | Epoch 33 - train_acc: 0.194, train_loss: 2.123, val_acc: 0.175, val_loss: 42.725
+Fold 6 | Epoch 34 - train_acc: 0.194, train_loss: 2.122, val_acc: 0.175, val_loss: 41.888
+Epoch 00035: reducing learning rate of group 0 to 2.5600e-05.
+Fold 6 | Epoch 35 - train_acc: 0.194, train_loss: 2.120, val_acc: 0.175, val_loss: 41.377
+Fold 6 | Epoch 36 - train_acc: 0.193, train_loss: 2.119, val_acc: 0.175, val_loss: 41.602
+Fold 6 | Epoch 37 - train_acc: 0.195, train_loss: 2.118, val_acc: 0.175, val_loss: 40.045
+Fold 6 | Epoch 38 - train_acc: 0.195, train_loss: 2.117, val_acc: 0.175, val_loss: 40.322
+Fold 6 | Epoch 39 - train_acc: 0.193, train_loss: 2.116, val_acc: 0.175, val_loss: 37.171
+Fold 6 | Epoch 40 - train_acc: 0.196, train_loss: 2.115, val_acc: 0.175, val_loss: 33.977
+Fold 6 | Epoch 41 - train_acc: 0.194, train_loss: 2.114, val_acc: 0.175, val_loss: 31.038
+Fold 6 | Epoch 42 - train_acc: 0.196, train_loss: 2.113, val_acc: 0.175, val_loss: 31.726
+Fold 6 | Epoch 43 - train_acc: 0.196, train_loss: 2.112, val_acc: 0.175, val_loss: 31.376
+Fold 6 | Epoch 44 - train_acc: 0.197, train_loss: 2.111, val_acc: 0.175, val_loss: 30.202
+Fold 6 | Epoch 45 - train_acc: 0.199, train_loss: 2.110, val_acc: 0.175, val_loss: 30.084
+Epoch 00046: reducing learning rate of group 0 to 2.0480e-05.
+Fold 6 | Epoch 46 - train_acc: 0.198, train_loss: 2.109, val_acc: 0.175, val_loss: 30.726
+Fold 6 | Epoch 47 - train_acc: 0.199, train_loss: 2.108, val_acc: 0.175, val_loss: 31.307
+Fold 6 | Epoch 48 - train_acc: 0.199, train_loss: 2.107, val_acc: 0.175, val_loss: 33.117
+Fold 6 | Epoch 49 - train_acc: 0.199, train_loss: 2.106, val_acc: 0.175, val_loss: 36.600
+Fold 6 | Epoch 50 - train_acc: 0.199, train_loss: 2.106, val_acc: 0.175, val_loss: 36.704
+Fold 6 | Epoch 51 - train_acc: 0.198, train_loss: 2.105, val_acc: 0.175, val_loss: 35.179
+Fold 6 | Epoch 52 - train_acc: 0.200, train_loss: 2.104, val_acc: 0.175, val_loss: 33.036
+Fold 6 | Epoch 53 - train_acc: 0.199, train_loss: 2.103, val_acc: 0.175, val_loss: 30.613
+Fold 6 | Epoch 54 - train_acc: 0.199, train_loss: 2.103, val_acc: 0.175, val_loss: 28.509
+Fold 6 | Epoch 55 - train_acc: 0.199, train_loss: 2.102, val_acc: 0.175, val_loss: 31.736
+Fold 6 | Epoch 56 - train_acc: 0.199, train_loss: 2.101, val_acc: 0.175, val_loss: 31.766
+Epoch 00057: reducing learning rate of group 0 to 1.6384e-05.
+Fold 6 | Epoch 57 - train_acc: 0.200, train_loss: 2.100, val_acc: 0.175, val_loss: 31.560
+Fold 6 | Epoch 58 - train_acc: 0.200, train_loss: 2.100, val_acc: 0.175, val_loss: 28.914
+Fold 6 | Epoch 59 - train_acc: 0.200, train_loss: 2.099, val_acc: 0.175, val_loss: 26.662
+Fold 6 | Epoch 60 - train_acc: 0.199, train_loss: 2.099, val_acc: 0.175, val_loss: 23.989
+Fold 6 | Epoch 61 - train_acc: 0.201, train_loss: 2.098, val_acc: 0.175, val_loss: 21.704
+Fold 6 | Epoch 62 - train_acc: 0.200, train_loss: 2.098, val_acc: 0.175, val_loss: 18.703
+Fold 6 | Epoch 63 - train_acc: 0.200, train_loss: 2.097, val_acc: 0.175, val_loss: 16.809
+Fold 6 | Epoch 64 - train_acc: 0.201, train_loss: 2.096, val_acc: 0.175, val_loss: 14.703
+Fold 6 | Epoch 65 - train_acc: 0.203, train_loss: 2.096, val_acc: 0.175, val_loss: 14.203
+Fold 6 | Epoch 66 - train_acc: 0.202, train_loss: 2.095, val_acc: 0.175, val_loss: 16.439
+Fold 6 | Epoch 67 - train_acc: 0.202, train_loss: 2.095, val_acc: 0.175, val_loss: 15.890
+Epoch 00068: reducing learning rate of group 0 to 1.3107e-05.
+Fold 6 | Epoch 68 - train_acc: 0.203, train_loss: 2.094, val_acc: 0.175, val_loss: 16.440
+Fold 6 | Epoch 69 - train_acc: 0.204, train_loss: 2.094, val_acc: 0.175, val_loss: 16.632
+Fold 6 | Epoch 70 - train_acc: 0.205, train_loss: 2.093, val_acc: 0.175, val_loss: 16.837
+Fold 6 | Epoch 71 - train_acc: 0.205, train_loss: 2.093, val_acc: 0.175, val_loss: 14.467
+Fold 6 | Epoch 72 - train_acc: 0.203, train_loss: 2.092, val_acc: 0.175, val_loss: 11.834
+Fold 6 | Epoch 73 - train_acc: 0.203, train_loss: 2.092, val_acc: 0.175, val_loss: 8.264
+Fold 6 | Epoch 74 - train_acc: 0.204, train_loss: 2.091, val_acc: 0.175, val_loss: 6.712
+Fold 6 | Epoch 75 - train_acc: 0.204, train_loss: 2.091, val_acc: 0.175, val_loss: 9.160
+Fold 6 | Epoch 76 - train_acc: 0.204, train_loss: 2.090, val_acc: 0.175, val_loss: 12.235
+Fold 6 | Epoch 77 - train_acc: 0.204, train_loss: 2.090, val_acc: 0.175, val_loss: 14.415
+Fold 6 | Epoch 78 - train_acc: 0.203, train_loss: 2.089, val_acc: 0.175, val_loss: 15.837
+Epoch 00079: reducing learning rate of group 0 to 1.0486e-05.
+Fold 6 | Epoch 79 - train_acc: 0.204, train_loss: 2.089, val_acc: 0.175, val_loss: 16.800
+Fold 6 | Epoch 80 - train_acc: 0.202, train_loss: 2.089, val_acc: 0.175, val_loss: 15.189
+Fold 6 | Epoch 81 - train_acc: 0.203, train_loss: 2.088, val_acc: 0.175, val_loss: 12.249
+Fold 6 | Epoch 82 - train_acc: 0.203, train_loss: 2.088, val_acc: 0.175, val_loss: 10.906
+Fold 6 | Epoch 83 - train_acc: 0.202, train_loss: 2.088, val_acc: 0.175, val_loss: 10.188
+Fold 6 | Epoch 84 - train_acc: 0.203, train_loss: 2.087, val_acc: 0.175, val_loss: 10.036
+Fold 6 | Epoch 85 - train_acc: 0.201, train_loss: 2.087, val_acc: 0.175, val_loss: 9.260
+Fold 6 | Epoch 86 - train_acc: 0.202, train_loss: 2.086, val_acc: 0.175, val_loss: 8.607
+Fold 6 | Epoch 87 - train_acc: 0.201, train_loss: 2.086, val_acc: 0.175, val_loss: 9.025
+Fold 6 | Epoch 88 - train_acc: 0.200, train_loss: 2.086, val_acc: 0.175, val_loss: 6.917
+Fold 6 | Epoch 89 - train_acc: 0.201, train_loss: 2.085, val_acc: 0.175, val_loss: 6.907
+Epoch 00090: reducing learning rate of group 0 to 8.3886e-06.
+Fold 6 | Epoch 90 - train_acc: 0.203, train_loss: 2.085, val_acc: 0.175, val_loss: 7.243
+Fold 6 | Epoch 91 - train_acc: 0.203, train_loss: 2.085, val_acc: 0.175, val_loss: 6.478
+Fold 6 | Epoch 92 - train_acc: 0.203, train_loss: 2.085, val_acc: 0.175, val_loss: 5.419
+Fold 6 | Epoch 93 - train_acc: 0.203, train_loss: 2.084, val_acc: 0.175, val_loss: 4.670
+Fold 6 | Epoch 94 - train_acc: 0.203, train_loss: 2.084, val_acc: 0.175, val_loss: 3.851
+Fold 6 | Epoch 95 - train_acc: 0.203, train_loss: 2.084, val_acc: 0.175, val_loss: 3.621
+Fold 6 | Epoch 96 - train_acc: 0.203, train_loss: 2.083, val_acc: 0.172, val_loss: 3.049
+Fold 6 | Epoch 97 - train_acc: 0.203, train_loss: 2.083, val_acc: 0.185, val_loss: 2.179
+Fold 6 | Epoch 98 - train_acc: 0.204, train_loss: 2.083, val_acc: 0.115, val_loss: 2.210
+Fold 6 | Epoch 99 - train_acc: 0.204, train_loss: 2.083, val_acc: 0.165, val_loss: 2.209
+Fold 6 | Epoch 100 - train_acc: 0.204, train_loss: 2.082, val_acc: 0.170, val_loss: 2.208
+Epoch 00101: reducing learning rate of group 0 to 6.7109e-06.
+Fold 6 | Epoch 101 - train_acc: 0.204, train_loss: 2.082, val_acc: 0.172, val_loss: 2.591
+Fold 6 | Epoch 102 - train_acc: 0.204, train_loss: 2.082, val_acc: 0.175, val_loss: 2.919
+Fold 6 | Epoch 103 - train_acc: 0.205, train_loss: 2.082, val_acc: 0.175, val_loss: 4.004
+Fold 6 | Epoch 104 - train_acc: 0.205, train_loss: 2.081, val_acc: 0.175, val_loss: 4.307
+Fold 6 | Epoch 105 - train_acc: 0.204, train_loss: 2.081, val_acc: 0.175, val_loss: 5.307
+Fold 6 | Epoch 106 - train_acc: 0.205, train_loss: 2.081, val_acc: 0.175, val_loss: 5.700
+Fold 6 | Epoch 107 - train_acc: 0.205, train_loss: 2.081, val_acc: 0.175, val_loss: 6.031
+Fold 6 | Epoch 108 - train_acc: 0.205, train_loss: 2.080, val_acc: 0.175, val_loss: 6.479
+Fold 6 | Epoch 109 - train_acc: 0.206, train_loss: 2.080, val_acc: 0.175, val_loss: 7.006
+Fold 6 | Epoch 110 - train_acc: 0.206, train_loss: 2.080, val_acc: 0.175, val_loss: 7.832
+Fold 6 | Epoch 111 - train_acc: 0.205, train_loss: 2.080, val_acc: 0.175, val_loss: 7.725
+Epoch 00112: reducing learning rate of group 0 to 5.3687e-06.
+Fold 6 | Epoch 112 - train_acc: 0.206, train_loss: 2.080, val_acc: 0.175, val_loss: 8.183
+Fold 6 | Epoch 113 - train_acc: 0.206, train_loss: 2.079, val_acc: 0.175, val_loss: 6.780
+Fold 6 | Epoch 114 - train_acc: 0.206, train_loss: 2.079, val_acc: 0.175, val_loss: 6.086
+Fold 6 | Epoch 115 - train_acc: 0.206, train_loss: 2.079, val_acc: 0.175, val_loss: 5.600
+Fold 6 | Epoch 116 - train_acc: 0.206, train_loss: 2.079, val_acc: 0.175, val_loss: 5.490
+Fold 6 | Epoch 117 - train_acc: 0.206, train_loss: 2.079, val_acc: 0.175, val_loss: 6.127
+Fold 6 | Epoch 118 - train_acc: 0.207, train_loss: 2.078, val_acc: 0.175, val_loss: 6.669
+Fold 6 | Epoch 119 - train_acc: 0.206, train_loss: 2.078, val_acc: 0.175, val_loss: 7.037
+Fold 6 | Epoch 120 - train_acc: 0.207, train_loss: 2.078, val_acc: 0.175, val_loss: 7.416
+Fold 6 | Epoch 121 - train_acc: 0.208, train_loss: 2.078, val_acc: 0.172, val_loss: 5.986
+Fold 6 | Epoch 122 - train_acc: 0.207, train_loss: 2.078, val_acc: 0.172, val_loss: 5.469
+Epoch 00123: reducing learning rate of group 0 to 4.2950e-06.
+Fold 6 | Epoch 123 - train_acc: 0.207, train_loss: 2.078, val_acc: 0.172, val_loss: 5.595
+Fold 6 | Epoch 124 - train_acc: 0.206, train_loss: 2.077, val_acc: 0.172, val_loss: 5.170
+Fold 6 | Epoch 125 - train_acc: 0.206, train_loss: 2.077, val_acc: 0.175, val_loss: 3.790
+Fold 6 | Epoch 126 - train_acc: 0.207, train_loss: 2.077, val_acc: 0.180, val_loss: 3.543
+Fold 6 | Epoch 127 - train_acc: 0.206, train_loss: 2.077, val_acc: 0.177, val_loss: 3.205
+Fold 6 | Epoch 128 - train_acc: 0.207, train_loss: 2.077, val_acc: 0.180, val_loss: 3.227
+Fold 6 | Epoch 129 - train_acc: 0.207, train_loss: 2.077, val_acc: 0.172, val_loss: 3.795
+Fold 6 | Epoch 130 - train_acc: 0.208, train_loss: 2.077, val_acc: 0.175, val_loss: 3.876
+Fold 6 | Epoch 131 - train_acc: 0.206, train_loss: 2.077, val_acc: 0.172, val_loss: 3.831
+Fold 6 | Epoch 132 - train_acc: 0.207, train_loss: 2.076, val_acc: 0.172, val_loss: 4.252
+Fold 6 | Epoch 133 - train_acc: 0.206, train_loss: 2.076, val_acc: 0.177, val_loss: 4.118
+Epoch 00134: reducing learning rate of group 0 to 3.4360e-06.
+Fold 6 | Epoch 134 - train_acc: 0.208, train_loss: 2.076, val_acc: 0.177, val_loss: 3.801
+Fold 6 | Epoch 135 - train_acc: 0.207, train_loss: 2.076, val_acc: 0.175, val_loss: 3.047
+Fold 6 | Epoch 136 - train_acc: 0.207, train_loss: 2.076, val_acc: 0.172, val_loss: 2.981
+Fold 6 | Epoch 137 - train_acc: 0.207, train_loss: 2.076, val_acc: 0.163, val_loss: 2.608
+Fold 6 | Epoch 138 - train_acc: 0.206, train_loss: 2.076, val_acc: 0.158, val_loss: 2.443
+Fold 6 | Epoch 139 - train_acc: 0.207, train_loss: 2.075, val_acc: 0.158, val_loss: 2.285
+Fold 6 | Epoch 140 - train_acc: 0.208, train_loss: 2.075, val_acc: 0.170, val_loss: 2.416
+Fold 6 | Epoch 141 - train_acc: 0.207, train_loss: 2.075, val_acc: 0.172, val_loss: 2.738
+Fold 6 | Epoch 142 - train_acc: 0.207, train_loss: 2.075, val_acc: 0.170, val_loss: 2.626
+Fold 6 | Epoch 143 - train_acc: 0.208, train_loss: 2.075, val_acc: 0.175, val_loss: 2.900
+Fold 6 | Epoch 144 - train_acc: 0.207, train_loss: 2.075, val_acc: 0.172, val_loss: 2.752
+Epoch 00145: reducing learning rate of group 0 to 2.7488e-06.
+Fold 6 | Epoch 145 - train_acc: 0.207, train_loss: 2.075, val_acc: 0.168, val_loss: 2.592
+Fold 6 | Epoch 146 - train_acc: 0.209, train_loss: 2.075, val_acc: 0.155, val_loss: 2.384
+Fold 6 | Epoch 147 - train_acc: 0.207, train_loss: 2.075, val_acc: 0.160, val_loss: 2.272
+Fold 6 | Epoch 148 - train_acc: 0.208, train_loss: 2.075, val_acc: 0.152, val_loss: 2.218
+Fold 6 | Epoch 149 - train_acc: 0.209, train_loss: 2.075, val_acc: 0.147, val_loss: 2.193
+Fold 6 | Epoch 150 - train_acc: 0.208, train_loss: 2.074, val_acc: 0.163, val_loss: 2.180
+[sub3-Fold6] BEST test_acc=0.142
 Confusion matrix:
- [[70  0  0  0  0  0  0  0  0]
- [40  0  0  0  0  0  0  0  0]
- [30  0  0  0  0  0  0  0  0]
- [40  0  0  0  0  0  0  0  0]
- [30  0  0  0  0  0  0  0  0]
- [60  0  0  0  0  0  0  0  0]
- [50  0  0  0  0  0  0  0  0]
- [30  0  0  0  0  0  0  0  0]
- [50  0  0  0  0  0  0  0  0]]
-Subject sub3: mean±std test acc = 0.169 ± 0.008
+ [[33  0  0  0  0  0 37  0  0]
+ [17  0  0  0  0  0 23  0  0]
+ [13  0  0  0  0  0 17  0  0]
+ [18  0  0  0  0  0 22  0  0]
+ [14  0  0  0  0  0 16  0  0]
+ [33  0  0  0  0  0 27  0  0]
+ [26  0  0  0  0  0 24  0  0]
+ [11  0  0  0  0  0 19  0  0]
+ [28  0  0  0  0  0 22  0  0]]
+Subject sub3: mean±std test acc = 0.163 ± 0.017
