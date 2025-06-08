@@ -166,12 +166,16 @@ def main():
             train_acc = ta / len(ds_train)
 
             # Validation
-            model.eval(); va = 0
+            model.eval(); vl = va = 0
             with torch.no_grad():
                 for xb, xf, yb in dl_val:
                     xb, xf, yb = xb.to(device), xf.to(device), yb.to(device)
-                    pred = model(xb, xf); va += (pred.argmax(1) == yb).sum().item()
+                    pred = model(xb, xf)
+                    vloss = criterion(pred, yb)
+                    vl += vloss.item() * len(yb)
+                    va += (pred.argmax(1) == yb).sum().item()
             val_acc = va / len(ds_val)
+            val_loss = vl / len(ds_val)
             scheduler.step(train_acc)
 
             if val_acc > best_val:
@@ -180,7 +184,8 @@ def main():
                 torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_fold{test_block}_{args.category}_best.pt")
 
             if args.use_wandb:
-                wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc, "train/loss": tl / len(dl_train), "val/loss": loss.item()})
+                wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc,
+                           "train/loss": tl / len(ds_train), "val/loss": val_loss})
 
         # Test
         
