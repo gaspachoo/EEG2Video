@@ -70,16 +70,16 @@ def reshape_labels(labels: np.ndarray) -> np.ndarray:
 
 def format_labels(labels: np.ndarray, category:str) -> np.ndarray:
     match category:
-        case "color" | "face_appearance" | "human_appearance" | "object":
+        case "color" | "face_appearance" | "human_appearance":
             return labels.astype(np.int64)
-        case "label" | "object_number" :
+        case "label" | "obj_number" :
             labels = labels-1
             return labels.astype(np.int64)
         case "optical_flow_score":
             threshold = 1.799
             return (labels > threshold).astype(np.int64)
         case _:
-            raise ValueError(f"Unknown category: {category}. Must be one of: color, face_appearance, human_appearance, object, label, object_number, optical_flow_score.")
+            raise ValueError(f"Unknown category: {category}. Must be one of: color, face_appearance, human_appearance, object, label, obj_number, optical_flow_score.")
 # ------------------------------ main -------------------------------------
 def main():
     args = parse_args()
@@ -150,7 +150,7 @@ def main():
 
         # W&B
         if args.use_wandb:
-            wandb.init(project=PROJECT_NAME, name=f"{subj_name}_fold{test_block}", config=vars(args))
+            wandb.init(project=PROJECT_NAME, name=f"{subj_name}_fold{test_block}_{args.category}", config=vars(args))
             wandb.watch(model, log="all")
 
         # Entraînement
