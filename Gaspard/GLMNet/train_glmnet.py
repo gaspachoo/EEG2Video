@@ -37,7 +37,7 @@ def parse_args():
     p.add_argument("--raw_dir",  default = "./data/Preprocessing/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
     p.add_argument("--feat_dir", default="./data/Preprocessing/DE_1per1s/", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
-    p.add_argument("--category", default="label",choices=['color', 'face_appearance', 'human_appearance','label','obj_number','optical_flow_score'], help="Label file")
+    p.add_argument("--category", default="label",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
     p.add_argument("--save_dir", default="./Gaspard/checkpoints/glmnet")
     p.add_argument("--epochs",   type=int, default=50)
     p.add_argument("--bs",       type=int, default=128)
@@ -70,7 +70,7 @@ def reshape_labels(labels: np.ndarray) -> np.ndarray:
 
 def format_labels(labels: np.ndarray, category:str) -> np.ndarray:
     match category:
-        case "color" | "face_appearance" | "human_appearance":
+        case "color" | "face_appearance" | "human_appearance" | "label_cluster":
             return labels.astype(np.int64)
         case "label" | "obj_number" :
             labels = labels-1
@@ -79,7 +79,7 @@ def format_labels(labels: np.ndarray, category:str) -> np.ndarray:
             threshold = 1.799
             return (labels > threshold).astype(np.int64)
         case _:
-            raise ValueError(f"Unknown category: {category}. Must be one of: color, face_appearance, human_appearance, object, label, obj_number, optical_flow_score.")
+            raise ValueError(f"Unknown category: {category}. Must be one of: color, face_appearance, human_appearance, object, label_cluster, label, obj_number, optical_flow_score.")
 # ------------------------------ main -------------------------------------
 def main():
     args = parse_args()
