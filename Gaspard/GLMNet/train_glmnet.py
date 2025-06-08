@@ -98,6 +98,12 @@ def main():
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
     print("Label distribution:", label_distribution)
+
+    # Display label distribution for each block
+    for b in range(labels_raw.shape[0]):
+        u_b, c_b = np.unique(labels_raw[b], return_counts=True)
+        dist_b = {int(u): int(c) for u, c in zip(u_b, c_b)}
+        print(f"Block {b} distribution: {dist_b}")
     labels = format_labels(reshape_labels(labels_raw), args.category)                        # (7,40,5,2)
     print(labels.shape)
     num_unique_labels = len(np.unique(labels))
@@ -177,6 +183,13 @@ def main():
             val_acc = va / len(ds_val)
             val_loss = vl / len(ds_val)
             scheduler.step(val_acc)
+
+            # Print training progress
+            print(
+                f"Fold {test_block} | Epoch {ep:02d} - "
+                f"train_acc: {train_acc:.3f}, train_loss: {tl/len(ds_train):.3f}, "
+                f"val_acc: {val_acc:.3f}, val_loss: {val_loss:.3f}"
+            )
 
             if val_acc > best_val:
                 best_val = val_acc
