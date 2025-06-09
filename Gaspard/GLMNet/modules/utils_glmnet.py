@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 from Gaspard.GLMNet.modules.models_paper import shallownet, mlpnet
-from sklearn.preprocessing import StandardScaler 
+from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 class GLMNet(nn.Module):
     """ShallowNet (raw) + MLP (freq) → concat → FC."""
@@ -89,3 +90,15 @@ def standard_scale_features(X, scaler=None, return_scaler=False):
     if return_scaler:
         return X_scaled, scaler
     return X_scaled
+
+
+def compute_raw_stats(X: np.ndarray):
+    """Compute per-channel mean and std from training data."""
+    mean = X.mean(axis=(0, 2))
+    std = X.std(axis=(0, 2)) + 1e-6
+    return mean, std
+
+
+def normalize_raw(X: np.ndarray, mean: np.ndarray, std: np.ndarray):
+    """Normalize raw EEG with provided statistics."""
+    return (X - mean[None, :, None]) / std[None, :, None]

@@ -19,7 +19,12 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
     
 
-from Gaspard.GLMNet.modules.utils_glmnet import GLMNet, standard_scale_features
+from Gaspard.GLMNet.modules.utils_glmnet import (
+    GLMNet,
+    standard_scale_features,
+    compute_raw_stats,
+    normalize_raw,
+)
 
 
 # -------- W&B -------------------------------------------------------------
@@ -128,6 +133,14 @@ def main():
         X_val, F_val, y_val = get_data([val_block])
         X_test, F_test, y_test = get_data([test_block])
 
+        # Compute normalization statistics on training raw EEG
+        raw_mean, raw_std = compute_raw_stats(X_train)
+
+        # Apply normalization to all splits
+        X_train = normalize_raw(X_train, raw_mean, raw_std)
+        X_val = normalize_raw(X_val, raw_mean, raw_std)
+        X_test = normalize_raw(X_test, raw_mean, raw_std)
+
         # Fit scaler on training features and apply to all splits
         F_train_scaled, scaler = standard_scale_features(F_train, return_scaler=True)
         F_val_scaled = standard_scale_features(F_val, scaler=scaler)
@@ -137,6 +150,13 @@ def main():
         scaler_path = os.path.join(args.save_dir, f"{subj_name}_fold{test_block}_{args.category}_scaler.pkl")
         with open(scaler_path, "wb") as f:
             pickle.dump(scaler, f)
+
+        # Save raw EEG normalization parameters
+        norm_path = os.path.join(
+            args.save_dir,
+            f"{subj_name}_fold{test_block}_{args.category}_rawnorm.npz",
+        )
+        np.savez(norm_path, mean=raw_mean, std=raw_std)
 
 
         # Conversion en tenseurs

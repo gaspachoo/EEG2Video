@@ -6,7 +6,12 @@ from EEG_preprocessing.segment_raw_signals_200Hz import extract_2s_segment
 from EEG_preprocessing.segment_sliding_window import seg_sliding_window
 from EEG_preprocessing.extract_DE_PSD_features_1per500ms import extract_de_psd_sw
 from EEG_preprocessing.extract_DE_PSD_features_1per2s import extract_de_psd_raw
-from Gaspard.GLMNet.inference_glmnet import inf_glmnet, load_glmnet_from_checkpoint, load_scaler
+from Gaspard.GLMNet.inference_glmnet import (
+    inf_glmnet,
+    load_glmnet_from_checkpoint,
+    load_scaler,
+    load_raw_stats,
+)
 from Gaspard.Seq2Seq.inference_seq2seq_v2 import inf_seq2seq, load_s2s_from_checkpoint
 from Gaspard.SemanticPredictor.inference_semantic import inf_semantic_predictor, load_semantic_predictor_from_checkpoint
 from Gaspard.TuneAVideo.inference_tuneavideo import inf_tuneavideo, load_tuneavideo_from_checkpoint, load_pairs
@@ -26,6 +31,12 @@ def parse_args():
     # Define model checkpoints to use
     parser.add_argument("--glmnet_path", type=str, default="./Gaspard/checkpoints/glmnet/sub3_fold0_best.pt", help="Path to GLMNet model checkpoint")
     parser.add_argument("--glmnet_scaler_path", type=str, default="./Gaspard/checkpoints/glmnet/sub3_fold0_scaler.pkl", help="Path to GLMNet StandardScaler")
+    parser.add_argument(
+        "--glmnet_stats_path",
+        type=str,
+        default="./Gaspard/checkpoints/glmnet/sub3_fold0_rawnorm.npz",
+        help="Path to GLMNet raw normalization stats",
+    )
     parser.add_argument("--s2s_path", type=str, default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_classic.pth", help="Path to Seq2Seq model checkpoint")
     parser.add_argument("--sempred_path", type=str, default="./Gaspard/checkpoints/semantic/eeg2text_clip.pt", help="Path to Semantic Predictor model checkpoint")
     parser.add_argument("--sempred_scaler_path", type=str, default="./Gaspard/checkpoints/semantic/scaler.pkl", help="Path to Semantic Predictor StandardScaler")
@@ -68,7 +79,15 @@ if __name__ == "__main__":
     # GLMNet inference
     model_glmnet = load_glmnet_from_checkpoint(args.glmnet_path, device=DEVICE)
     scaler_glmnet = load_scaler(args.glmnet_scaler_path)
-    eeg_embeddings = inf_glmnet(model_glmnet, scaler_glmnet, seven_sw, features_seven_sw, device=DEVICE)[None, None, None, ...]
+    stats_glmnet = load_raw_stats(args.glmnet_stats_path)
+    eeg_embeddings = inf_glmnet(
+        model_glmnet,
+        scaler_glmnet,
+        seven_sw,
+        features_seven_sw,
+        stats_glmnet,
+        device=DEVICE,
+    )[None, None, None, ...]
     print("EEG embeddings shape:", eeg_embeddings.shape)
     
     # Seq2Seq inference

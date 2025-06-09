@@ -85,11 +85,15 @@ We use 2s raw EEGs and 1s windows for DE/PSD features.
 
 Script : `Gaspard/GLMNet/train_glmnet.py`
 
+- Raw EEGs are normalized per channel using the training split statistics.
+
 ### Inference :
     
 We generate EEgs embeddings from train GLMNet.
 
 We use 2s raw EEGs and 500ms windows for DE/PSD features.
+
+The same normalization parameters are loaded to preprocess raw EEGs at inference time.
 
 Script : `Gaspard/GLMNet/inference_glmnet.py`
 
