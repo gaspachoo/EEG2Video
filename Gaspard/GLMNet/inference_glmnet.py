@@ -17,8 +17,18 @@ OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
 
 # --- Load the pretrained GLMNet ---
 def load_glmnet_from_checkpoint(ckpt_path, device='cuda'):
-    model = GLMNet(OCCIPITAL_IDX, out_dim=7).to(device)
+    """Load a pretrained GLMNet inferring the number of classes from the checkpoint."""
     state = torch.load(ckpt_path, map_location=device)
+
+    # Infer the output dimension from the final fully connected layer
+    if "fc.2.weight" in state:
+        num_classes = state["fc.2.weight"].shape[0]
+    elif "fc.weight" in state:
+        num_classes = state["fc.weight"].shape[0]
+    else:
+        raise KeyError("Cannot infer class count from checkpoint")
+
+    model = GLMNet(OCCIPITAL_IDX, out_dim=num_classes).to(device)
     model.load_state_dict(state)
     model.eval()
     return model
