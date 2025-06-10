@@ -39,7 +39,7 @@ RAW_T = 200 # time points in raw EEG, 1 second at 200Hz
 def parse_args():
      #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     p = argparse.ArgumentParser()
-    p.add_argument("--raw_dir",  default = "./data/Preprocessing/Segmented_Rawf_200Hz_2s", help="directory with .npy files") 
+    p.add_argument("--raw_dir",  default="./data/Preprocessing/Segmented_Rawf_200Hz_2s", help="directory with .npy files")
     p.add_argument("--feat_dir", default="./data/Preprocessing/DE_1per1s/", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
     p.add_argument("--category", default="label",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
@@ -57,6 +57,12 @@ def parse_args():
         help="Type of learning rate scheduler",
     )
     p.add_argument("--use_wandb", action="store_true")
+    p.add_argument(
+        "--window",
+        choices=["1s", "500ms"],
+        default="1s",
+        help="length of EEG windows used for training",
+    )
     return p.parse_args()
 
 
@@ -69,18 +75,20 @@ def split_raw_2s_to_1s(raw2s: np.ndarray) -> np.ndarray:
     second = raw2s[..., RAW_T: 2*RAW_T]  # (7,40,5,62,200)
     return np.stack([first, second], axis=3)  # (7,40,5,2,62,200)
 
-def reshape_labels(labels: np.ndarray) -> np.ndarray:
-    """Convert labels from (7,40) to (7,40,5,2)"""
+def reshape_labels(labels: np.ndarray, n_win: int) -> np.ndarray:
+    """Expand labels to match the EEG window dimension."""
     if labels.shape[1] == 40:
-        labels = labels[..., None, None]            # (7,40,1,1)
-        labels = np.repeat(labels, 5, axis=2)       # (7,40,5,1)
+        labels = labels[..., None, None]
+        labels = np.repeat(labels, 5, axis=2)
     else:
         assert labels.shape[1] == 200, "Labels must be (7,40,200) or (7,40)"
-        labels = labels.reshape(-1,40,5)[..., None]              # (7,40,5,1)
+        labels = labels.reshape(-1, 40, 5)[..., None]
 
-    labels = np.repeat(labels, 2, axis=3)       # (7,40,5,2)
-    assert labels.shape == (7,40,5,2), "Label shape must be (7,40,5,2) after expansion"
-    return labels 
+    labels = np.repeat(labels, n_win, axis=3)
+    assert (
+        labels.shape[:3] == (7, 40, 5) and labels.shape[3] == n_win
+    ), "Label shape mismatch after expansion"
+    return labels
 
 def format_labels(labels: np.ndarray, category:str) -> np.ndarray:
     match category:
@@ -97,6 +105,11 @@ def format_labels(labels: np.ndarray, category:str) -> np.ndarray:
 # ------------------------------ main -------------------------------------
 def main():
     args = parse_args()
+    if args.window == "500ms":
+        if args.raw_dir == "./data/Preprocessing/Segmented_Rawf_200Hz_2s":
+            args.raw_dir = "./data/Preprocessing/Segmented_500ms_sw"
+        if args.feat_dir == "./data/Preprocessing/DE_1per1s/":
+            args.feat_dir = "./data/Preprocessing/DE_500ms_sw"
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
     
@@ -106,8 +119,8 @@ def main():
     filename = "sub3.npy"  # ou args.subj_name
     subj_name = filename.replace(".npy", "")
 
-    raw2s = np.load(os.path.join(args.raw_dir, filename))  # (7,40,5,62,400)
-    feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,2,62,5)
+    raw = np.load(os.path.join(args.raw_dir, filename))
+    feat = np.load(os.path.join(args.feat_dir, filename))
     labels_raw = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
@@ -118,18 +131,28 @@ def main():
         u_b, c_b = np.unique(labels_raw[b], return_counts=True)
         dist_b = {int(u): int(c) for u, c in zip(u_b, c_b)}
         print(f"Block {b} distribution: {dist_b}")
-    labels = format_labels(reshape_labels(labels_raw), args.category)                        # (7,40,5,2)
+
+    if args.window == "1s":
+        raw = split_raw_2s_to_1s(raw)
+        if feat.ndim == 5:
+            feat = np.repeat(feat[:, :, :, None, :, :], 2, axis=3)
+        n_win = 2
+        time_len = RAW_T
+    else:
+        n_win = raw.shape[3]
+        time_len = raw.shape[-1]
+        assert feat.shape[:4] == raw.shape[:4], "Feature/EEG mismatch"
+
+    labels = format_labels(reshape_labels(labels_raw, n_win), args.category)
     print(labels.shape)
     num_unique_labels = len(np.unique(labels))
     print("Number of categories:", num_unique_labels)
-    
-    raw1s = split_raw_2s_to_1s(raw2s)                      # (7,40,5,2,62,200)
 
-# New training procedure
     # Flatten data and split into train/val/test
-    X_all = raw1s.reshape(-1, 62, 200)
+    X_all = raw.reshape(-1, 62, time_len)
     F_all = feat.reshape(-1, 62, 5)
     y_all = labels.reshape(-1)
+
 
     n = len(y_all)
     idx = np.random.permutation(n)

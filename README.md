@@ -81,7 +81,9 @@ Models path : `Gaspard/GLMNet/models.py`
 
 ### Training :
 
-We use 2s raw EEGs and 1s windows for DE/PSD features.
+Training uses 2s raw EEGs and 1&nbsp;s windows for DE/PSD features by default. Pass
+`--window 500ms` to instead use the 500&nbsp;ms sliding‑window data stored in
+`Segmented_500ms_sw` and `DE_500ms_sw`.
 
 Script : `Gaspard/GLMNet/train_glmnet.py`
 
@@ -92,6 +94,8 @@ trained with `Gaspard/GLMNet/train_glfnet_mlp.py`.
 - Both trainers accept a `--scheduler` argument (`steplr`,
   `reducelronplateau`, `cosine`) and a `--min_lr` value to set the learning rate
   floor.
+- Use `--window 500ms` to train on the 500&nbsp;ms sliding windows instead of the
+  default 1&nbsp;s segments.
 
 ### Inference :
     
