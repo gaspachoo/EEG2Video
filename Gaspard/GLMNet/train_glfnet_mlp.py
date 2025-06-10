@@ -107,126 +107,108 @@ def main():
 
     acc_folds = []
 
-    for test_block in range(7):
-        val_block = (test_block - 1) % 7
-        train_blocks = [i for i in range(7) if i not in [test_block, val_block]]
+    # Flatten features and randomly split data
+    F_all = feat.reshape(-1, 62, 5)
+    y_all = labels.reshape(-1)
 
-        def get_data(block_ids):
-            x_feat = feat[block_ids].reshape(-1, 62, 5)
-            y = labels[block_ids].reshape(-1)
-            return x_feat, y
+    n = len(y_all)
+    idx = np.random.permutation(n)
+    train_end = int(0.8 * n)
+    val_end = int(0.9 * n)
+    train_idx = idx[:train_end]
+    val_idx = idx[train_end:val_end]
+    test_idx = idx[val_end:]
 
-        F_train, y_train = get_data(train_blocks)
-        F_val, y_val = get_data([val_block])
-        F_test, y_test = get_data([test_block])
+    F_train, y_train = F_all[train_idx], y_all[train_idx]
+    F_val, y_val = F_all[val_idx], y_all[val_idx]
+    F_test, y_test = F_all[test_idx], y_all[test_idx]
 
-        F_train_scaled, scaler = standard_scale_features(F_train, return_scaler=True)
-        F_val_scaled = standard_scale_features(F_val, scaler=scaler)
-        F_test_scaled = standard_scale_features(F_test, scaler=scaler)
+    F_train_scaled, scaler = standard_scale_features(F_train, return_scaler=True)
+    F_val_scaled = standard_scale_features(F_val, scaler=scaler)
+    F_test_scaled = standard_scale_features(F_test, scaler=scaler)
 
-        scaler_path = os.path.join(args.save_dir, f"{subj_name}_fold{test_block}_{args.category}_scaler.pkl")
-        with open(scaler_path, "wb") as f:
-            pickle.dump(scaler, f)
+    scaler_path = os.path.join(args.save_dir, f"{subj_name}_{args.category}_scaler.pkl")
+    with open(scaler_path, "wb") as f:
+        pickle.dump(scaler, f)
 
-        ds_train = TensorDataset(
-            torch.tensor(F_train_scaled, dtype=torch.float32),
-            torch.tensor(y_train),
-        )
-        ds_val = TensorDataset(
-            torch.tensor(F_val_scaled, dtype=torch.float32),
-            torch.tensor(y_val),
-        )
-        ds_test = TensorDataset(
-            torch.tensor(F_test_scaled, dtype=torch.float32),
-            torch.tensor(y_test),
-        )
+    ds_train = TensorDataset(torch.tensor(F_train_scaled, dtype=torch.float32),
+                             torch.tensor(y_train))
+    ds_val = TensorDataset(torch.tensor(F_val_scaled, dtype=torch.float32),
+                           torch.tensor(y_val))
+    ds_test = TensorDataset(torch.tensor(F_test_scaled, dtype=torch.float32),
+                            torch.tensor(y_test))
 
-        dl_train = DataLoader(ds_train, args.bs, shuffle=True)
-        dl_val = DataLoader(ds_val, args.bs)
-        dl_test = DataLoader(ds_test, args.bs)
+    dl_train = DataLoader(ds_train, args.bs, shuffle=True)
+    dl_val = DataLoader(ds_val, args.bs)
+    dl_test = DataLoader(ds_test, args.bs)
 
-        model = GLFNetMLP(OCCIPITAL_IDX, out_dim=num_classes).to(device)
-        opt = optim.Adam(model.parameters(), lr=args.lr)
-        scheduler = ReduceLROnPlateau(opt, mode="max", factor=0.8, patience=10, verbose=True)
-        criterion = nn.CrossEntropyLoss()
+    model = GLFNetMLP(OCCIPITAL_IDX, out_dim=num_classes).to(device)
+    opt = optim.Adam(model.parameters(), lr=args.lr)
+    scheduler = ReduceLROnPlateau(opt, mode="max", factor=0.8, patience=10, verbose=True)
+    criterion = nn.CrossEntropyLoss()
 
-        if args.use_wandb:
-            wandb.init(project=PROJECT_NAME, name=f"{subj_name}_fold{test_block}_{args.category}", config=vars(args))
-            wandb.watch(model, log="all")
+    if args.use_wandb:
+        wandb.init(project=PROJECT_NAME, name=f"{subj_name}_{args.category}", config=vars(args))
+        wandb.watch(model, log="all")
 
-        best_val = 0.0
-        for ep in tqdm(range(1, args.epochs + 1), desc=f"Fold {test_block}"):
-            model.train(); tl = ta = 0
-            for xf, yb in dl_train:
-                xf, yb = xf.to(device), yb.to(device)
-                opt.zero_grad(); pred = model(xf)
-                loss = criterion(pred, yb); loss.backward(); opt.step()
-                tl += loss.item() * len(yb); ta += (pred.argmax(1) == yb).sum().item()
-            train_acc = ta / len(ds_train)
+    best_val = 0.0
+    for ep in tqdm(range(1, args.epochs + 1)):
+        model.train(); tl = ta = 0
+        for xf, yb in dl_train:
+            xf, yb = xf.to(device), yb.to(device)
+            opt.zero_grad(); pred = model(xf)
+            loss = criterion(pred, yb); loss.backward(); opt.step()
+            tl += loss.item() * len(yb); ta += (pred.argmax(1) == yb).sum().item()
+        train_acc = ta / len(ds_train)
 
-            model.eval(); vl = va = 0
-            with torch.no_grad():
-                for xf, yb in dl_val:
-                    xf, yb = xf.to(device), yb.to(device)
-                    pred = model(xf)
-                    vloss = criterion(pred, yb)
-                    vl += vloss.item() * len(yb)
-                    va += (pred.argmax(1) == yb).sum().item()
-            val_acc = va / len(ds_val)
-            val_loss = vl / len(ds_val)
-            scheduler.step(val_acc)
-            # Get current learning rate for logging
-            current_lr = opt.param_groups[0]["lr"]
-
-            print(
-                f"Fold {test_block} | Epoch {ep:02d} - train_acc: {train_acc:.3f}, train_loss: {tl/len(ds_train):.3f}, val_acc: {val_acc:.3f}, val_loss: {val_loss:.3f}, lr: {current_lr:.2e}"
-            )
-
-            if val_acc > best_val:
-                best_val = val_acc
-                os.makedirs(args.save_dir, exist_ok=True)
-                torch.save(
-                    model.state_dict(),
-                    f"{args.save_dir}/{subj_name}_fold{test_block}_{args.category}_best.pt",
-                )
-
-            if args.use_wandb:
-                # Log metrics and learning rate
-                wandb.log({
-                    "epoch": ep,
-                    "train/acc": train_acc,
-                    "val/acc": val_acc,
-                    "train/loss": tl / len(ds_train),
-                    "val/loss": val_loss,
-                    "lr": current_lr,
-                })
-
-        model.load_state_dict(torch.load(f"{args.save_dir}/{subj_name}_fold{test_block}_{args.category}_best.pt"))
-        model.eval(); test_acc = 0
-        preds, labels_test = [], []
+        model.eval(); vl = va = 0
         with torch.no_grad():
-            for xf, yb in dl_test:
+            for xf, yb in dl_val:
                 xf, yb = xf.to(device), yb.to(device)
-                out = model(xf)
-                pred_labels = out.argmax(1)
-                test_acc += (pred_labels == yb).sum().item()
-                preds.append(pred_labels.cpu())
-                labels_test.append(yb.cpu())
-        preds = torch.cat(preds).numpy()
-        labels_test = torch.cat(labels_test).numpy()
-        cm = confusion_matrix(labels_test, preds)
-        test_acc /= len(ds_test)
-        acc_folds.append(test_acc)
-        print(f"[{subj_name}-Fold{test_block}] BEST test_acc={test_acc:.3f}")
-        print("Confusion matrix:\n", cm)
+                pred = model(xf)
+                vloss = criterion(pred, yb)
+                vl += vloss.item() * len(yb)
+                va += (pred.argmax(1) == yb).sum().item()
+        val_acc = va / len(ds_val)
+        val_loss = vl / len(ds_val)
+        scheduler.step(val_acc)
+        current_lr = opt.param_groups[0]["lr"]
+
+        print(f"Epoch {ep:02d} - train_acc: {train_acc:.3f}, train_loss: {tl/len(ds_train):.3f}, "
+              f"val_acc: {val_acc:.3f}, val_loss: {val_loss:.3f}, lr: {current_lr:.2e}")
+
+        if val_acc > best_val:
+            best_val = val_acc
+            os.makedirs(args.save_dir, exist_ok=True)
+            torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_{args.category}_best.pt")
+
         if args.use_wandb:
-            class_names = [str(c) for c in np.unique(labels)]
-            cm_plot = wandb.plot.confusion_matrix(probs=None, y_true=labels_test, preds=preds, class_names=class_names)
-            wandb.log({"test/acc": test_acc, "test/confusion_matrix": cm_plot})
-            wandb.finish()
+            wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc,
+                       "train/loss": tl / len(ds_train), "val/loss": val_loss,
+                       "lr": current_lr})
 
-    print(f"Subject {subj_name}: mean±std test acc = {np.mean(acc_folds):.3f} ± {np.std(acc_folds):.3f}")
-
-
+    model.load_state_dict(torch.load(f"{args.save_dir}/{subj_name}_{args.category}_best.pt"))
+    model.eval(); test_acc = 0
+    preds, labels_test = [], []
+    with torch.no_grad():
+        for xf, yb in dl_test:
+            xf, yb = xf.to(device), yb.to(device)
+            out = model(xf)
+            pred_labels = out.argmax(1)
+            test_acc += (pred_labels == yb).sum().item()
+            preds.append(pred_labels.cpu())
+            labels_test.append(yb.cpu())
+    preds = torch.cat(preds).numpy()
+    labels_test = torch.cat(labels_test).numpy()
+    cm = confusion_matrix(labels_test, preds)
+    test_acc /= len(ds_test)
+    print(f"Test accuracy = {test_acc:.3f}")
+    print("Confusion matrix:\n", cm)
+    if args.use_wandb:
+        class_names = [str(c) for c in np.unique(labels)]
+        cm_plot = wandb.plot.confusion_matrix(probs=None, y_true=labels_test, preds=preds, class_names=class_names)
+        wandb.log({"test/acc": test_acc, "test/confusion_matrix": cm_plot})
+        wandb.finish()
 if __name__ == "__main__":
     main()
+
