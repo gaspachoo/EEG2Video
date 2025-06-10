@@ -44,13 +44,7 @@ We detect on 3 types of windows :
 
     Script : `EEG_preprocessing/extract_DE_PSD_features_1per2s.py`
 
-- Detect features on 1s windows without overlapping.
-
-    Shapes adapted to (block, concept, repetition, window, channel, band).
-
-    Script : `EEG_preprocessing/extract_DE_PSD_features_1per1s.py`
-
-- Detect features on 1s windows without overlapping.
+- Detect features on 500ms windows with a 250 ms overlap.
 
     Shapes adapted to (block, concept, repetition, window, channel, band).
 
@@ -81,9 +75,8 @@ Models path : `Gaspard/GLMNet/models.py`
 
 ### Training :
 
-Training uses 2s raw EEGs and 1&nbsp;s windows for DE/PSD features by default. Pass
-`--window 500ms` to instead use the 500&nbsp;ms sliding‑window data stored in
-`Segmented_500ms_sw` and `DE_500ms_sw`.
+Training uses 2s raw EEGs split into 500&nbsp;ms sliding windows for DE/PSD features.
+The pre‑segmented data is stored in `Segmented_500ms_sw` and `DE_500ms_sw`.
 
 Script : `Gaspard/GLMNet/train_glmnet.py`
 
@@ -94,8 +87,6 @@ trained with `Gaspard/GLMNet/train_glfnet_mlp.py`.
 - Both trainers accept a `--scheduler` argument (`steplr`,
   `reducelronplateau`, `cosine`) and a `--min_lr` value to set the learning rate
   floor.
-- Use `--window 500ms` to train on the 500&nbsp;ms sliding windows instead of the
-  default 1&nbsp;s segments.
 
 ### Inference :
     

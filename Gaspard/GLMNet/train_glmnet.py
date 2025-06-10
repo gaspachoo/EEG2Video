@@ -32,15 +32,14 @@ PROJECT_NAME = "eeg2video-GLMNetv3"  # <‑‑ change if you need another projec
 
 # ------------------------------ constants ---------------------------------
 OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
-RAW_T = 200 # time points in raw EEG, 1 second at 200Hz
 
 
 # ------------------------------ utils -------------------------------------
 def parse_args():
      #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     p = argparse.ArgumentParser()
-    p.add_argument("--raw_dir",  default="./data/Preprocessing/Segmented_Rawf_200Hz_2s", help="directory with .npy files")
-    p.add_argument("--feat_dir", default="./data/Preprocessing/DE_1per1s/", help="directory with .npy files")
+    p.add_argument("--raw_dir",  default="./data/Preprocessing/Segmented_500ms_sw", help="directory with .npy files")
+    p.add_argument("--feat_dir", default="./data/Preprocessing/DE_500ms_sw", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
     p.add_argument("--category", default="label",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
     p.add_argument("--save_dir", default="./Gaspard/checkpoints/glmnet")
@@ -59,21 +58,11 @@ def parse_args():
     p.add_argument("--use_wandb", action="store_true")
     p.add_argument(
         "--window",
-        choices=["1s", "500ms"],
-        default="1s",
+        choices=["500ms"],
+        default="500ms",
         help="length of EEG windows used for training",
     )
     return p.parse_args()
-
-
-def split_raw_2s_to_1s(raw2s: np.ndarray) -> np.ndarray:
-    """Convert (7,40,5,62,400) 2‑second raw → (7,40,5,2,62,200).
-    The new dim axis=3 indexes the first / second second.
-    """
-    assert raw2s.shape[-1] == 2 * RAW_T, "last dim must be 400 (=2 s)"
-    first  = raw2s[..., :RAW_T]          # (7,40,5,62,200)
-    second = raw2s[..., RAW_T: 2*RAW_T]  # (7,40,5,62,200)
-    return np.stack([first, second], axis=3)  # (7,40,5,2,62,200)
 
 def reshape_labels(labels: np.ndarray, n_win: int) -> np.ndarray:
     """Expand labels to match the EEG window dimension."""
@@ -105,11 +94,6 @@ def format_labels(labels: np.ndarray, category:str) -> np.ndarray:
 # ------------------------------ main -------------------------------------
 def main():
     args = parse_args()
-    if args.window == "500ms":
-        if args.raw_dir == "./data/Preprocessing/Segmented_Rawf_200Hz_2s":
-            args.raw_dir = "./data/Preprocessing/Segmented_500ms_sw"
-        if args.feat_dir == "./data/Preprocessing/DE_1per1s/":
-            args.feat_dir = "./data/Preprocessing/DE_500ms_sw"
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
     
@@ -132,16 +116,9 @@ def main():
         dist_b = {int(u): int(c) for u, c in zip(u_b, c_b)}
         print(f"Block {b} distribution: {dist_b}")
 
-    if args.window == "1s":
-        raw = split_raw_2s_to_1s(raw)
-        if feat.ndim == 5:
-            feat = np.repeat(feat[:, :, :, None, :, :], 2, axis=3)
-        n_win = 2
-        time_len = RAW_T
-    else:
-        n_win = raw.shape[3]
-        time_len = raw.shape[-1]
-        assert feat.shape[:4] == raw.shape[:4], "Feature/EEG mismatch"
+    n_win = raw.shape[3]
+    time_len = raw.shape[-1]
+    assert feat.shape[:4] == raw.shape[:4], "Feature/EEG mismatch"
 
     labels = format_labels(reshape_labels(labels_raw, n_win), args.category)
     print(labels.shape)
