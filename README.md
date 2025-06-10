@@ -89,6 +89,9 @@ An alternative, lighter model that relies only on spectral features can be
 trained with `Gaspard/GLMNet/train_glfnet_mlp.py`.
 
 - Raw EEGs are normalized per channel using the training split statistics.
+- Both trainers accept a `--scheduler` argument (`steplr`,
+  `reducelronplateau`, `cosine`) and a `--min_lr` value to set the learning rate
+  floor.
 
 ### Inference :
     

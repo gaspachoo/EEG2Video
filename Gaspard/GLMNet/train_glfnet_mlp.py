@@ -9,7 +9,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 import wandb
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, CosineAnnealingLR
 import pickle
 from sklearn.metrics import confusion_matrix
 
@@ -50,6 +50,15 @@ def parse_args():
     p.add_argument("--epochs", type=int, default=50)
     p.add_argument("--bs", type=int, default=128)
     p.add_argument("--lr", type=float, default=1e-4)
+    p.add_argument("--min_lr", type=float, default=1e-6,
+                   help="Minimum learning rate for the scheduler")
+    p.add_argument(
+        "--scheduler",
+        type=str,
+        choices=["steplr", "reducelronplateau", "cosine"],
+        default="reducelronplateau",
+        help="Type of learning rate scheduler",
+    )
     p.add_argument("--use_wandb", action="store_true")
     return p.parse_args()
 
@@ -144,7 +153,17 @@ def main():
 
     model = GLFNetMLP(OCCIPITAL_IDX, out_dim=num_classes).to(device)
     opt = optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = ReduceLROnPlateau(opt, mode="max", factor=0.8, patience=10, verbose=True)
+
+    if args.scheduler == "reducelronplateau":
+        scheduler = ReduceLROnPlateau(
+            opt, mode="max", factor=0.8, patience=10, verbose=True, min_lr=args.min_lr
+        )
+    elif args.scheduler == "steplr":
+        scheduler = StepLR(opt, step_size=10, gamma=0.5)
+    elif args.scheduler == "cosine":
+        scheduler = CosineAnnealingLR(opt, T_max=args.epochs // 2, eta_min=args.min_lr)
+    else:
+        scheduler = None
     criterion = nn.CrossEntropyLoss()
 
     if args.use_wandb:
@@ -171,7 +190,14 @@ def main():
                 va += (pred.argmax(1) == yb).sum().item()
         val_acc = va / len(ds_val)
         val_loss = vl / len(ds_val)
-        scheduler.step(val_acc)
+        if scheduler is not None:
+            if args.scheduler == "reducelronplateau":
+                scheduler.step(val_acc)
+            else:
+                scheduler.step()
+            for pg in opt.param_groups:
+                if pg["lr"] < args.min_lr:
+                    pg["lr"] = args.min_lr
         current_lr = opt.param_groups[0]["lr"]
 
         print(f"Epoch {ep:02d} - train_acc: {train_acc:.3f}, train_loss: {tl/len(ds_train):.3f}, "
