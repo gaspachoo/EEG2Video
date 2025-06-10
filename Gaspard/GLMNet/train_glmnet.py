@@ -98,7 +98,7 @@ def main():
     subj_name = filename.replace(".npy", "")
 
     raw2s = np.load(os.path.join(args.raw_dir, filename))  # (7,40,5,62,400)
-    feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,62,5)
+    feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,2,62,5)
     labels_raw = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
