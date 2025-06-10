@@ -28,7 +28,7 @@ from Gaspard.GLMNet.modules.utils_glmnet import (
 
 
 # -------- W&B -------------------------------------------------------------
-PROJECT_NAME = "eeg2video-GLMNetv2"  # <‑‑ change if you need another project
+PROJECT_NAME = "eeg2video-GLMNetv3"  # <‑‑ change if you need another project
 
 # ------------------------------ constants ---------------------------------
 OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
