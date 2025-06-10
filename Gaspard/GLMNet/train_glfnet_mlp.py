@@ -30,7 +30,7 @@ OCCIPITAL_IDX = list(range(50, 62))
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--feat_dir", default="./data/Preprocessing/DE_1per1s/", help="directory with .npy files")
+    p.add_argument("--feat_dir", default="./data/Preprocessing/DE_500ms_sw", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
     p.add_argument(
         "--category",
@@ -62,8 +62,8 @@ def parse_args():
     p.add_argument("--use_wandb", action="store_true")
     p.add_argument(
         "--window",
-        choices=["1s", "500ms"],
-        default="1s",
+        choices=["500ms"],
+        default="500ms",
         help="length of EEG windows used for training",
     )
     return p.parse_args()
@@ -99,8 +99,6 @@ def format_labels(labels: np.ndarray, category: str) -> np.ndarray:
 
 def main():
     args = parse_args()
-    if args.window == "500ms" and args.feat_dir == "./data/Preprocessing/DE_1per1s/":
-        args.feat_dir = "./data/Preprocessing/DE_500ms_sw"
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
 
@@ -110,14 +108,8 @@ def main():
     subj_name = filename.replace(".npy", "")
 
     feat = np.load(os.path.join(args.feat_dir, filename))
-    if args.window == "1s":
-        if feat.ndim == 5:
-            feat = np.repeat(feat[:, :, :, None, :, :], 2, axis=3)
-        n_win = 2
-        assert feat.ndim == 6 and feat.shape[:4] == (7, 40, 5, n_win), "Unexpected feature shape"
-    else:
-        n_win = feat.shape[3]
-        assert feat.ndim == 6 and feat.shape[:4] == (7, 40, 5, n_win), "Unexpected feature shape"
+    n_win = feat.shape[3]
+    assert feat.ndim == 6 and feat.shape[:4] == (7, 40, 5, n_win), "Unexpected feature shape"
 
     labels_raw = np.load(f"{args.label_dir}/All_video_{args.category}.npy")
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
