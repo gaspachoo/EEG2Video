@@ -203,12 +203,14 @@ def main():
             val_acc = va / len(ds_val)
             val_loss = vl / len(ds_val)
             scheduler.step(val_acc)
+            # Get current learning rate for logging
+            current_lr = opt.param_groups[0]["lr"]
 
             # Print training progress
             print(
                 f"Fold {test_block} | Epoch {ep:02d} - "
                 f"train_acc: {train_acc:.3f}, train_loss: {tl/len(ds_train):.3f}, "
-                f"val_acc: {val_acc:.3f}, val_loss: {val_loss:.3f}"
+                f"val_acc: {val_acc:.3f}, val_loss: {val_loss:.3f}, lr: {current_lr:.2e}"
             )
 
             if val_acc > best_val:
@@ -217,8 +219,15 @@ def main():
                 torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_fold{test_block}_{args.category}_best.pt")
 
             if args.use_wandb:
-                wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc,
-                           "train/loss": tl / len(ds_train), "val/loss": val_loss})
+                # Log metrics and learning rate
+                wandb.log({
+                    "epoch": ep,
+                    "train/acc": train_acc,
+                    "val/acc": val_acc,
+                    "train/loss": tl / len(ds_train),
+                    "val/loss": val_loss,
+                    "lr": current_lr,
+                })
 
         # Test
         
