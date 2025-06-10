@@ -60,18 +60,24 @@ def parse_args():
         help="Type of learning rate scheduler",
     )
     p.add_argument("--use_wandb", action="store_true")
+    p.add_argument(
+        "--window",
+        choices=["1s", "500ms"],
+        default="1s",
+        help="length of EEG windows used for training",
+    )
     return p.parse_args()
 
 
-def reshape_labels(labels: np.ndarray) -> np.ndarray:
+def reshape_labels(labels: np.ndarray, n_win: int) -> np.ndarray:
     if labels.shape[1] == 40:
         labels = labels[..., None, None]
         labels = np.repeat(labels, 5, axis=2)
     else:
         assert labels.shape[1] == 200, "Labels must be (7,40,200) or (7,40)"
         labels = labels.reshape(-1, 40, 5)[..., None]
-    labels = np.repeat(labels, 2, axis=3)
-    assert labels.shape == (7, 40, 5, 2)
+    labels = np.repeat(labels, n_win, axis=3)
+    assert labels.shape[:3] == (7, 40, 5) and labels.shape[3] == n_win
     return labels
 
 
@@ -93,6 +99,8 @@ def format_labels(labels: np.ndarray, category: str) -> np.ndarray:
 
 def main():
     args = parse_args()
+    if args.window == "500ms" and args.feat_dir == "./data/Preprocessing/DE_1per1s/":
+        args.feat_dir = "./data/Preprocessing/DE_500ms_sw"
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
 
@@ -101,17 +109,22 @@ def main():
     filename = "sub3.npy"
     subj_name = filename.replace(".npy", "")
 
-    feat = np.load(os.path.join(args.feat_dir, filename))  # (7,40,5,2,62,5)
-    if feat.ndim == 5:
-        feat = np.repeat(feat[:, :, :, None, :, :], 2, axis=3)
-    assert feat.ndim == 6 and feat.shape[:4] == (7, 40, 5, 2), "Unexpected feature shape"
+    feat = np.load(os.path.join(args.feat_dir, filename))
+    if args.window == "1s":
+        if feat.ndim == 5:
+            feat = np.repeat(feat[:, :, :, None, :, :], 2, axis=3)
+        n_win = 2
+        assert feat.ndim == 6 and feat.shape[:4] == (7, 40, 5, n_win), "Unexpected feature shape"
+    else:
+        n_win = feat.shape[3]
+        assert feat.ndim == 6 and feat.shape[:4] == (7, 40, 5, n_win), "Unexpected feature shape"
 
     labels_raw = np.load(f"{args.label_dir}/All_video_{args.category}.npy")
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
     print("Label distribution:", label_distribution)
 
-    labels = format_labels(reshape_labels(labels_raw), args.category)
+    labels = format_labels(reshape_labels(labels_raw, n_win), args.category)
     num_classes = len(np.unique(labels))
 
     acc_folds = []
