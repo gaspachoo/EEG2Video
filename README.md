@@ -124,7 +124,7 @@ The model is just a rewriting of original model : `Gaspard/Seq2Seq/models/transf
 
 - We use the generated EEG embeddings from part  as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
 
-    Script : `Gaspard/Seq2Seq/train_seq2seq.py`
+    Script : `Gaspard/Seq2Seq/train_seq2seq_v2.py`
 
  ### Inference : 
 
