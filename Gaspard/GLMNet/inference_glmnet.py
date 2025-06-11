@@ -103,9 +103,9 @@ if __name__ == "__main__":
     
     parser.add_argument('--raw_dir', default="./data/Preprocessing/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
     parser.add_argument('--feat_dir', default="./data/Preprocessing/DE_500ms_sw", help='directory of pre-windowed feature .npy files')
-    parser.add_argument('--checkpoint_path', default="./Gaspard/checkpoints/glmnet/sub3_fold0_color_best.pt", help='path to GLMNet checkpoint')
-    parser.add_argument('--scaler_path', default="./Gaspard/checkpoints/glmnet/sub3_fold0_color_scaler.pkl", help='path to saved StandardScaler')
-    parser.add_argument('--stats_path', default="./Gaspard/checkpoints/glmnet/sub3_fold0_color_rawnorm.npz", help='path to raw EEG normalization stats')
+    parser.add_argument('--checkpoint_path', default="./Gaspard/checkpoints/glmnet/sub3_label_cluster_best.pt", help='path to GLMNet checkpoint')
+    parser.add_argument('--scaler_path', default="./Gaspard/checkpoints/glmnet/sub3_lebel_cluster_scaler.pkl", help='path to saved StandardScaler')
+    parser.add_argument('--stats_path', default="./Gaspard/checkpoints/glmnet/sub3_label_cluster_rawnorm.npz", help='path to raw EEG normalization stats')
     parser.add_argument('--output_dir', default="./data/GLMNet/EEG_embeddings_sw", help='where to save concatenated embeddings')
     args = parser.parse_args()
     generate_all_embeddings(
