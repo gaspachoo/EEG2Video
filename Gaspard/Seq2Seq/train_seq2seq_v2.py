@@ -24,6 +24,8 @@ def parse_args():
     parser.add_argument('--save_path',     type=str,
                         default="./Gaspard/checkpoints/seq2seq",
                         help='Dossier où sauvegarder le checkpoint final')
+    parser.add_argument('--stats_path',    type=str, default=None,
+                        help="Où sauvegarder mean_z et std_z (défaut: save_path)")
     parser.add_argument('--ckpt_name',     type=str,   default='seq2seq_v2_color.pth',help='Name of the saved checkpoint file')
     parser.add_argument('--use_wandb',     action='store_true',
                         help='Activer la journalisation sur Weights & Biases')
@@ -49,7 +51,10 @@ def parse_args():
     parser.add_argument('--normalize',     action='store_true',
                         help='Activer la normalisation des latents vidéo (calculer mean/std global)')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.stats_path is None:
+        args.stats_path = args.save_path
+    return args
 
 # ------------------ Préparation des données ------------------
 
@@ -85,6 +90,8 @@ def load_and_prepare_data(args):
         std_z  = z0_all.std(axis=(0,2,3,4), keepdims=True) + 1e-6
         z0_all_norm = (z0_all - mean_z) / std_z
         z0_flat = z0_all_norm.reshape(z0_all_norm.shape[0], 6, -1)  # (1400,6,9216)
+        os.makedirs(args.stats_path, exist_ok=True)
+        np.savez(os.path.join(args.stats_path, 'stats.npz'), mean=mean_z, std=std_z)
     else:
         mean_z, std_z = None, None
         z0_flat = z0_all.reshape(z0_all.shape[0], 6, -1)             # (1400,6,9216)

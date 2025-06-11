@@ -67,7 +67,15 @@ def main():
                         help='Where to save predicted latents')
     parser.add_argument('--device',        default='cuda',
                         help='cuda or cpu')
+    parser.add_argument('--stats_path',    type=str,
+                        help='Directory containing stats.npz with mean/std')
     args = parser.parse_args()
+
+    stats = None
+    if args.stats_path:
+        stats_file = os.path.join(args.stats_path, 'stats.npz')
+        if os.path.isfile(stats_file):
+            stats = np.load(stats_file)
 
     os.makedirs(args.output_dir, exist_ok=True)
     device = torch.device(args.device if torch.cuda.is_available() and args.device=='cuda' else 'cpu')
@@ -83,8 +91,13 @@ def main():
         emb_block = emb_flat[block_id]             # (40,5,7,512)
 
         pred = inf_seq2seq(model, emb_block, device)
+
+        if stats is not None:
+            mean = stats['mean']
+            std = stats['std']
+            pred = pred * std + mean
+
         out_path = os.path.join(args.output_dir, f'block{block_id}.npy')
-        
 
         np.save(out_path, pred)
         print(f"Saved predicted latents at {out_path}, shape {pred.shape}")

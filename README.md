@@ -123,6 +123,7 @@ The model is just a rewriting of original model : `Gaspard/Seq2Seq/models/transf
 #### 2. Use Seq2Seq model to align EEGs embeddings and video latents
 
 - We use the generated EEG embeddings from part  as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
+- The option `--stats_path` defines where to save `mean_z` and `std_z` when `--normalize` is active (default is `--save_path`).
 
     Script : `Gaspard/Seq2Seq/train_seq2seq.py`
 
@@ -131,6 +132,7 @@ The model is just a rewriting of original model : `Gaspard/Seq2Seq/models/transf
 We use the generated EEG embeddings from part 2 to generate predicted latents.
 
 Script : `Gaspard/Seq2Seq/inference_seq2seq_v2.py`
+- During inference, provide the same `--stats_path` to restore latents to their original scale.
 
 
 
