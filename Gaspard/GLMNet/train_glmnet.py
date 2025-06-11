@@ -41,10 +41,10 @@ def parse_args():
     p.add_argument("--raw_dir",  default="./data/Preprocessing/Segmented_500ms_sw", help="directory with .npy files")
     p.add_argument("--feat_dir", default="./data/Preprocessing/DE_500ms_sw", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
-    p.add_argument("--category", default="label",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
+    p.add_argument("--category", default="label_cluster",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
     p.add_argument("--save_dir", default="./Gaspard/checkpoints/glmnet")
-    p.add_argument("--epochs",   type=int, default=50)
-    p.add_argument("--bs",       type=int, default=128)
+    p.add_argument("--epochs",   type=int, default=500)
+    p.add_argument("--bs",       type=int, default=200)
     p.add_argument("--lr",       type=float, default=1e-4)
     p.add_argument("--min_lr",   type=float, default=1e-6,
                    help="Minimum learning rate for the scheduler")
@@ -217,6 +217,7 @@ def main():
             best_val = val_acc
             os.makedirs(args.save_dir, exist_ok=True)
             torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_{args.category}_best.pt")
+            print(f"New best model saved at epoch {ep} with val_acc={val_acc:.3f}")
 
         if args.use_wandb:
             wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc,
