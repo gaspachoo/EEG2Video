@@ -21,7 +21,7 @@ project_root = os.path.dirname(
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from Gaspard.GLMNet.modules.utils_glfnet_mlp import GLFNetMLP
+from Old.Gaspard.GLMNet.utils_glfnet_mlp import GLFNetMLP
 from Gaspard.GLMNet.modules.utils_glmnet import standard_scale_features
 
 PROJECT_NAME = "eeg2video-GLFNetMLP"

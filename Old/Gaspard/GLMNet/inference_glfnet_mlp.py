@@ -9,7 +9,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from Gaspard.GLMNet.modules.utils_glfnet_mlp import GLFNetMLP
+from Old.Gaspard.GLMNet.utils_glfnet_mlp import GLFNetMLP
 from Gaspard.GLMNet.modules.utils_glmnet import standard_scale_features
 
 OCCIPITAL_IDX = list(range(50, 62))
