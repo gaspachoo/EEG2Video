@@ -146,8 +146,12 @@ def train_seq2seq(args):
             src = src.to(device)   # (B,7,512)
             tgt = tgt.to(device)   # (B,6,9216)
 
+            # decoder inputs are shifted by one step; first step is zeros
+            tgt_in = torch.zeros_like(tgt)
+            tgt_in[:, 1:] = tgt[:, :-1]
+
             optimizer.zero_grad()
-            out = model(src, tgt)  # (B,6,9216)
+            out = model(src, tgt_in)  # (B,6,9216)
             loss = criterion(out, tgt)
             loss.backward()
             optimizer.step()
@@ -162,7 +166,12 @@ def train_seq2seq(args):
             for src, tgt in tqdm(val_loader, desc=f"Val Epoch {epoch}"):
                 src = src.to(device)
                 tgt = tgt.to(device)
-                out = model(src, tgt)
+
+                # same shift logic as in training
+                tgt_in = torch.zeros_like(tgt)
+                tgt_in[:, 1:] = tgt[:, :-1]
+
+                out = model(src, tgt_in)
                 val_loss += criterion(out, tgt).item()
         avg_val = val_loss / len(val_loader)
         scheduler.step(avg_val)
@@ -188,7 +197,12 @@ def train_seq2seq(args):
         for src, tgt in tqdm(test_loader, desc="Test"):
             src = src.to(device)
             tgt = tgt.to(device)
-            out = model(src, tgt)
+
+            # shift targets to provide decoder inputs
+            tgt_in = torch.zeros_like(tgt)
+            tgt_in[:, 1:] = tgt[:, :-1]
+
+            out = model(src, tgt_in)
             test_loss += criterion(out, tgt).item()
     avg_test = test_loss / len(test_loader)
     print(f"Test final  ► test_loss={avg_test:.4f}")

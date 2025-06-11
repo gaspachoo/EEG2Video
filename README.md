@@ -122,8 +122,9 @@ The model is just a rewriting of original model : `Gaspard/Seq2Seq/models/transf
 
 #### 2. Use Seq2Seq model to align EEGs embeddings and video latents
 
-- We use the generated EEG embeddings from part  as source(shape : [batch, 7, 512]) and the generated latents from part 3.1 as source (shape : [batch, 6, 9216]) to train the model.
-- The option `--stats_path` defines where to save `mean_z` and `std_z` when `--normalize` is active (default is `--save_path`).
+- We use the generated EEG embeddings from part 2 as source (shape : `[batch, 7, 512]`) and the video latents from part 3.1 as target (shape : `[batch, 6, 9216]`).
+- Training shifts the target sequence by one step: `tgt_in[:,1:] = tgt[:,:-1]` and the first step is filled with zeros. The decoder therefore receives the previous latent at each time step instead of the ground truth.
+- The option `--stats_path` defines where to save `mean_z` and `std_z` when `--normalize` is active (default: `--save_path`). The resulting `stats.npz` must also be provided at inference to restore the latents to their original scale.
 
     Script : `Gaspard/Seq2Seq/train_seq2seq_v2.py`
 
