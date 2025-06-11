@@ -60,12 +60,6 @@ def parse_args():
         help="Type of learning rate scheduler",
     )
     p.add_argument("--use_wandb", action="store_true")
-    p.add_argument(
-        "--window",
-        choices=["500ms"],
-        default="500ms",
-        help="length of EEG windows used for training",
-    )
     return p.parse_args()
 
 

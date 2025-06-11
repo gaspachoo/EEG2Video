@@ -56,12 +56,6 @@ def parse_args():
         help="Type of learning rate scheduler",
     )
     p.add_argument("--use_wandb", action="store_true")
-    p.add_argument(
-        "--window",
-        choices=["500ms"],
-        default="500ms",
-        help="length of EEG windows used for training",
-    )
     return p.parse_args()
 
 def reshape_labels(labels: np.ndarray, n_win: int) -> np.ndarray:
@@ -109,12 +103,6 @@ def main():
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
     print("Label distribution:", label_distribution)
-
-    # Display label distribution for each block
-    for b in range(labels_raw.shape[0]):
-        u_b, c_b = np.unique(labels_raw[b], return_counts=True)
-        dist_b = {int(u): int(c) for u, c in zip(u_b, c_b)}
-        print(f"Block {b} distribution: {dist_b}")
 
     n_win = raw.shape[3]
     time_len = raw.shape[-1]
@@ -224,9 +212,6 @@ def main():
                 if pg["lr"] < args.min_lr:
                     pg["lr"] = args.min_lr
         current_lr = opt.param_groups[0]["lr"]
-
-        print(f"Epoch {ep:02d} - train_acc: {train_acc:.3f}, train_loss: {tl/len(ds_train):.3f}, "
-              f"val_acc: {val_acc:.3f}, val_loss: {val_loss:.3f}, lr: {current_lr:.2e}")
 
         if val_acc > best_val:
             best_val = val_acc
