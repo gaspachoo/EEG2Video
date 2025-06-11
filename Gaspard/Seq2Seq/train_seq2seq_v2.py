@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--save_path',     type=str,
                         default="./Gaspard/checkpoints/seq2seq",
                         help='Dossier où sauvegarder le checkpoint final')
-    parser.add_argument('--stats_path',    type=str, default=None,
+    parser.add_argument('--stats_path',    type=str, default="./Gaspard/checkpoints/seq2seq",
                         help="Où sauvegarder mean_z et std_z (défaut: save_path)")
     parser.add_argument('--ckpt_name',     type=str,   default='seq2seq_v2_color.pth',help='Name of the saved checkpoint file')
     parser.add_argument('--use_wandb',     action='store_true',
