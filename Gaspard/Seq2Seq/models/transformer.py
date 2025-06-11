@@ -36,3 +36,43 @@ class Seq2SeqTransformer(nn.Module):
         memory = self.transformer_encoder(src)  # (B,7,d_model)
         output = self.transformer_decoder(tgt, memory, tgt_mask=tgt_mask)  # (B,6,d_model)
         return self.out_linear(output)  # (B,6,9216)
+
+    def forward_autoreg(self, src, seq_len=6):
+        """Autoregressive inference without teacher forcing.
+
+        Parameters
+        ----------
+        src : Tensor
+            EEG embeddings of shape ``(B, 7, 512)``.
+        seq_len : int, optional
+            Number of latent frames to generate (default: 6).
+
+        Returns
+        -------
+        Tensor
+            Predicted latent sequence of shape ``(B, seq_len, 9216)``.
+        """
+
+        batch_size = src.size(0)
+
+        # encode source sequence
+        src = self.input_proj(src)
+        src = self.pos_encoder(src)
+        memory = self.transformer_encoder(src)  # (B,7,d_model)
+
+        # first decoder token is zeros
+        ys = torch.zeros(batch_size, 1, self.output_proj.out_features, device=src.device)
+        preds = []
+
+        for _ in range(seq_len):
+            tgt = self.pos_decoder(ys)
+            tgt_mask = nn.Transformer.generate_square_subsequent_mask(ys.size(1)).to(src.device)
+            out = self.transformer_decoder(tgt, memory, tgt_mask=tgt_mask)
+            last = out[:, -1:, :]
+            pred = self.out_linear(last)
+            preds.append(pred)
+
+            next_in = self.output_proj(pred)
+            ys = torch.cat((ys, next_in), dim=1)
+
+        return torch.cat(preds, dim=1)
