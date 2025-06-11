@@ -31,7 +31,7 @@ def parse_args():
     # Hyperparameters
     parser.add_argument('--epochs',        type=int,   default=300,
                         help='Nombre d\u2019époques')
-    parser.add_argument('--batch_size',    type=int,   default=64,
+    parser.add_argument('--batch_size',    type=int,   default=32,
                         help='Taille de batch')
     parser.add_argument('--lr',            type=float, default=5e-4,
                         help='Taux d\u2019apprentissage initial')
@@ -127,7 +127,7 @@ def train_seq2seq(args):
     criterion = nn.MSELoss()
 
     if args.use_wandb:
-        wandb.init(project="eeg2video-seq2seq-v2", config=vars(args))
+        wandb.init(project="eeg2video-Seq2Seqv2", config=vars(args))
 
     best_val = float('inf')
 

@@ -61,7 +61,7 @@ def main():
                         help='Path to embeddings .npy (shape 7*40*5*7,512)')
     parser.add_argument('--ckpt_file',      type=str,
                         default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_color.pth",
-                        help='Directory with seq2seq_sw_block{block}.pth')
+                        help='Path of the model checkpoint file .pth')
     parser.add_argument('--output_dir',    type=str,
                         default="./data/Seq2Seq/Predicted_latents/",
                         help='Where to save predicted latents')
