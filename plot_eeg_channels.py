@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 def load_first_sample(data: np.ndarray) -> np.ndarray:
     """Collapse leading dimensions to get a single (channels, time) array."""
+    print(f"Data shape: {data.shape}")
     if data.ndim < 2:
         raise ValueError("EEG data must have at least 2 dimensions")
     if data.ndim > 2:
@@ -19,10 +20,10 @@ def load_first_sample(data: np.ndarray) -> np.ndarray:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Plot raw EEG channels")
-    parser.add_argument("file", help="Path to the raw EEG .npy file")
+    parser.add_argument("--file", type=str, help="Path to the raw EEG .npy file")
     parser.add_argument("--channels", type=int, default=10,
                         help="Number of channels to plot")
-    parser.add_argument("--timepoints", type=int, default=100,
+    parser.add_argument("--timepoints", type=int, default=500,
                         help="Number of time points to display")
     args = parser.parse_args()
 
@@ -35,13 +36,15 @@ def main() -> None:
 
     plt.figure(figsize=(12, num_channels * 1.5))
     for idx, ch in enumerate(chosen):
-        offset = idx * np.max(np.abs(sample)) * 1.1
-        plt.plot(sample[ch, :t] + offset, label=f"Channel {ch}")
+        offset = idx * np.max(np.abs(sample))
+        plt.plot(sample[ch, :t] + offset, label=f"Channel {ch}", linewidth=3)
 
     plt.xlabel("Time")
     plt.title("Raw EEG Channels")
     plt.legend()
     plt.tight_layout()
+    plt.grid()
+    plt.savefig("eeg_channels_plot.png", dpi=300)
     plt.show()
 
 
