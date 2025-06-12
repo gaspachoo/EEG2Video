@@ -1,10 +1,15 @@
 import argparse
 from PIL import Image, ImageFilter
+import numpy as np
 
 
 def process_gif(input_path: str, output_path: str, mode: str, channel: str = "r", threshold: int = 128,
                 blur_rgb: float = 10.0, blur_other: float = 2.0) -> None:
-    """Process a GIF according to the selected mode."""
+    """Process a GIF according to the selected mode.
+
+    In ``rgb`` mode the chosen channel is kept only when it is the
+    strongest on the current pixel, otherwise the pixel is set to white.
+    """
     frames = []
     with Image.open(input_path) as im:
         duration = im.info.get("duration", 100)
@@ -13,16 +18,26 @@ def process_gif(input_path: str, output_path: str, mode: str, channel: str = "r"
             im.seek(frame_idx)
             frame = im.convert("RGB")
             if mode == "rgb":
-                channels = frame.split()
-                zero = Image.new("L", frame.size, 0)
+                arr = np.array(frame)
+                r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
                 if channel == "r":
-                    frame = Image.merge("RGB", (channels[0], zero, zero))
+                    mask = (r > g) & (r > b)
+                    arr[:, :, 1] = np.where(mask, 0, 255)
+                    arr[:, :, 2] = np.where(mask, 0, 255)
+                    arr[:, :, 0] = np.where(mask, r, 255)
                 elif channel == "g":
-                    frame = Image.merge("RGB", (zero, channels[1], zero))
+                    mask = (g > r) & (g > b)
+                    arr[:, :, 0] = np.where(mask, 0, 255)
+                    arr[:, :, 2] = np.where(mask, 0, 255)
+                    arr[:, :, 1] = np.where(mask, g, 255)
                 elif channel == "b":
-                    frame = Image.merge("RGB", (zero, zero, channels[2]))
+                    mask = (b > r) & (b > g)
+                    arr[:, :, 0] = np.where(mask, 0, 255)
+                    arr[:, :, 1] = np.where(mask, 0, 255)
+                    arr[:, :, 2] = np.where(mask, b, 255)
                 else:
                     raise ValueError("channel must be r, g or b")
+                frame = Image.fromarray(arr, "RGB")
                 frame = frame.filter(ImageFilter.GaussianBlur(blur_rgb))
             elif mode == "bw":
                 gray = frame.convert("L")
