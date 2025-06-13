@@ -4,6 +4,8 @@ Acronyms used:
 -   DE = Differential Entropy
 -   PSD = Power Spectral Density
 
+⚠️⚠️⚠️⚠️ This is suitable for "gaspard" branch only ! ⚠️⚠️⚠️⚠️
+
 ## 1. Data Preprocessing  ($\approx$ 1 week)
 ### 1. EEG data segmentation:
 

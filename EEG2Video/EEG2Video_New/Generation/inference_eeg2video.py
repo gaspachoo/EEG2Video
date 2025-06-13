@@ -44,7 +44,7 @@ eeg = torch.load('./data/EEG/sub1.npy',map_location='cpu')
 
 negative = eeg.mean(dim=0)
 
-pretrained_model_path = "./Gaspard/stable-diffusion-v1-4" #"Zhoutianyi/huggingface/stable-diffusion-v1-4"
+pretrained_model_path = "./stable-diffusion-v1-4" #"Zhoutianyi/huggingface/stable-diffusion-v1-4"
 my_model_path = "outputs/40_classes_200_epoch"
 
 unet = UNet3DConditionModel.from_pretrained(my_model_path, subfolder='unet', torch_dtype=torch.float16).to(device)

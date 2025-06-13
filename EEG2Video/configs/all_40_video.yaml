@@ -1,4 +1,4 @@
-pretrained_model_path: "./Gaspard/stable-diffusion-v1-4"
+pretrained_model_path: "./stable-diffusion-v1-4"
 output_dir: "./outputs/10_classes_6000_epochs"
 
 train_data:
