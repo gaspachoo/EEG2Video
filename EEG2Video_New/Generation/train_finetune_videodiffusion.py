@@ -197,15 +197,12 @@ def main(
 
     # text_path = './text'
     text_prompts = []
-    video_text = './data/BLIP//1st_10min.txt' #rdata/SEED-DV/Video/BLIP-caption/1st_10min.txt'
+    video_text = './data/BLIP//1st_10min.txt' #dataset/SEED-DV/Video/BLIP-caption/1st_10min.txt'
 
     with open(video_text, 'r') as f:
         for line in f:
             text_prompts.append(line.strip())
     selected_texts = [text_prompts[ind].strip() for ind in selected_indices]
-    # with open(video_text, 'r') as f:
-    #     for line in f:
-    #         text_prompts.append(line.strip())
         
     train_dataset.prompt = selected_texts
     print("video_path_length:", len(train_dataset.video_path))
