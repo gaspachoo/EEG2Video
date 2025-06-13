@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument("--tuneavideo_path", type=str,default="./Gaspard/checkpoints/TuneAVideo/unet_ep89.pt",help="Path to TuneAVideo model checkpoint")
     
     # TuneAVideo parameters
-    parser.add_argument("--diffusion_model_path", type=str, default="./Gaspard/stable-diffusion-v1-4", help="Chemin vers SD-v1-4 pré-entraîné")
+    parser.add_argument("--diffusion_model_path", type=str, default="./stable-diffusion-v1-4", help="Chemin vers SD-v1-4 pré-entraîné")
     parser.add_argument("--output_dir", type=str, default="./data/EEG2Video-outputs", help="Répertoire de sortie pour les GIFs")
     parser.add_argument("--num_inference_steps", type=int, default=100, help="Nombre de pas de diffusion")
     parser.add_argument("--guidance_scale", type=float, default=12.5, help="Coefficient de guidance")

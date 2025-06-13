@@ -11,7 +11,7 @@ def decode_latents(latents_dir, output_dir, device="cuda"):
     os.makedirs(output_dir, exist_ok=True)
 
     # Load VAE decoder
-    vae = AutoencoderKL.from_pretrained("./Gaspard/stable-diffusion-v1-4", subfolder='vae').to(device)
+    vae = AutoencoderKL.from_pretrained("./stable-diffusion-v1-4", subfolder='vae').to(device)
     # vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-ema").to(device)
     vae.eval()
 

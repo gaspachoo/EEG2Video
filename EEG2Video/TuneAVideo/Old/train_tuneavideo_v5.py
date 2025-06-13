@@ -88,7 +88,7 @@ class TuneAVideoTrainerDDP:
         self.vae = AutoencoderKL.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='vae').to('cpu').eval()
         self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch16')
         self.unet = UNet3DConditionModel.from_pretrained_2d(
-            './Gaspard/stable-diffusion-v1-4', subfolder='unet').to(self.device)
+            './stable-diffusion-v1-4', subfolder='unet').to(self.device)
         self.scheduler = PNDMScheduler.from_pretrained('CompVis/stable-diffusion-v1-4', subfolder='scheduler')
 
         # freeze

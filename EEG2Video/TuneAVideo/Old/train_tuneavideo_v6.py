@@ -300,7 +300,7 @@ def parse_args():
     p.add_argument("--zhat_dir", type=str, default="./data/Predicted_latents")
     p.add_argument("--sem_dir", type=str, default="./data/Semantic_embeddings")
     p.add_argument("--ckpt_dir", type=str, default="./checkpoints/TuneAVideo")
-    p.add_argument("--base_model_path", type=str, default="./Gaspard/stable-diffusion-v1-4",
+    p.add_argument("--base_model_path", type=str, default="./stable-diffusion-v1-4",
                    help="Path to the 2D SD‑1.4 checkpoint that was temporally inflated.")
 
     p.add_argument("--epochs", type=int, default=50)

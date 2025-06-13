@@ -34,7 +34,7 @@ def parse_args():
     )
     p.add_argument(
         "--diffusion_model_path", type=str,
-        default="./Gaspard/stable-diffusion-v1-4",
+        default="./stable-diffusion-v1-4",
         help="Chemin vers SD-v1-4 pré-entraîné"
     )
     p.add_argument(
