@@ -1,9 +1,9 @@
-pretrained_model_path: "./checkpoints/stable-diffusion-v1-4"
+pretrained_model_path: "./Gaspard/stable-diffusion-v1-4"
 output_dir: "./outputs/10_classes_6000_epochs"
 
 train_data:
   video_path: "data/panda01.mp4"
-  prompt: "a panda is eatting bamboo"
+  prompt: "a panda is eating bamboo"
   n_sample_frames: 6
   width: 512
   height: 288
