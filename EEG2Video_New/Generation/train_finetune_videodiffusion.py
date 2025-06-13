@@ -341,10 +341,12 @@ def main(
             #progress_bar.set_postfix(**logs) 
 
         if epoch %100 == 0:
-            if accelerator.is_main_process:
-                samples = []
-                generator = torch.Generator(device=latents.device)
-                generator.manual_seed(seed)
+            # Validation and checkpointing are also executed in mixed precision
+            with accelerator.autocast():
+                if accelerator.is_main_process:
+                    samples = []
+                    generator = torch.Generator(device=latents.device)
+                    generator.manual_seed(seed)
 
                 ddim_inv_latent = None
                 # if validation_data.use_inv_latent:
@@ -368,27 +370,29 @@ def main(
                 
 
             accelerator.wait_for_everyone()
-            if accelerator.is_main_process:
-                unet = accelerator.unwrap_model(unet)
-                pipeline = TuneAVideoPipeline.from_pretrained(
-                    pretrained_model_path,
-                    text_encoder=text_encoder,
-                    vae=vae,
-                    unet=unet,
-                )
-                pipeline.save_pretrained(output_dir)
+            with accelerator.autocast():
+                if accelerator.is_main_process:
+                    unet = accelerator.unwrap_model(unet)
+                    pipeline = TuneAVideoPipeline.from_pretrained(
+                        pretrained_model_path,
+                        text_encoder=text_encoder,
+                        vae=vae,
+                        unet=unet,
+                    )
+                    pipeline.save_pretrained(output_dir)
 
     # Create the pipeline using the trained modules and save it.
     accelerator.wait_for_everyone()
-    if accelerator.is_main_process:
-        unet = accelerator.unwrap_model(unet)
-        pipeline = TuneAVideoPipeline.from_pretrained(
-            pretrained_model_path,
-            text_encoder=text_encoder,
-            vae=vae,
-            unet=unet,
-        )
-        pipeline.save_pretrained(output_dir)
+    with accelerator.autocast():
+        if accelerator.is_main_process:
+            unet = accelerator.unwrap_model(unet)
+            pipeline = TuneAVideoPipeline.from_pretrained(
+                pretrained_model_path,
+                text_encoder=text_encoder,
+                vae=vae,
+                unet=unet,
+            )
+            pipeline.save_pretrained(output_dir)
 
     accelerator.end_training()
 
