@@ -11,3 +11,6 @@ vae_reconstructions/
 latent_out_block7_40_classes.npy
 stable-diffusion-v1-4/
 outputs/
+*.npy
+*.png
+gifs/
