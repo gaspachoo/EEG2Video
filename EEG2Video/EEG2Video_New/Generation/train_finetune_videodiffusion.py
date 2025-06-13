@@ -191,9 +191,6 @@ def main(
     video_ind = selected_indices
     for ind in video_ind:
         file = video_path + '/' + str(ind+1) + '.mp4'
-        print(file.shape)  # (6, 3, H, W)
-
-        #file = video_path + '/' + str(ind+1) + '.gif'
         video_files.append(file)
         
     train_dataset.video_path = video_files
@@ -401,7 +398,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="./configs/all_40_video.yaml")
+    parser.add_argument("--config", type=str, default="./EEG2Video/EEG2Video_New/Generation/configs/all_40_video.yaml")
     args = parser.parse_args()
 
     main(**OmegaConf.load(args.config))
