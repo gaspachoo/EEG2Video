@@ -66,8 +66,8 @@ eeg_test = torch.from_numpy(eeg_test).float().cuda()
 
 pretrained_model_path = "./checkpoints/stable-diffusion-v1-4"
 my_model_path = "./outputs/40_classes_video_200_epoch"
-unet = UNet3DConditionModel.from_pretrained(my_model_path, subfolder='unet', torch_dtype=torch.float16).to('cuda')
-pipe = TuneAVideoPipeline.from_pretrained(pretrained_model_path, unet=unet, torch_dtype=torch.float16).to("cuda")
+unet = UNet3DConditionModel.from_pretrained(my_model_path, subfolder='unet', torch_dtype=torch.float16).to('cuda') # type: ignore
+pipe = TuneAVideoPipeline.from_pretrained(pretrained_model_path, unet=unet, torch_dtype=torch.float16).to("cuda") # type: ignore
 pipe.enable_xformers_memory_efficient_attention()
 pipe.enable_vae_slicing()
 
@@ -89,12 +89,12 @@ woDANA = True
 
 for i in range(0,200):
     if woSeq2Seq:
-        video = pipe(model, eeg_test[i:i+1,...], latents=None, video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos
+        video = pipe(model, eeg_test[i:i+1,...], latents=None, video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos # type: ignore[reportCallIssue]
         savename = '40_Classes_woSeq2Seq'
     elif woDANA:
-        video = pipe(model, eeg_test[i:i+1,...], latents=latents[i:i+1,...], video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos
+        video = pipe(model, eeg_test[i:i+1,...], latents=latents[i:i+1,...], video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos # type: ignore[reportCallIssue]
         savename = '40_Classes_woDANA'
     else:
-        video = pipe(model, eeg_test[i:i+1,...], latents=latents_add_noise[i:i+1,...], video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos
+        video = pipe(model, eeg_test[i:i+1,...], latents=latents_add_noise[i:i+1,...], video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos # type: ignore[reportCallIssue]
         savename = '40_Classes_Fullmodel'
     save_videos_grid(video, f"./{savename}/{i}.gif")
