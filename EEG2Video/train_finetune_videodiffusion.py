@@ -23,10 +23,10 @@ from diffusers.utils.import_utils import is_xformers_available
 from tqdm import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 
-from tuneavideo.models.unet import UNet3DConditionModel
-from tuneavideo.data.dataset import TuneAVideoDataset, TuneMultiVideoDataset
-from tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
-from tuneavideo.util import save_videos_grid, ddim_inversion
+from EEG2Video_New.Generation.models.unet import UNet3DConditionModel
+from EEG2Video_New.Generation.tuneavideo.data.dataset import TuneAVideoDataset, TuneMultiVideoDataset
+from EEG2Video_New.Generation.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
+from EEG2Video_New.Generation.tuneavideo.util import save_videos_grid, ddim_inversion
 from einops import rearrange
 
 
@@ -171,7 +171,7 @@ def main(
 
     # text_path = './text'
     text_prompts = []
-    video_text = './data/final_data/text.txt'
+    video_text = './data/BLIP//1st_10min.txt'
 
     with open(video_text, 'r') as f:
         for line in f:
@@ -366,7 +366,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="./configs/all_40_video.yaml")
+    parser.add_argument("--config", type=str, default="./EEG2Video/configs/all_40_video.yaml")
     args = parser.parse_args()
 
     main(**OmegaConf.load(args.config))
