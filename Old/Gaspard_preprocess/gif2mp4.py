@@ -1,14 +1,30 @@
 import imageio
 import os
-from moviepy.editor import ImageSequenceClip
+import inspect
+
+# MoviePy changed its structure in version 2.2.1. The clip is now located
+# in moviepy.video.io rather than the editor module. We try the old import
+# first to remain backward compatible and fall back to the new path if needed.
+try:
+    from moviepy.editor import ImageSequenceClip
+except Exception:  # pragma: no cover - moviepy might be unavailable
+    from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
 
 def convert_gif_to_mp4(gif_path, mp4_path):
     try:
         reader = imageio.get_reader(gif_path)
         frames = [frame for frame in reader]
-        fps = 3  # valeur fixée
+        # GIFs are typically low FPS, we fix it manually
+        fps = 3
         clip = ImageSequenceClip(frames, fps=fps)
-        clip.write_videofile(mp4_path, codec="libx264", audio=False, verbose=False, logger=None)
+        write_kwargs = {
+            "codec": "libx264",
+            "audio": False,
+            "logger": None,
+        }
+        if "verbose" in inspect.signature(clip.write_videofile).parameters:
+            write_kwargs["verbose"] = False
+        clip.write_videofile(mp4_path, **write_kwargs)
     except Exception as e:
         print(f"Error converting {gif_path} to MP4: {e}")
 
