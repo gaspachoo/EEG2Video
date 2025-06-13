@@ -1,7 +1,7 @@
 import argparse
 from PIL import Image, ImageFilter
 import numpy as np
-
+import os
 
 def process_gif(input_path: str, output_path: str, mode: str, channel: str = "r", threshold: int = 128,
                 blur_rgb: float = 10.0, blur_other: float = 2.0) -> None:
@@ -49,13 +49,14 @@ def process_gif(input_path: str, output_path: str, mode: str, channel: str = "r"
             else:
                 raise ValueError("Invalid mode")
             frames.append(frame)
+    os.makedirs('./gifs', exist_ok=True)
     frames[0].save(output_path, save_all=True, append_images=frames[1:], duration=duration, loop=loop)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Apply transformations to a GIF")
-    parser.add_argument("input_gif", help="Path to input GIF")
-    parser.add_argument("output_gif", help="Path to output GIF")
+    parser.add_argument("--input_gif",type=str, default = './data/Seq2Seq/Video_gifs/Block0/1.gif', help="Path to input GIF")
+    parser.add_argument("--output_gif",type=str, default='./gifs/bw.gif', help="Path to output GIF")
     parser.add_argument("--mode", choices=["rgb", "bw", "gray"], required=True,
                         help="Transformation mode")
     parser.add_argument("--channel", choices=["r", "g", "b"], default="r",
@@ -64,7 +65,7 @@ def main() -> None:
                         help="Threshold for bw mode")
     parser.add_argument("--blur-rgb", type=float, default=10.0,
                         help="Blur radius for rgb mode")
-    parser.add_argument("--blur-other", type=float, default=2.0,
+    parser.add_argument("--blur-other", type=float, default=10,
                         help="Blur radius for bw/gray modes")
     args = parser.parse_args()
 
