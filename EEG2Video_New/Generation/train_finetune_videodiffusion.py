@@ -69,7 +69,7 @@ def main(
     train_data: Dict,
     validation_data: Dict,
     validation_steps: int = 100,
-    trainable_modules: Tuple[str] = (
+    trainable_modules: Tuple[str, ...] = (
         "attn1.to_q",
         "attn2.to_q",
         "attn_temp",
