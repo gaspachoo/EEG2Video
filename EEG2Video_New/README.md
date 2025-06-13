@@ -4,6 +4,9 @@
 
 We are excited to release the new version of **EEG2Video**. Thank you all for your support of this project!
 
+### Mixed Precision Training
+When training with `fp16`, wrap the VAE encoding, noise addition, UNet forward pass and loss computation in `accelerator.autocast()` to avoid dtype mismatch errors.
+
 
 ## Support
 
