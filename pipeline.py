@@ -6,16 +6,16 @@ from EEG_preprocessing.segment_raw_signals_200Hz import extract_2s_segment
 from EEG_preprocessing.segment_sliding_window import seg_sliding_window
 from EEG_preprocessing.extract_DE_PSD_features_1per500ms import extract_de_psd_sw
 from EEG_preprocessing.extract_DE_PSD_features_1per2s import extract_de_psd_raw
-from Gaspard.GLMNet.inference_glmnet import (
+from EEG2Video.GLMNet.inference_glmnet import (
     inf_glmnet,
     load_glmnet_from_checkpoint,
     load_scaler,
     load_raw_stats,
 )
-from Gaspard.Seq2Seq.inference_seq2seq_v2 import inf_seq2seq, load_s2s_from_checkpoint
-from Gaspard.SemanticPredictor.inference_semantic import inf_semantic_predictor, load_semantic_predictor_from_checkpoint
-from Gaspard.TuneAVideo.inference_tuneavideo import inf_tuneavideo, load_tuneavideo_from_checkpoint, load_pairs
-from Gaspard.TuneAVideo.tuneavideo.util import save_videos_grid
+from EEG2Video.Seq2Seq.inference_seq2seq_v2 import inf_seq2seq, load_s2s_from_checkpoint
+from EEG2Video.SemanticPredictor.inference_semantic import inf_semantic_predictor, load_semantic_predictor_from_checkpoint
+from EEG2Video.TuneAVideo.inference_tuneavideo import inf_tuneavideo, load_tuneavideo_from_checkpoint, load_pairs
+from EEG2Video.TuneAVideo.tuneavideo.util import save_videos_grid
 
 
 
@@ -29,18 +29,18 @@ def parse_args():
     parser.add_argument("--eeg_root", type=str, default="./data/EEG", help="Path to EEG folder")
     
     # Define model checkpoints to use
-    parser.add_argument("--glmnet_path", type=str, default="./Gaspard/checkpoints/glmnet/sub3_fold0_best.pt", help="Path to GLMNet model checkpoint")
-    parser.add_argument("--glmnet_scaler_path", type=str, default="./Gaspard/checkpoints/glmnet/sub3_fold0_scaler.pkl", help="Path to GLMNet StandardScaler")
+    parser.add_argument("--glmnet_path", type=str, default="./EEG2Video/checkpoints/glmnet/sub3_fold0_best.pt", help="Path to GLMNet model checkpoint")
+    parser.add_argument("--glmnet_scaler_path", type=str, default="./EEG2Video/checkpoints/glmnet/sub3_fold0_scaler.pkl", help="Path to GLMNet StandardScaler")
     parser.add_argument(
         "--glmnet_stats_path",
         type=str,
-        default="./Gaspard/checkpoints/glmnet/sub3_fold0_rawnorm.npz",
+        default="./EEG2Video/checkpoints/glmnet/sub3_fold0_rawnorm.npz",
         help="Path to GLMNet raw normalization stats",
     )
-    parser.add_argument("--s2s_path", type=str, default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_classic.pth", help="Path to Seq2Seq model checkpoint")
-    parser.add_argument("--sempred_path", type=str, default="./Gaspard/checkpoints/semantic/eeg2text_clip.pt", help="Path to Semantic Predictor model checkpoint")
-    parser.add_argument("--sempred_scaler_path", type=str, default="./Gaspard/checkpoints/semantic/scaler.pkl", help="Path to Semantic Predictor StandardScaler")
-    parser.add_argument("--tuneavideo_path", type=str,default="./Gaspard/checkpoints/TuneAVideo/unet_ep89.pt",help="Path to TuneAVideo model checkpoint")
+    parser.add_argument("--s2s_path", type=str, default="./EEG2Video/checkpoints/seq2seq/seq2seq_v2_classic.pth", help="Path to Seq2Seq model checkpoint")
+    parser.add_argument("--sempred_path", type=str, default="./EEG2Video/checkpoints/semantic/eeg2text_clip.pt", help="Path to Semantic Predictor model checkpoint")
+    parser.add_argument("--sempred_scaler_path", type=str, default="./EEG2Video/checkpoints/semantic/scaler.pkl", help="Path to Semantic Predictor StandardScaler")
+    parser.add_argument("--tuneavideo_path", type=str,default="./EEG2Video/checkpoints/TuneAVideo/unet_ep89.pt",help="Path to TuneAVideo model checkpoint")
     
     # TuneAVideo parameters
     parser.add_argument("--diffusion_model_path", type=str, default="./stable-diffusion-v1-4", help="Chemin vers SD-v1-4 pré-entraîné")

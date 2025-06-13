@@ -36,13 +36,13 @@ EEG2Video/
 │   ├── EEG_VP_train_test.py       # Training / test loop & helpers
 │   └── models.py                  # ShallowNet, DeepNet, EEGNet, Conformer, …
 │
-├── Gaspard_preprocess/            # Personal preprocessing utilities
+├── EEG2Video_preprocess/            # Personal preprocessing utilities
 │   ├── import.py                  # Load & plot raw blocks
 │   ├── yaml_gen.py                # YAML metadata generator
 │   ├── process_video.py           # Extract 2 s clips, down‑sample videos
 │   └── plot_data.py               # Quick visual checks
 │
-├── Gaspard/                 # Training scripts & custom models
+├── EEG2Video/                 # Training scripts & custom models
 │   ├── train_glmnet_cv.py         # Cross‑validated GLMNet trainer
 │   ├── train_model_comparison.py  # ShallowNet vs Deep baselines
 │   ├── train_shallownet_{cv,paper}.py # ShallowNet experiments
@@ -82,7 +82,7 @@ EEG2Video/
 | **1. Pre‑processing** | `EEG_preprocessing/segment_raw_signals_200Hz.py`<br>`EEG_preprocessing/extract_DE_PSD_features_*.py` | Slice raw `.npy` recordings into windows (200 Hz) and compute DE/PSD features. |
 | **2. Feature Engineering** | `EEG_preprocessing/gen_features_from_sw_data.py` | Aggregate sliding‑window features for downstream tasks. |
 | **3. EEG Baselines** | `EEG-VP/EEG_VP_train_test.py` | Train ShallowNet / EEGNet / Conformer baselines on classification. |
-| **4. GLMNet & MLP** | `Gaspard/train_glmnet_cv.py`<br>`Gaspard/train_mlp_cv.py` | Cross‑validated training on spectral features. |
+| **4. GLMNet & MLP** | `EEG2Video/train_glmnet_cv.py`<br>`EEG2Video/train_mlp_cv.py` | Cross‑validated training on spectral features. |
 | **5. EEG‑to‑Video** | `EEG2Video/train_finetune_videodiffusion.py` | Fine‑tune latent‑diffusion pipeline conditioned on EEG embeddings. |
 | **6. Inference** | `EEG2Video/inference_eeg2video.py` | Generate video clips from unseen EEG segments. |
 | **7. Evaluation** | `EEG2Video/40_class_run_metrics.py` | Compute clip/video accuracy, CLIP Score, MSE, SSIM, PSNR, etc. |
@@ -96,14 +96,14 @@ Below is a non‑exhaustive registry of public classes & utilities (auto‑gener
 ### Core Helpers
 
 - **`analyse_tree.py`** – `list_functions_and_classes`, `scan_project`
-- **`Gaspard_preprocess/import.py`** – `load_all_eeg_data_by_subject`, `plot_eeg_block`
+- **`EEG2Video_preprocess/import.py`** – `load_all_eeg_data_by_subject`, `plot_eeg_block`
 
 ### Representative Models
 
 | Path | Classes |
 |------|---------|
-| `Gaspard/models/encoders.py` | `CLIP`, `GLMNetEncoder`, `MLPEncoder`, `ShallowNetEncoder`, `MLPEncoder_feat` |
-| `Gaspard/models/transformers.py` | `EEG2VideoTransformer` |
+| `EEG2Video/models/encoders.py` | `CLIP`, `GLMNetEncoder`, `MLPEncoder`, `ShallowNetEncoder`, `MLPEncoder_feat` |
+| `EEG2Video/models/transformers.py` | `EEG2VideoTransformer` |
 | `EEG2Video/models/unet.py` | `UNet3DConditionModel`, `UNet3DConditionOutput` |
 | `EEG2Video/models/DANA_module.py` | `Diffusion` |
 

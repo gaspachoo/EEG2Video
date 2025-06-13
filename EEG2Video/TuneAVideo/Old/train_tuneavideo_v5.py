@@ -283,7 +283,7 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument('--zhat_dir', type=str, default='./data/Predicted_latents')
     p.add_argument('--sem_dir', type=str, default='./data/Semantic_embeddings')
-    p.add_argument('--ckpt_dir', type=str, default='./Gaspard/checkpoints/TuneAVideo')
+    p.add_argument('--ckpt_dir', type=str, default='./EEG2Video/checkpoints/TuneAVideo')
     p.add_argument('--epochs', type=int, default=50)
     p.add_argument('--batch_size', type=int, default=1)
     p.add_argument('--lr', type=float, default=1e-4)

@@ -23,9 +23,9 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 )
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-from Gaspard.TuneAVideo.pipelines.pipeline_tuneeeg2video import TuneAVideoPipeline
-from Gaspard.TuneAVideo.models.unet import UNet3DConditionModel
-from Gaspard.TuneAVideo.tuneavideo.util import save_videos_grid
+from EEG2Video.TuneAVideo.pipelines.pipeline_tuneeeg2video import TuneAVideoPipeline
+from EEG2Video.TuneAVideo.models.unet import UNet3DConditionModel
+from EEG2Video.TuneAVideo.tuneavideo.util import save_videos_grid
 
 
 def parse_args():
@@ -39,7 +39,7 @@ def parse_args():
     )
     p.add_argument(
         "--ckpt_dir", type=str,
-        default="./Gaspard/checkpoints/TuneAVideo",
+        default="./EEG2Video/checkpoints/TuneAVideo",
         help="Répertoire des checkpoints UNet (unet_epXX.pt)"
     )
     p.add_argument(

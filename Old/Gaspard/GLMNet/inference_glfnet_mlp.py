@@ -9,8 +9,8 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from Old.Gaspard.GLMNet.utils_glfnet_mlp import GLFNetMLP
-from Gaspard.GLMNet.modules.utils_glmnet import standard_scale_features
+from Old.EEG2Video.GLMNet.utils_glfnet_mlp import GLFNetMLP
+from EEG2Video.GLMNet.modules.utils_glmnet import standard_scale_features
 
 OCCIPITAL_IDX = list(range(50, 62))
 
@@ -65,8 +65,8 @@ def generate_all_embeddings(feat_dir, ckpt_path, scaler_path, output_dir, device
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--feat_dir", default="./data/Preprocessing/DE_500ms_sw", help="directory of feature .npy files")
-    parser.add_argument("--checkpoint_path", default="./Gaspard/checkpoints/glfnet_mlp/sub3_fold0_color_best.pt", help="path to checkpoint")
-    parser.add_argument("--scaler_path", default="./Gaspard/checkpoints/glfnet_mlp/sub3_fold0_color_scaler.pkl", help="path to saved scaler")
+    parser.add_argument("--checkpoint_path", default="./EEG2Video/checkpoints/glfnet_mlp/sub3_fold0_color_best.pt", help="path to checkpoint")
+    parser.add_argument("--scaler_path", default="./EEG2Video/checkpoints/glfnet_mlp/sub3_fold0_color_scaler.pkl", help="path to saved scaler")
     parser.add_argument("--output_dir", default="./data/GLFNetMLP/EEG_embeddings_sw", help="where to save embeddings")
     args = parser.parse_args()
 

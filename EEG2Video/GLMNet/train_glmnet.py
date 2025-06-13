@@ -19,7 +19,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
     
 
-from Gaspard.GLMNet.modules.utils_glmnet import (
+from EEG2Video.GLMNet.modules.utils_glmnet import (
     GLMNet,
     standard_scale_features,
     compute_raw_stats,
@@ -42,7 +42,7 @@ def parse_args():
     p.add_argument("--feat_dir", default="./data/Preprocessing/DE_500ms_sw", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
     p.add_argument("--category", default="label_cluster",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
-    p.add_argument("--save_dir", default="./Gaspard/checkpoints/glmnet")
+    p.add_argument("--save_dir", default="./EEG2Video/checkpoints/glmnet")
     p.add_argument("--epochs",   type=int, default=500)
     p.add_argument("--bs",       type=int, default=200)
     p.add_argument("--lr",       type=float, default=1e-4)

@@ -363,7 +363,7 @@ def parse_args():
     
     # Checkpointing & logging
     p.add_argument("--use_wandb", action="store_true") 
-    p.add_argument("--ckpt_dir", type=str, default="./Gaspard/checkpoints/TuneAVideo")
+    p.add_argument("--ckpt_dir", type=str, default="./EEG2Video/checkpoints/TuneAVideo")
     p.add_argument("--save_every", type=int, default=1)
     return p.parse_args()
 

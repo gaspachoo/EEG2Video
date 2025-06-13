@@ -21,8 +21,8 @@ project_root = os.path.dirname(
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from Old.Gaspard.GLMNet.utils_glfnet_mlp import GLFNetMLP
-from Gaspard.GLMNet.modules.utils_glmnet import standard_scale_features
+from Old.EEG2Video.GLMNet.utils_glfnet_mlp import GLFNetMLP
+from EEG2Video.GLMNet.modules.utils_glmnet import standard_scale_features
 
 PROJECT_NAME = "eeg2video-GLFNetMLP"
 OCCIPITAL_IDX = list(range(50, 62))
@@ -46,7 +46,7 @@ def parse_args():
         ],
         help="Label type",
     )
-    p.add_argument("--save_dir", default="./Gaspard/checkpoints/glfnet_mlp")
+    p.add_argument("--save_dir", default="./EEG2Video/checkpoints/glfnet_mlp")
     p.add_argument("--epochs", type=int, default=50)
     p.add_argument("--bs", type=int, default=128)
     p.add_argument("--lr", type=float, default=1e-4)

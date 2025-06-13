@@ -36,7 +36,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 )
 if project_root not in sys.path:
     sys.path.insert(1, project_root)
-from Gaspard.TuneAVideo.models.unet import UNet3DConditionModel
+from EEG2Video.TuneAVideo.models.unet import UNet3DConditionModel
 
 torch.cuda.set_device(0)
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
@@ -168,7 +168,7 @@ class TuneAVideoPipeline(DiffusionPipeline):
         eeg_embeddings = eeg_embeddings.view(bs_embed * num_videos_per_eeg, seq_len, -1)
 
         if do_classifier_guidance:
-            uncond_embeddings = np.load('./Gaspard/TuneAVideo/negative.npy')
+            uncond_embeddings = np.load('./EEG2Video/TuneAVideo/negative.npy')
             uncond_embeddings = torch.from_numpy(uncond_embeddings).cuda()
             eeg_embeddings = torch.cat([uncond_embeddings, eeg_embeddings])
         return eeg_embeddings

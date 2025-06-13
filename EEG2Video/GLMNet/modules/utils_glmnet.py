@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from Gaspard.GLMNet.modules.models_paper import shallownet, mlpnet
+from EEG2Video.GLMNet.modules.models_paper import shallownet, mlpnet
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 

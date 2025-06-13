@@ -9,7 +9,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
     
 # Import Seq2SeqTransformer defined in your training script
-from Gaspard.Seq2Seq.models.transformer import Seq2SeqTransformer
+from EEG2Video.Seq2Seq.models.transformer import Seq2SeqTransformer
     
 def load_s2s_from_checkpoint(ckpt_path, device):
     model = Seq2SeqTransformer().to(device)
@@ -60,7 +60,7 @@ def main():
                         default="./data/GLMNet/EEG_embeddings_sw/sub3.npy",
                         help='Path to embeddings .npy (shape 7*40*5*7,512)')
     parser.add_argument('--ckpt_file',      type=str,
-                        default="./Gaspard/checkpoints/seq2seq/seq2seq_v2_color.pth",
+                        default="./EEG2Video/checkpoints/seq2seq/seq2seq_v2_color.pth",
                         help='Path of the model checkpoint file .pth')
     parser.add_argument('--output_dir',    type=str,
                         default="./data/Seq2Seq/Predicted_latents/",

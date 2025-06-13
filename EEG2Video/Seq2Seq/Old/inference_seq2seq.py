@@ -50,7 +50,7 @@ def main():
                         default="./data/Seq2Seq/Video_latents",
                         help='Directory with block{block}_latents.npy (shape 200,6,4,36,64)')
     parser.add_argument('--ckpt_dir',      type=str,
-                        default="./Gaspard/checkpoints/seq2seq/",
+                        default="./EEG2Video/checkpoints/seq2seq/",
                         help='Directory with seq2seq_sw_block{block}.pth')
     parser.add_argument('--output_dir',    type=str,
                         default="./data/Seq2Seq/Predicted_latents/",

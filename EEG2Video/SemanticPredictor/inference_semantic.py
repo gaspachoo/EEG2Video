@@ -10,7 +10,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 )
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-from Gaspard.SemanticPredictor.models.clip import CLIP
+from EEG2Video.SemanticPredictor.models.clip import CLIP
 
 def seed_everything(seed=42):
     import random
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # default paths
     
     default_eeg = "./data/Preprocessing/DE_1per2s/sub1.npy"
-    default_model = "./Gaspard/checkpoints/semantic/eeg2text_clip.pt"
+    default_model = "./EEG2Video/checkpoints/semantic/eeg2text_clip.pt"
     default_save = "./data/SemanticPredictor/Semantic_embeddings"
 
     parser = argparse.ArgumentParser(
@@ -82,7 +82,7 @@ if __name__ == '__main__':
                         help='Path to pretrained SemanticPredictor (eeg2text_clip.pt)')
     parser.add_argument('--save_dir', type=str, default=default_save,
                         help='Output directory for block-wise embeddings (.npy)')
-    parser.add_argument('--scaler_path', type=str, default="./Gaspard/checkpoints/semantic/scaler.pkl",
+    parser.add_argument('--scaler_path', type=str, default="./EEG2Video/checkpoints/semantic/scaler.pkl",
                         help='Path to saved StandardScaler')
     parser.add_argument('--batch_size', type=int, default=64,
                         help='Batch size for inference')

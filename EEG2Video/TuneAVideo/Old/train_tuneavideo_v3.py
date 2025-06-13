@@ -183,7 +183,7 @@ class TuneAVideoTrainer:
         return val_loss / len(self.val_loader)
 
     def _save(self, epoch):
-        ckpt_dir = ("Gaspard/checkpoints/TuneAVideo")
+        ckpt_dir = ("EEG2Video/checkpoints/TuneAVideo")
         os.makedirs(ckpt_dir, exist_ok=True)
         self.pipeline.unet.save_pretrained(os.path.join(ckpt_dir, f'unet_ep{epoch}.pt'))
 

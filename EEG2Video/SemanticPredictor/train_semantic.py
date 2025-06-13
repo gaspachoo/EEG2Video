@@ -11,7 +11,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 )
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-from Gaspard.SemanticPredictor.models.clip import CLIP
+from EEG2Video.SemanticPredictor.models.clip import CLIP
 
 
 def seed_everything(seed=42):
@@ -75,7 +75,7 @@ def train():
     
     parser.add_argument('--eeg_file', type=str, default="./data/Preprocessing/DE_1per2s/sub1.npy")
     parser.add_argument('--text_dir', type=str, default="./data/SemanticPredictor/Text_embeddings")
-    parser.add_argument('--save_path', type=str, default="./Gaspard/checkpoints/semantic")
+    parser.add_argument('--save_path', type=str, default="./EEG2Video/checkpoints/semantic")
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--lr', type=float, default=5e-4)

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from Gaspard.GLMNet.modules.models_paper import mlpnet
-from Gaspard.GLMNet.modules.utils_glmnet import standard_scale_features
+from EEG2Video.GLMNet.modules.models_paper import mlpnet
+from EEG2Video.GLMNet.modules.utils_glmnet import standard_scale_features
 
 class GLFNetMLP(nn.Module):
     """MLP-based EEG classifier using global and occipital branches."""

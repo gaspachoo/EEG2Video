@@ -22,7 +22,7 @@ def parse_args():
                         default="./data/Seq2Seq/Video_latents",
                         help='Répertoire contenant les fichiers block0.npy ... block6.npy de latents vidéo')
     parser.add_argument('--save_path',     type=str,
-                        default="./Gaspard/checkpoints/seq2seq",
+                        default="./EEG2Video/checkpoints/seq2seq",
                         help='Dossier où sauvegarder le checkpoint final')
     parser.add_argument('--use_wandb',     action='store_true',
                         help='Activer la journalisation sur Weights & Biases')

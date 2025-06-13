@@ -20,7 +20,7 @@ def parse_args():
                         default="./data/Seq2Seq/Video_latents",
                         help='Directory with block{block_id}.npy')
     parser.add_argument('--save_path',     type=str,
-                        default="./Gaspard/checkpoints/seq2seq/",
+                        default="./EEG2Video/checkpoints/seq2seq/",
                         help='Where to save models')
     
     # Training parameters
