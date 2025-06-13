@@ -398,7 +398,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="./EEG2Video/EEG2Video_New/Generation/configs/all_40_video.yaml")
+    parser.add_argument("--config", type=str, default="./EEG2Video_New/Generation/configs/all_40_video.yaml")
     args = parser.parse_args()
 
     main(**OmegaConf.load(args.config))
