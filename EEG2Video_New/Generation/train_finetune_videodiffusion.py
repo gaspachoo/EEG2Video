@@ -31,7 +31,7 @@ from tuneavideo.util import save_videos_grid, ddim_inversion
 from einops import rearrange
 
 
-os.environ["PYTORCH_CUDA_ALLOC_conf"] = "max_split_size_mb:24"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:24"
 
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
 # check_min_version("0.10.0.dev0")
