@@ -58,7 +58,7 @@ woSeq2Seq = True
 woDANA = False
 
 if woSeq2Seq:
-    latents = np.load('./EEG2Video_New/Seq2Seq/latent_out_block7_40_classes.npy')
+    latents = np.load('./outputs/latent_out_block7_40_classes.npy')
     latents = torch.from_numpy(latents).half()
     latents = rearrange(latents, 'a b c d e -> a c b d e')
     latents = latents.to(device)

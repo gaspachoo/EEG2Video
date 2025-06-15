@@ -384,7 +384,7 @@ if __name__ == "__main__":
     latent_out = out[:, :-1, :].cpu().detach().numpy()
     latent_out = np.array(latent_out)
     print(latent_out.shape)
-    np.save('latent_out_block7_40_classes.npy', latent_out)
+    np.save('./outputs/latent_out_block7_40_classes.npy', latent_out)
     model_dict = model.state_dict()
     
     os.makedirs('./EEG2Video_New/checkpoints', exist_ok=True)
