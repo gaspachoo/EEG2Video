@@ -40,12 +40,12 @@ def seed_everything(seed=0, cudnn_deterministic=True):
 seed_everything(114514)
 
 
-eeg = torch.load('./data/EEG/sub1.npy',map_location='cpu')
+eeg = torch.from_numpy(np.load('./data/EEG/sub1.npy')).to("cpu")
 
 negative = eeg.mean(dim=0)
 
 pretrained_model_path = "./stable-diffusion-v1-4" #"Zhoutianyi/huggingface/stable-diffusion-v1-4"
-my_model_path = "outputs/40_classes_200_epoch"
+my_model_path = "./outputs/40_classes_200_epoch"
 
 unet = UNet3DConditionModel.from_pretrained(my_model_path, subfolder='unet', torch_dtype=torch.float16).to(device)
 pipe = TuneAVideoPipeline.from_pretrained(pretrained_model_path ,unet=unet, torch_dtype=torch.float16).to(device)
@@ -54,8 +54,8 @@ pipe.enable_vae_slicing()
 
 
 # Ablation, inference w/o Seq2Seq and w/o DANA
-woSeq2Seq = False
-woDANA = True
+woSeq2Seq = True
+woDANA = False
 
 if woSeq2Seq:
     latents = np.load('./EEG2Video_New/Seq2Seq/latent_out_block7_40_classes.npy')
@@ -72,17 +72,17 @@ if woDANA:
 for i in range(len(eeg)):
     if woSeq2Seq:
         video = pipe(model, eeg[i:i+1,...],negative_eeg=negative, latents=None, video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos
-        savename = f'../../../40_Classes_woSeq2Seq/'
+        savename = f'./EEG2Video_New/checkpoints/40_Classes_woSeq2Seq/'
         import os
         os.makedirs(savename, exist_ok=True)
     elif woDANA:
         video = pipe(model, eeg[i:i+1,...],negative_eeg=negative, latents=latents[i:i+1,...], video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos
-        savename = f'../../../40_Classes_woDANA/'
+        savename = f'./EEG2Video_New/checkpoints/40_Classes_woDANA/'
         import os
         os.makedirs(savename, exist_ok=True)
     else:
         video = pipe(model, eeg[i:i+1,...],negative_eeg=negative, latents=latents_add_noise[i:i+1,...], video_length=6, height=288, width=512, num_inference_steps=100, guidance_scale=12.5).videos
-        savename = f'../../../40_Classes_Fullmodel/'
+        savename = f'./EEG2Video_New/checkpoints/40_Classes_Fullmodel/'
         import os
         os.makedirs(savename, exist_ok=True)
     save_videos_grid(video, f"./{savename}/{i}.gif")
