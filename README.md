@@ -87,6 +87,9 @@ trained with `EEG2Video/GLMNet/train_glfnet_mlp.py`.
 - Both trainers accept a `--scheduler` argument (`steplr`,
   `reducelronplateau`, `cosine`) and a `--min_lr` value to set the learning rate
   floor.
+- `train_glmnet.py` can load several subjects at once with `--subjects`
+  (e.g. `--subjects sub3.npy sub4.npy`) and allows filtering the dataset
+  with `--cluster-id` to keep only samples belonging to a given label cluster.
 
 ### Inference :
     
