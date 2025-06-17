@@ -43,6 +43,18 @@ def parse_args():
     p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
     p.add_argument("--category", default="label_cluster",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
     p.add_argument("--save_dir", default="./EEG2Video/checkpoints/glmnet")
+    p.add_argument(
+        "--subjects",
+        nargs="+",
+        default=["sub3.npy"],
+        help="List of subject files to load (e.g. sub3.npy sub4.npy)",
+    )
+    p.add_argument(
+        "--cluster_id",
+        type=int,
+        default=None,
+        help="Keep only examples with this label cluster",
+    )
     p.add_argument("--epochs",   type=int, default=500)
     p.add_argument("--bs",       type=int, default=200)
     p.add_argument("--lr",       type=float, default=1e-4)
@@ -93,12 +105,16 @@ def main():
     
     os.makedirs(args.save_dir, exist_ok=True)
     
-    # Sélection d’un seul sujet
-    filename = "sub3.npy"  # ou args.subj_name
-    subj_name = filename.replace(".npy", "")
+    subj_name = "-".join([os.path.splitext(os.path.basename(s))[0] for s in args.subjects])
 
-    raw = np.load(os.path.join(args.raw_dir, filename))
-    feat = np.load(os.path.join(args.feat_dir, filename))
+    raw_list = []
+    feat_list = []
+    for fname in args.subjects:
+        raw_list.append(np.load(os.path.join(args.raw_dir, fname)))
+        feat_list.append(np.load(os.path.join(args.feat_dir, fname)))
+
+    raw = np.concatenate(raw_list, axis=0)
+    feat = np.concatenate(feat_list, axis=0)
     labels_raw = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
@@ -108,7 +124,8 @@ def main():
     time_len = raw.shape[-1]
     assert feat.shape[:4] == raw.shape[:4], "Feature/EEG mismatch"
 
-    labels = format_labels(reshape_labels(labels_raw, n_win), args.category)
+    labels_per_sub = format_labels(reshape_labels(labels_raw, n_win), args.category)
+    labels = np.concatenate([labels_per_sub for _ in args.subjects], axis=0)
     print(labels.shape)
     num_unique_labels = len(np.unique(labels))
     print("Number of categories:", num_unique_labels)
@@ -117,6 +134,12 @@ def main():
     X_all = raw.reshape(-1, 62, time_len)
     F_all = feat.reshape(-1, 62, 5)
     y_all = labels.reshape(-1)
+
+    if args.cluster_id is not None:
+        mask = y_all == args.cluster_id
+        X_all = X_all[mask]
+        F_all = F_all[mask]
+        y_all = y_all[mask]
 
 
     n = len(y_all)
