@@ -97,10 +97,13 @@ class myTransformer(nn.Module):
             Text logits and latent predictions of shape ``(batch, 7, 4, 36, 64)``.
             Only the last 6 frames are used for the loss.
         """
-        src = self.eeg_embedding(src.view(src.size(0) * src.size(1), 1, 62, 100))
-        src = src.view(tgt.size(0), 7, -1)
 
-        tgt = tgt.view(tgt.size(0), tgt.size(1), -1)
+        # Reshape EEG input for embedding while remaining robust to non-contiguous tensors
+        src = self.eeg_embedding(src.reshape(src.size(0) * src.size(1), 1, 62, 100))
+        src = src.reshape(tgt.size(0), 7, -1)
+
+        # Flatten video latents before linear embedding
+        tgt = tgt.reshape(tgt.size(0), tgt.size(1), -1)
         tgt = self.img_embedding(tgt)
 
         src = self.positional_encoding(src)
