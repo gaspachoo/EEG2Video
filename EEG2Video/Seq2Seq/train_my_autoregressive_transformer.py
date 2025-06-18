@@ -4,7 +4,7 @@ EEG embeddings are subject-specific, while video latents are provided once per
 block (``block0.npy`` to ``block6.npy``) and shared across all subjects.
 """
 
-import os
+import os, sys
 import argparse
 import numpy as np
 import torch
@@ -13,7 +13,15 @@ from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 import wandb
 
-from eeg_video_dataset import Dataset
+project_root = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    
+from EEG2Video.Seq2Seq.models.eeg_video_dataset import Dataset
 from EEG2Video.Seq2Seq.models.my_autoregressive_transformer import myTransformer
 
 
@@ -28,7 +36,7 @@ def parse_args():
     parser.add_argument(
         '--video_dir',
         type=str,
-        required=True,
+        default ='./data/Seq2Seq/Video_latents',
         help='Directory with block-level video latent .npy files shared by all subjects'
     )
     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs')
@@ -49,17 +57,9 @@ def parse_args():
 
 def load_eeg_data(eeg_path: str):
     """Load EEG embeddings from ``eeg_path`` and reshape to ``(N, 7, 62, 100)``."""
-
-    eeg = np.load(eeg_path)
-    if eeg.ndim == 6:
-        # (7, 40, 5, 7, 62, 100) -> (1400, 7, 62, 100)
-        eeg = eeg.reshape(-1, *eeg.shape[-3:])
-    elif eeg.ndim == 5:
-        eeg = eeg.reshape(-1, eeg.shape[-2], eeg.shape[-1])
-    elif eeg.ndim == 2:
-        if eeg.shape[0] % 7 != 0:
-            raise ValueError(f'EEG embedding shape {eeg.shape} not divisible by 7')
-        eeg = eeg.reshape(-1, 7, eeg.shape[1])
+    # (7, 40, 5, 7, 62, 100) -> (1400, 7, 62, 100)
+    eeg = np.load(eeg_path).astype(np.float32)
+    eeg = eeg.reshape(-1, *eeg.shape[-3:])
     return eeg
 
 
