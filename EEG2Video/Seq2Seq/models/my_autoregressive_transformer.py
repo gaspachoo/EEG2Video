@@ -96,7 +96,16 @@ class myTransformer(nn.Module):
         Tuple[Tensor, Tensor]
             Text logits and latent predictions of shape ``(batch, 7, 4, 36, 64)``.
             Only the last 6 frames are used for the loss.
+
+        Raises
+        ------
+        ValueError
+            If ``src`` is not of shape ``(batch, 7, 62, 100)``.
         """
+
+        # Validate EEG input dimensions
+        if src.size(1) != 7 or src.size(2) != 62 or src.size(3) != 100:
+            raise ValueError(f"Expected src shape (B,7,62,100) but got {tuple(src.shape)}")
 
         # Reshape EEG input for embedding while remaining robust to non-contiguous tensors
         src = self.eeg_embedding(src.reshape(src.size(0) * src.size(1), 1, 62, 100))
