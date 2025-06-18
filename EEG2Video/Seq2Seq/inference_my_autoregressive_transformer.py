@@ -12,7 +12,7 @@ if project_root not in sys.path:
 from EEG2Video.Seq2Seq.models.my_autoregressive_transformer import myTransformer
 
 # class mapping used during training
-GT_LABEL = np.load("data/meta_info/All_video_label.npy")
+GT_LABEL = np.load("./data/meta_info/All_video_label.npy")
 CHOSEN_LABELS = list(range(1, 41))
 
 
@@ -81,7 +81,7 @@ def main():
     parser.add_argument(
         '--eeg_path',
         type=str,
-        required=True,
+        default = './data/Preprocessing/Segmented_500ms_sw/sub3.npy',
         help='Path to an EEG file from data/Preprocessing/Segmented_500ms_sw'
     )
     parser.add_argument('--output_dir', type=str, default = "./data/Seq2Seq/Latents_autoreg", help='Directory to save predictions')
