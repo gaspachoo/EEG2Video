@@ -1,0 +1,140 @@
+import os
+import argparse
+import numpy as np
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, random_split
+from tqdm import tqdm
+
+from eeg_video_dataset import Dataset
+from EEG2Video.Seq2Seq.models.my_autoregressive_transformer import myTransformer
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--eeg_dir', type=str, required=True,
+                        help='Directory containing subject EEG embeddings as .npy files')
+    parser.add_argument('--video_dir', type=str, required=True,
+                        help='Directory with video latent .npy files for each subject')
+    parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs')
+    parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
+    parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
+    parser.add_argument('--train_ratio', type=float, default=0.8, help='Training split ratio')
+    parser.add_argument('--val_ratio', type=float, default=0.1, help='Validation split ratio')
+    parser.add_argument('--save_dir', type=str, default='EEG2Video/checkpoint/Seq2Seq_v2/',
+                        help='Directory to store the best checkpoint')
+    return parser.parse_args()
+
+
+def load_subject_data(eeg_path: str, video_path: str):
+    eeg = np.load(eeg_path)
+    if eeg.ndim == 5:
+        eeg = eeg.reshape(-1, eeg.shape[-2], eeg.shape[-1])
+    elif eeg.ndim == 2:
+        if eeg.shape[0] % 7 != 0:
+            raise ValueError(f'EEG embedding shape {eeg.shape} not divisible by 7')
+        eeg = eeg.reshape(-1, 7, eeg.shape[1])
+    video = np.load(video_path)
+    if video.ndim == 7:
+        video = video.reshape(-1, *video.shape[-5:])
+    return eeg, video
+
+
+def build_dataset(eeg_dir: str, video_dir: str):
+    eeg_all, video_all = [], []
+    for fname in sorted(os.listdir(eeg_dir)):
+        if not fname.endswith('.npy'):
+            continue
+        eeg_path = os.path.join(eeg_dir, fname)
+        vid_path = os.path.join(video_dir, fname)
+        if not os.path.isfile(vid_path):
+            raise FileNotFoundError(f'Missing video latent file for {fname}')
+        eeg, vid = load_subject_data(eeg_path, vid_path)
+        eeg_all.append(eeg)
+        video_all.append(vid)
+    eeg_concat = np.concatenate(eeg_all, axis=0)
+    video_concat = np.concatenate(video_all, axis=0)
+    return Dataset(eeg_concat, video_concat)
+
+
+def split_dataset(dataset: Dataset, train_ratio: float, val_ratio: float):
+    total = len(dataset)
+    n_train = int(train_ratio * total)
+    n_val = int(val_ratio * total)
+    n_test = total - n_train - n_val
+    return random_split(dataset, [n_train, n_val, n_test])
+
+
+def main():
+    args = parse_args()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    ds = build_dataset(args.eeg_dir, args.video_dir)
+    train_ds, val_ds, test_ds = split_dataset(ds, args.train_ratio, args.val_ratio)
+
+    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=args.batch_size)
+    test_loader = DataLoader(test_ds, batch_size=args.batch_size)
+
+    model = myTransformer().to(device)
+    optim = torch.optim.Adam(model.parameters(), lr=args.lr)
+    criterion = nn.MSELoss()
+
+    best_val = float('inf')
+    os.makedirs(args.save_dir, exist_ok=True)
+    ckpt_path = os.path.join(args.save_dir, 'best.pt')
+
+    for epoch in range(1, args.epochs + 1):
+        model.train()
+        train_loss = 0.0
+        for eeg, video in tqdm(train_loader, desc=f'Train {epoch}'):
+            eeg = eeg.to(device)
+            video = video.to(device)
+            b, t, c, h, w = video.shape
+            tgt = torch.zeros(b, 1, c, h, w, device=device)
+            full = torch.cat([tgt, video], dim=1)
+            optim.zero_grad()
+            _, out = model(eeg, full)
+            loss = criterion(out[:, 1:], video)
+            loss.backward()
+            optim.step()
+            train_loss += loss.item()
+        train_loss /= len(train_loader)
+
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for eeg, video in val_loader:
+                eeg = eeg.to(device)
+                video = video.to(device)
+                b, t, c, h, w = video.shape
+                tgt = torch.zeros(b, 1, c, h, w, device=device)
+                full = torch.cat([tgt, video], dim=1)
+                _, out = model(eeg, full)
+                val_loss += criterion(out[:, 1:], video).item()
+        val_loss /= len(val_loader)
+
+        if val_loss < best_val:
+            best_val = val_loss
+            torch.save(model.state_dict(), ckpt_path)
+
+        print(f'Epoch {epoch:03d}  train_loss={train_loss:.4f}  val_loss={val_loss:.4f}')
+
+    # final test
+    model.load_state_dict(torch.load(ckpt_path))
+    model.eval()
+    test_loss = 0.0
+    with torch.no_grad():
+        for eeg, video in test_loader:
+            eeg = eeg.to(device)
+            video = video.to(device)
+            b, t, c, h, w = video.shape
+            tgt = torch.zeros(b, 1, c, h, w, device=device)
+            full = torch.cat([tgt, video], dim=1)
+            _, out = model(eeg, full)
+            test_loss += criterion(out[:, 1:], video).item()
+    test_loss /= len(test_loader)
+    print(f'Test loss: {test_loss:.4f}')
+
+if __name__ == '__main__':
+    main()
