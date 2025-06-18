@@ -41,6 +41,7 @@ def load_subject_data(eeg_path: str, video_path: str):
     eeg = np.load(eeg_path)
     if eeg.ndim == 6:
         # shape (7, 40, 5, 7, 62, 100) -> (1400, 7, 62, 100)
+        print("Dim is 6")
         eeg = eeg.reshape(-1, *eeg.shape[-3:])
     elif eeg.ndim == 5:
         eeg = eeg.reshape(-1, eeg.shape[-2], eeg.shape[-1])
