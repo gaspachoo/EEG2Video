@@ -42,23 +42,31 @@ def load_model(ckpt_path: str, device: torch.device) -> myTransformer:
 
 
 def preprocess_eeg(eeg_path: str):
-    eeg = np.load(eeg_path)  # (7,40,5,62,400)
+    eeg = np.load(eeg_path)
 
-    # reorder concepts using GT_LABEL mapping
-    new_eeg = np.zeros_like(eeg)
-    for blk in range(7):
-        idx = [list(GT_LABEL[blk]).index(lbl) for lbl in CHOSEN_LABELS]
-        new_eeg[blk] = eeg[blk][idx]
+    # If the file already contains sliding windows, keep them
+    if eeg.ndim == 6:
+        windows = eeg  # (7, 40, 5, 7, 62, 100)
+    else:
+        # Otherwise create the windows as in training
+        win = 100
+        step = 50
 
-    # sliding windows of 100 samples with 50 overlap -> 7 windows
-    win = 100
-    step = 50
-    windows = []
-    for start in range(0, new_eeg.shape[-1] - win + 1, win - step):
-        windows.append(new_eeg[..., start:start + win])
-    windows = np.stack(windows, axis=-1)  # (7,40,5,62,100,7)
+        reordered = np.zeros_like(eeg)
+        for blk in range(7):
+            idx = [list(GT_LABEL[blk]).index(lbl) for lbl in CHOSEN_LABELS]
+            reordered[blk] = eeg[blk][idx]
 
-    data = windows.reshape(-1, 62, 100, windows.shape[-1])  # (7*40*5,62,100,7)
+        win_list = []
+        for start in range(0, reordered.shape[-1] - win + 1, win - step):
+            win_list.append(reordered[..., start:start + win])
+        windows = np.stack(win_list, axis=-1)  # (7,40,5,62,100,7)
+
+    # When coming from segment_sliding_window the layout is (7,40,5,7,62,100)
+    if windows.shape[-3] == 62:
+        windows = windows.transpose(0, 1, 2, 4, 5, 3)
+
+    data = windows.reshape(-1, 62, 100, windows.shape[-1])
     b, c, l, f = data.shape
     data = data.reshape(b, -1)
 
@@ -85,7 +93,12 @@ def generate_latents(model: myTransformer, eeg: torch.Tensor, device: torch.devi
 def main():
     parser = argparse.ArgumentParser(description="Inference for myTransformer")
     parser.add_argument('--ckpt', type=str, required=True, help='Model checkpoint')
-    parser.add_argument('--eeg_path', type=str, required=True, help='Path to subject EEG file')
+    parser.add_argument(
+        '--eeg_path',
+        type=str,
+        required=True,
+        help='Path to an EEG file from data/Preprocessing/Segmented_500ms_sw'
+    )
     parser.add_argument('--output_dir', type=str, required=True, help='Directory to save predictions')
     parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
     parser.add_argument('--batch_size', type=int, default=32)
