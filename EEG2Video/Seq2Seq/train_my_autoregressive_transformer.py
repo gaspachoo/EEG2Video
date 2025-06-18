@@ -48,7 +48,7 @@ def parse_args():
                         help='LR decay factor')
     parser.add_argument('--train_ratio', type=float, default=0.8, help='Training split ratio')
     parser.add_argument('--val_ratio', type=float, default=0.1, help='Validation split ratio')
-    parser.add_argument('--save_dir', type=str, default='EEG2Video/checkpoint/Seq2Seq_v2/',
+    parser.add_argument('--save_dir', type=str, default='EEG2Video/checkpoints/Seq2Seq_v2/',
                         help='Directory to store the best checkpoint')
     parser.add_argument('--use_wandb', action='store_true',
                         help='Enable logging to Weights & Biases')

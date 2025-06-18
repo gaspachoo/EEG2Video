@@ -77,14 +77,14 @@ def generate_latents(model: myTransformer, eeg: torch.Tensor, device: torch.devi
 
 def main():
     parser = argparse.ArgumentParser(description="Inference for myTransformer")
-    parser.add_argument('--ckpt', type=str, required=True, help='Model checkpoint')
+    parser.add_argument('--ckpt', type=str, default = "./EEG2Video/checkpoints/Seq2Seq_v2/best.pt", help='Model checkpoint')
     parser.add_argument(
         '--eeg_path',
         type=str,
         required=True,
         help='Path to an EEG file from data/Preprocessing/Segmented_500ms_sw'
     )
-    parser.add_argument('--output_dir', type=str, required=True, help='Directory to save predictions')
+    parser.add_argument('--output_dir', type=str, default = "./data/Seq2Seq/Latents_autoreg", help='Directory to save predictions')
     parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
     parser.add_argument('--batch_size', type=int, default=32)
     args = parser.parse_args()
