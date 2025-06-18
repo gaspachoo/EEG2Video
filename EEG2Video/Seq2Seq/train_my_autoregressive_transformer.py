@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
+import wandb
 
 from eeg_video_dataset import Dataset
 from EEG2Video.Seq2Seq.models.my_autoregressive_transformer import myTransformer
@@ -23,10 +24,16 @@ def parse_args():
     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
+    parser.add_argument('--scheduler_step', type=int, default=50,
+                        help='Epoch interval for LR scheduler')
+    parser.add_argument('--scheduler_gamma', type=float, default=0.5,
+                        help='LR decay factor')
     parser.add_argument('--train_ratio', type=float, default=0.8, help='Training split ratio')
     parser.add_argument('--val_ratio', type=float, default=0.1, help='Validation split ratio')
     parser.add_argument('--save_dir', type=str, default='EEG2Video/checkpoint/Seq2Seq_v2/',
                         help='Directory to store the best checkpoint')
+    parser.add_argument('--use_wandb', action='store_true',
+                        help='Enable logging to Weights & Biases')
     return parser.parse_args()
 
 
@@ -85,11 +92,18 @@ def main():
 
     model = myTransformer().to(device)
     optim = torch.optim.Adam(model.parameters(), lr=args.lr)
+    scheduler = torch.optim.lr_scheduler.StepLR(
+        optim, step_size=args.scheduler_step, gamma=args.scheduler_gamma
+    )
     criterion = nn.MSELoss()
 
     best_val = float('inf')
     os.makedirs(args.save_dir, exist_ok=True)
     ckpt_path = os.path.join(args.save_dir, 'best.pt')
+
+    if args.use_wandb:
+        wandb.init(project='eeg2video-autoregressive', config=vars(args))
+        wandb.watch(model, log='all')
 
     for epoch in range(1, args.epochs + 1):
         model.train()
@@ -121,11 +135,22 @@ def main():
                 val_loss += criterion(out[:, 1:], video).item()
         val_loss /= len(val_loader)
 
+        scheduler.step()
+        current_lr = optim.param_groups[0]['lr']
+
         if val_loss < best_val:
             best_val = val_loss
             torch.save(model.state_dict(), ckpt_path)
 
-        print(f'Epoch {epoch:03d}  train_loss={train_loss:.4f}  val_loss={val_loss:.4f}')
+        print(f'Epoch {epoch:03d}  train_loss={train_loss:.4f}  val_loss={val_loss:.4f}  lr={current_lr:.6e}')
+
+        if args.use_wandb:
+            wandb.log({
+                'epoch': epoch,
+                'train_loss': train_loss,
+                'val_loss': val_loss,
+                'lr': current_lr
+            })
 
     # final test
     model.load_state_dict(torch.load(ckpt_path))
@@ -142,6 +167,9 @@ def main():
             test_loss += criterion(out[:, 1:], video).item()
     test_loss /= len(test_loader)
     print(f'Test loss: {test_loss:.4f}')
+    if args.use_wandb:
+        wandb.log({'test_loss': test_loss})
+        wandb.finish()
 
 if __name__ == '__main__':
     main()
