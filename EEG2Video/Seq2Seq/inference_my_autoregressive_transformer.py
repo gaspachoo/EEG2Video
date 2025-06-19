@@ -3,6 +3,7 @@ import sys
 import argparse
 import numpy as np
 import torch
+import pickle
 from sklearn.preprocessing import StandardScaler
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -16,6 +17,12 @@ GT_LABEL = np.load("./data/meta_info/All_video_label.npy")
 CHOSEN_LABELS = list(range(1, 41))
 
 
+def load_scaler(path: str) -> StandardScaler:
+    """Load a fitted ``StandardScaler`` saved with ``pickle``."""
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
+
 def load_model(ckpt_path: str, device: torch.device) -> myTransformer:
     model = myTransformer().to(device)
     state = torch.load(ckpt_path, map_location=device)
@@ -26,16 +33,13 @@ def load_model(ckpt_path: str, device: torch.device) -> myTransformer:
     return model
 
 
-def load_eeg_data(eeg_path: str):
-    """Load EEG embeddings from ``eeg_path`` and reshape to ``(N, 7, 62, 100)``."""
-    eeg = np.load(eeg_path).astype(np.float32) # (7, 40, 5, 7, 62, 100) 
-    eeg = eeg.reshape(-1, *eeg.shape[-3:]) #-> (1400, 7, 62, 100)
-    ba, bl,c,t = eeg.shape 
-    eeg_reshaped = eeg.reshape(ba,bl*c*t) # (1400, 7*62*100)
-    scaler = StandardScaler()
-    eeg_scaled = scaler.fit_transform(eeg_reshaped)
-    eeg = eeg_scaled.reshape(ba, bl, c, t)
-    return torch.from_numpy(eeg),scaler
+def load_eeg_data(eeg_path: str, scaler: StandardScaler) -> torch.Tensor:
+    """Load EEG embeddings from ``eeg_path`` and apply the provided scaler."""
+    eeg = np.load(eeg_path).astype(np.float32)
+    eeg = eeg.reshape(-1, *eeg.shape[-3:])
+    eeg_flat = eeg.reshape(len(eeg), -1)
+    eeg_scaled = scaler.transform(eeg_flat).reshape(eeg.shape)
+    return torch.from_numpy(eeg_scaled)
 
 def generate_latents(model: myTransformer, eeg: torch.Tensor, device: torch.device, batch_size: int = 32):
     preds = []
@@ -61,13 +65,15 @@ def main():
     parser.add_argument('--output_dir', type=str, default = "./data/Seq2Seq/Latents_autoreg", help='Directory to save predictions')
     parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
     parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--scaler_path', type=str, default="./EEG2Video/checkpoints/Seq2Seq_v2/scaler.pkl", help='Path to fitted StandardScaler')
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
     device = torch.device('cuda' if args.device == 'cuda' and torch.cuda.is_available() else 'cpu')
 
     model = load_model(args.ckpt, device)
-    eeg, _ = load_eeg_data(args.eeg_path)
+    scaler = load_scaler(args.scaler_path)
+    eeg = load_eeg_data(args.eeg_path, scaler)
 
     preds = generate_latents(model, eeg, device, args.batch_size)
     preds = preds.reshape(7, 200, 6, 4, 36, 64)

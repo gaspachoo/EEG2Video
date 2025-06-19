@@ -126,7 +126,7 @@ The model is just a rewriting of original model : `EEG2Video/Seq2Seq/models/tran
 - Training shifts the target sequence by one step: `tgt_in[:,1:] = tgt[:,:-1]` and the first step is filled with zeros. The decoder therefore receives the previous latent at each time step instead of the ground truth.
 - The option `--stats_path` defines where to save `mean_z` and `std_z` when `--normalize` is active (default: `--save_path`). The resulting `stats.npz` must also be provided at inference to restore the latents to their original scale.
 
-    Script : `EEG2Video/Seq2Seq/train_seq2seq_v2.py`
+Script : `EEG2Video/Seq2Seq/train_seq2seq_v2.py`
 
  ### Inference : 
 
@@ -134,6 +134,10 @@ We use the generated EEG embeddings from part 2 to generate predicted latents.
 
 Script : `EEG2Video/Seq2Seq/inference_seq2seq_v2.py`
 - During inference, provide the same `--stats_path` to restore latents to their original scale.
+
+Autoregressive variant:
+- Training script: `EEG2Video/Seq2Seq/train_my_autoregressive_transformer.py` with option `--save_scaler` to store the fitted scaler (e.g. `scaler.pkl`).
+- Inference script: `EEG2Video/Seq2Seq/inference_my_autoregressive_transformer.py` with option `--scaler_path` to load this scaler.
 
 
 
