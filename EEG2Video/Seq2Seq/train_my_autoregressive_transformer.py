@@ -10,6 +10,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
+from sklearn.preprocessing import StandardScaler
+import pickle
 from tqdm import tqdm
 import wandb
 
@@ -50,6 +52,8 @@ def parse_args():
     parser.add_argument('--val_ratio', type=float, default=0.1, help='Validation split ratio')
     parser.add_argument('--save_dir', type=str, default='EEG2Video/checkpoints/Seq2Seq_v2/',
                         help='Directory to store the best checkpoint')
+    parser.add_argument('--save_scaler', type=str, default='scaler.pkl',
+                        help='File path to store the fitted StandardScaler')
     parser.add_argument('--use_wandb', action='store_true',
                         help='Enable logging to Weights & Biases')
     return parser.parse_args()
@@ -116,7 +120,29 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ds = build_dataset(args.eeg_dir, args.video_dir)
-    train_ds, val_ds, test_ds = split_dataset(ds, args.train_ratio, args.val_ratio)
+    train_sub, val_sub, test_sub = split_dataset(ds, args.train_ratio, args.val_ratio)
+
+    # stack training EEG and fit scaler
+    eeg_train = ds.eeg[train_sub.indices]
+    eeg_train_flat = eeg_train.reshape(len(train_sub), -1)
+    scaler = StandardScaler().fit(eeg_train_flat)
+
+    def transform_split(indices):
+        eeg_split = ds.eeg[indices]
+        video_split = ds.video[indices]
+        eeg_scaled = scaler.transform(eeg_split.reshape(len(indices), -1)).reshape(eeg_split.shape)
+        return Dataset(eeg_scaled, video_split)
+
+    train_ds = transform_split(train_sub.indices)
+    val_ds = transform_split(val_sub.indices)
+    test_ds = transform_split(test_sub.indices)
+
+    # save scaler for later inference
+    scaler_path = args.save_scaler
+    if not os.path.isabs(scaler_path):
+        scaler_path = os.path.join(args.save_dir, scaler_path)
+    with open(scaler_path, 'wb') as f:
+        pickle.dump(scaler, f)
 
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=args.batch_size)
