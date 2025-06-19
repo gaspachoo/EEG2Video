@@ -46,15 +46,8 @@ def parse_args():
     p.add_argument("--epochs",   type=int, default=500)
     p.add_argument("--bs",       type=int, default=200)
     p.add_argument("--lr",       type=float, default=1e-4)
-    p.add_argument("--min_lr",   type=float, default=1e-6,
-                   help="Minimum learning rate for the scheduler")
-    p.add_argument(
-        "--scheduler",
-        type=str,
-        choices=["steplr", "reducelronplateau", "cosine"],
-        default="reducelronplateau",
-        help="Type of learning rate scheduler",
-    )
+    p.add_argument("--min_lr",   type=float, default=1e-6, help="Minimum learning rate for the scheduler")
+    p.add_argument("--scheduler",type=str, choices=["steplr", "reducelronplateau", "cosine"], default="reducelronplateau", help="Type of learning rate scheduler",)
     p.add_argument("--use_wandb", action="store_true")
     return p.parse_args()
 
@@ -164,7 +157,7 @@ def main():
     dl_val = DataLoader(ds_val, args.bs)
     dl_test = DataLoader(ds_test, args.bs)
 
-    model = GLMNet(OCCIPITAL_IDX, out_dim=num_unique_labels).to(device)
+    model = GLMNet(OCCIPITAL_IDX, time_len, out_dim=num_unique_labels).to(device)
     opt = optim.Adam(model.parameters(), lr=args.lr)
 
     if args.scheduler == "reducelronplateau":

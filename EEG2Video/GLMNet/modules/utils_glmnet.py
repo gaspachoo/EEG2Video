@@ -7,7 +7,7 @@ import numpy as np
 class GLMNet(nn.Module):
     """ShallowNet (raw) + MLP (freq) → concat → FC."""
 
-    def __init__(self, occipital_idx, out_dim: int = 40, emb_dim: int = 256):
+    def __init__(self, occipital_idx, T:int, out_dim: int = 40, emb_dim: int = 256):
         """Construct the GLMNet model.
 
         Parameters
@@ -24,7 +24,7 @@ class GLMNet(nn.Module):
         self.occipital_idx = list(occipital_idx)
 
         # Global branch processing raw EEG
-        self.raw_global = shallownet(emb_dim, 62, 200)
+        self.raw_global = shallownet(emb_dim, 62, T)
         # Local branch processing spectral features
         self.freq_local = mlpnet(emb_dim, len(self.occipital_idx) * 5)
 
