@@ -85,10 +85,14 @@ def main():
     print(f"Using device: {device}")
     
     os.makedirs(args.save_dir, exist_ok=True)
-    
+
     # Sélection d’un seul sujet
     filename = "sub3.npy"  # ou args.subj_name
     subj_name = filename.replace(".npy", "")
+
+    shallownet_path = os.path.join(
+        args.save_dir, f"{subj_name}_{args.category}_shallownet.pt"
+    )
 
     raw = np.load(os.path.join(args.raw_dir, filename))
     feat = np.load(os.path.join(args.feat_dir, filename))
@@ -209,8 +213,14 @@ def main():
         if val_acc > best_val:
             best_val = val_acc
             os.makedirs(args.save_dir, exist_ok=True)
-            torch.save(model.state_dict(), f"{args.save_dir}/{subj_name}_{args.category}_best.pt")
-            print(f"New best model saved at epoch {ep} with val_acc={val_acc:.3f}")
+            torch.save(
+                model.state_dict(),
+                f"{args.save_dir}/{subj_name}_{args.category}_best.pt",
+            )
+            torch.save(model.raw_global.state_dict(), shallownet_path)
+            print(
+                f"New best model saved at epoch {ep} with val_acc={val_acc:.3f}"
+            )
 
         if args.use_wandb:
             wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc,

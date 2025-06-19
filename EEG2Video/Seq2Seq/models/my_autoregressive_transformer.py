@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from EEG2Video.GLMNet.modules.models_paper import shallownet
+
 class MyEEGNetEmbedding(nn.Module):
     """EEGNet feature extractor used before the transformer."""
 
@@ -44,37 +46,19 @@ class MyEEGNetEmbedding(nn.Module):
 
 
 class ShallowNetEmbedding(nn.Module):
-    """ShallowNet feature extractor optionally loaded from a checkpoint."""
+    """Wraps the shallownet model used in GLMNet."""
 
     def __init__(self, d_model: int = 128, C: int = 62, T: int = 100,
-                 ckpt: str | None = None) -> None:
+                 weights_path: str | None = None) -> None:
         super().__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=(1, 13), padding=(0, 6)),
-            nn.BatchNorm2d(32),
-            nn.ELU(),
-            nn.Conv2d(32, 64, kernel_size=(C, 1)),
-            nn.BatchNorm2d(64),
-            nn.ELU(),
-            nn.AvgPool2d(kernel_size=(1, 5), stride=(1, 2)),
-            nn.Dropout(0.6),
-        )
-        time_dim = (T - 5) // 2 + 1
-        self.proj = nn.Linear(64 * time_dim, d_model)
-
-        if ckpt:
-            state = torch.load(ckpt, map_location="cpu")
-            if isinstance(state, dict) and "state_dict" in state:
-                state = state["state_dict"]
-            try:
-                self.load_state_dict(state, strict=False)
-            except RuntimeError:
-                print(f"Warning: failed to load ShallowNet weights from {ckpt}")
+        self.model = shallownet(out_dim=d_model, C=C, T=T)
+        if weights_path is not None:
+            state_dict = torch.load(weights_path, map_location="cpu")
+            self.model.load_state_dict(state_dict)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.features(x)
-        x = x.view(x.size(0), -1)
-        return self.proj(x)
+        return self.model(x)
+
 
 
 class PositionalEncoding(nn.Module):
@@ -97,34 +81,19 @@ class PositionalEncoding(nn.Module):
 
 
 class myTransformer(nn.Module):
-    def __init__(self, d_model: int = 512, *, eeg_backbone: str = "eegnet",
-                 shallownet_ckpt: str | None = None) -> None:
-        """Autoregressive transformer mapping EEG to video latents.
-
-        Parameters
-        ----------
-        d_model : int, optional
-            Dimension of the internal embeddings, by default ``512``.
-        eeg_backbone : {"eegnet", "shallownet"}, optional
-            Type of EEG encoder used before the transformer.
-        shallownet_ckpt : str, optional
-            Path to pretrained ShallowNet weights when ``eeg_backbone`` is
-            ``"shallownet"``.
-        """
-
+    def __init__(self, d_model: int = 512, use_shallownet: bool = False,
+                 shallownet_path: str | None = None) -> None:
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
-        if eeg_backbone == "eegnet":
-            self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
-        elif eeg_backbone == "shallownet":
+        if use_shallownet:
             self.eeg_embedding = ShallowNetEmbedding(
                 d_model=d_model,
                 C=62,
                 T=100,
-                ckpt=shallownet_ckpt,
+                weights_path=shallownet_path,
             )
         else:
-            raise ValueError(f"Unsupported eeg_backbone: {eeg_backbone}")
+            self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=d_model, nhead=4, batch_first=True),
@@ -166,8 +135,10 @@ class myTransformer(nn.Module):
             raise ValueError(f"Expected src shape (B,7,62,100) but got {tuple(src.shape)}")
 
         # Reshape EEG input for embedding while remaining robust to non-contiguous tensors
-        src = self.eeg_embedding(src.reshape(src.size(0) * src.size(1), 1, 62, 100))
-        src = src.reshape(tgt.size(0), 7, -1)
+        batch_size, seq_len, _, _ = src.shape
+        src = src.reshape(batch_size * seq_len, 1, 62, 100)
+        src = self.eeg_embedding(src)
+        src = src.reshape(batch_size, seq_len, -1)
 
         # Flatten video latents before linear embedding
         tgt = tgt.reshape(tgt.size(0), tgt.size(1), -1)
