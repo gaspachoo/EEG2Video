@@ -88,6 +88,10 @@ trained with `EEG2Video/GLMNet/train_glfnet_mlp.py`.
   `reducelronplateau`, `cosine`) and a `--min_lr` value to set the learning rate
   floor.
 
+- The best checkpoint is saved as `<subject>_<category>_best.pt` and the
+  ShallowNet weights are also stored in
+  `<subject>_<category>_shallownet.pt`.
+
 ### Inference :
     
 We generate EEgs embeddings from train GLMNet.
