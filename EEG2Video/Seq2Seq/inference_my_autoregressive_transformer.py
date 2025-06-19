@@ -1,3 +1,10 @@
+"""Inference script for the autoregressive transformer.
+
+The EEG encoder can be switched between **EEGNet** and **ShallowNet** using
+``--eeg_backbone``. Pretrained ShallowNet weights can be loaded with
+``--shallownet_ckpt``.
+"""
+
 import os
 import sys
 import argparse
@@ -23,8 +30,11 @@ def load_scaler(path: str) -> StandardScaler:
         return pickle.load(f)
 
 
-def load_model(ckpt_path: str, device: torch.device) -> myTransformer:
-    model = myTransformer().to(device)
+def load_model(ckpt_path: str, device: torch.device,
+               eeg_backbone: str = 'eegnet', shallownet_ckpt: str | None = None) -> myTransformer:
+    """Load ``myTransformer`` from ``ckpt_path`` using the chosen EEG encoder."""
+    model = myTransformer(eeg_backbone=eeg_backbone,
+                         shallownet_ckpt=shallownet_ckpt).to(device)
     state = torch.load(ckpt_path, map_location=device)
     if isinstance(state, dict) and 'state_dict' in state:
         state = state['state_dict']
@@ -66,12 +76,21 @@ def main():
     parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--scaler_path', type=str, default="./EEG2Video/checkpoints/Seq2Seq_v2/scaler.pkl", help='Path to fitted StandardScaler')
+    parser.add_argument('--eeg_backbone', choices=['eegnet', 'shallownet'],
+                        default='eegnet', help='EEG encoder type')
+    parser.add_argument('--shallownet_ckpt', type=str,
+                        help='Path to pretrained ShallowNet weights')
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
     device = torch.device('cuda' if args.device == 'cuda' and torch.cuda.is_available() else 'cpu')
 
-    model = load_model(args.ckpt, device)
+    model = load_model(
+        args.ckpt,
+        device,
+        eeg_backbone=args.eeg_backbone,
+        shallownet_ckpt=args.shallownet_ckpt,
+    )
     scaler = load_scaler(args.scaler_path)
     eeg = load_eeg_data(args.eeg_path, scaler)
 

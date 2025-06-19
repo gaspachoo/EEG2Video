@@ -4,7 +4,7 @@ import torch.nn as nn
 from EEG2Video.GLMNet.modules.models_paper import shallownet
 
 class MyEEGNetEmbedding(nn.Module):
-    """EEG feature extractor used before the transformer."""
+    """EEGNet feature extractor used before the transformer."""
 
     def __init__(self, d_model: int = 128, C: int = 62, T: int = 100,
                  F1: int = 16, D: int = 4, F2: int = 16, cross_subject: bool = False) -> None:
@@ -58,6 +58,7 @@ class ShallowNetEmbedding(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
+
 
 
 class PositionalEncoding(nn.Module):
