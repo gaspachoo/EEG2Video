@@ -26,42 +26,16 @@ def load_model(ckpt_path: str, device: torch.device) -> myTransformer:
     return model
 
 
-def preprocess_eeg(eeg_path: str):
-    eeg = np.load(eeg_path)
-
-    # If the file already contains sliding windows, keep them
-    if eeg.ndim == 6:
-        windows = eeg  # (7, 40, 5, 7, 62, 100)
-    else:
-        # Otherwise create the windows as in training
-        win = 100
-        step = 50
-
-        reordered = np.zeros_like(eeg)
-        for blk in range(7):
-            idx = [list(GT_LABEL[blk]).index(lbl) for lbl in CHOSEN_LABELS]
-            reordered[blk] = eeg[blk][idx]
-
-        win_list = []
-        for start in range(0, reordered.shape[-1] - win + 1, win - step):
-            win_list.append(reordered[..., start:start + win])
-        windows = np.stack(win_list, axis=-1)  # (7,40,5,62,100,7)
-
-    # When coming from segment_sliding_window the layout is (7,40,5,7,62,100)
-    if windows.shape[-3] == 62:
-        windows = windows.transpose(0, 1, 2, 4, 5, 3)
-
-    data = windows.reshape(-1, 62, 100, windows.shape[-1])
-    b, c, l, f = data.shape
-    data = data.reshape(b, -1)
-
+def load_eeg_data(eeg_path: str):
+    """Load EEG embeddings from ``eeg_path`` and reshape to ``(N, 7, 62, 100)``."""
+    eeg = np.load(eeg_path).astype(np.float32) # (7, 40, 5, 7, 62, 100) 
+    eeg = eeg.reshape(-1, *eeg.shape[-3:]) #-> (1400, 7, 62, 100)
+    ba, bl,c,t = eeg.shape 
+    eeg_reshaped = eeg.reshape(ba,bl*c*t) # (1400, 7*62*100)
     scaler = StandardScaler()
-    data = scaler.fit_transform(data)
-    data = data.reshape(b, c, l, f)
-
-    data = np.transpose(data, (0, 3, 1, 2))  # (b,7,62,100)
-    return torch.from_numpy(data).float(), scaler
-
+    eeg_scaled = scaler.fit_transform(eeg_reshaped)
+    eeg = eeg_scaled.reshape(ba, bl, c, t)
+    return torch.from_numpy(eeg),scaler
 
 def generate_latents(model: myTransformer, eeg: torch.Tensor, device: torch.device, batch_size: int = 32):
     preds = []
@@ -93,10 +67,10 @@ def main():
     device = torch.device('cuda' if args.device == 'cuda' and torch.cuda.is_available() else 'cpu')
 
     model = load_model(args.ckpt, device)
-    eeg, _ = preprocess_eeg(args.eeg_path)
+    eeg, _ = load_eeg_data(args.eeg_path)
 
     preds = generate_latents(model, eeg, device, args.batch_size)
-    preds = preds.reshape(7, 40, 5, 6, 4, 36, 64)
+    preds = preds.reshape(7, 200, 6, 4, 36, 64)
 
     for blk in range(7):
         out_path = os.path.join(args.output_dir, f'block{blk}.npy')
