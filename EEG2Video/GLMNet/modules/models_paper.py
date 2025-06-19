@@ -115,7 +115,8 @@ class shallownet(nn.Module):
             #nn.AdaptiveAvgPool2d((1, 26)),
             nn.Dropout(0.5),
         )
-        self.out = nn.Linear(1040*(T//200), out_dim)
+        n_samples = math.floor((T - 75) / 5 + 1)
+        self.out = nn.Linear(40 * n_samples, out_dim)
     
     def forward(self, x):               #input:(batch,1,C,T)
         x = self.net(x)
@@ -201,7 +202,8 @@ class tsconv(nn.Module):
             nn.ELU(),
             nn.Dropout(0.5),
         )
-        self.out = nn.Linear(1040*(T//200), out_dim)
+        n_samples = math.floor((T - 75) / 5 + 1)
+        self.out = nn.Linear(40 * n_samples, out_dim)
     
     def forward(self, x):               #input:(batch,1,C,T)
         x = self.net(x)

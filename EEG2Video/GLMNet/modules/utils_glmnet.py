@@ -19,6 +19,9 @@ class GLMNet(nn.Module):
         emb_dim : int
             Dimension of the intermediate embeddings (each branch outputs
             ``emb_dim`` features).
+        T : int
+            Number of temporal samples of the raw EEG. This value can vary
+            depending on the dataset.
         """
         super().__init__()
         self.occipital_idx = list(occipital_idx)
@@ -41,7 +44,7 @@ class GLMNet(nn.Module):
         Parameters
         ----------
         x_raw : torch.Tensor
-            Raw EEG of shape ``(B, 1, 62, 200)``.
+            Raw EEG of shape ``(B, 1, 62, T)``.
         x_feat : torch.Tensor
             Spectral features of shape ``(B, 62, 5)``.
         return_features : bool, optional
