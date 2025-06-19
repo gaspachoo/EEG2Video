@@ -1,7 +1,9 @@
 """Training script for the autoregressive transformer.
 
-EEG embeddings are subject-specific, while video latents are provided once per
-block (``block0.npy`` to ``block6.npy``) and shared across all subjects.
+EEG inputs can be encoded with **EEGNet** or **ShallowNet**. Select the encoder
+using ``--eeg_backbone`` and optionally load pretrained ShallowNet weights with
+``--shallownet_ckpt``. Video latents are provided once per block
+(``block0.npy`` to ``block6.npy``) and shared across all subjects.
 """
 
 import os, sys
@@ -56,6 +58,10 @@ def parse_args():
                         help='File path to store the fitted StandardScaler')
     parser.add_argument('--use_wandb', action='store_true',
                         help='Enable logging to Weights & Biases')
+    parser.add_argument('--eeg_backbone', choices=['eegnet', 'shallownet'],
+                        default='eegnet', help='EEG encoder type')
+    parser.add_argument('--shallownet_ckpt', type=str,
+                        help='Path to pretrained ShallowNet weights')
     return parser.parse_args()
 
 
@@ -148,7 +154,10 @@ def main():
     val_loader = DataLoader(val_ds, batch_size=args.batch_size)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size)
 
-    model = myTransformer().to(device)
+    model = myTransformer(
+        eeg_backbone=args.eeg_backbone,
+        shallownet_ckpt=args.shallownet_ckpt
+    ).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
         optim, step_size=args.scheduler_step, gamma=args.scheduler_gamma

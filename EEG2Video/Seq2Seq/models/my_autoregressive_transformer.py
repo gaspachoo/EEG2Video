@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class MyEEGNetEmbedding(nn.Module):
-    """EEG feature extractor used before the transformer."""
+    """EEGNet feature extractor used before the transformer."""
 
     def __init__(self, d_model: int = 128, C: int = 62, T: int = 100,
                  F1: int = 16, D: int = 4, F2: int = 16, cross_subject: bool = False) -> None:
@@ -43,6 +43,40 @@ class MyEEGNetEmbedding(nn.Module):
         return self.embedding(x)
 
 
+class ShallowNetEmbedding(nn.Module):
+    """ShallowNet feature extractor optionally loaded from a checkpoint."""
+
+    def __init__(self, d_model: int = 128, C: int = 62, T: int = 100,
+                 ckpt: str | None = None) -> None:
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=(1, 13), padding=(0, 6)),
+            nn.BatchNorm2d(32),
+            nn.ELU(),
+            nn.Conv2d(32, 64, kernel_size=(C, 1)),
+            nn.BatchNorm2d(64),
+            nn.ELU(),
+            nn.AvgPool2d(kernel_size=(1, 5), stride=(1, 2)),
+            nn.Dropout(0.6),
+        )
+        time_dim = (T - 5) // 2 + 1
+        self.proj = nn.Linear(64 * time_dim, d_model)
+
+        if ckpt:
+            state = torch.load(ckpt, map_location="cpu")
+            if isinstance(state, dict) and "state_dict" in state:
+                state = state["state_dict"]
+            try:
+                self.load_state_dict(state, strict=False)
+            except RuntimeError:
+                print(f"Warning: failed to load ShallowNet weights from {ckpt}")
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+        return self.proj(x)
+
+
 class PositionalEncoding(nn.Module):
     """Injects positional information into token embeddings."""
 
@@ -63,10 +97,34 @@ class PositionalEncoding(nn.Module):
 
 
 class myTransformer(nn.Module):
-    def __init__(self, d_model: int = 512) -> None:
+    def __init__(self, d_model: int = 512, *, eeg_backbone: str = "eegnet",
+                 shallownet_ckpt: str | None = None) -> None:
+        """Autoregressive transformer mapping EEG to video latents.
+
+        Parameters
+        ----------
+        d_model : int, optional
+            Dimension of the internal embeddings, by default ``512``.
+        eeg_backbone : {"eegnet", "shallownet"}, optional
+            Type of EEG encoder used before the transformer.
+        shallownet_ckpt : str, optional
+            Path to pretrained ShallowNet weights when ``eeg_backbone`` is
+            ``"shallownet"``.
+        """
+
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
-        self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
+        if eeg_backbone == "eegnet":
+            self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
+        elif eeg_backbone == "shallownet":
+            self.eeg_embedding = ShallowNetEmbedding(
+                d_model=d_model,
+                C=62,
+                T=100,
+                ckpt=shallownet_ckpt,
+            )
+        else:
+            raise ValueError(f"Unsupported eeg_backbone: {eeg_backbone}")
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=d_model, nhead=4, batch_first=True),
