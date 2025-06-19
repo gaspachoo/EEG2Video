@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from EEG2Video.GLMNet.modules.models_paper import shallownet
+
 class MyEEGNetEmbedding(nn.Module):
     """EEG feature extractor used before the transformer."""
 
@@ -43,6 +45,21 @@ class MyEEGNetEmbedding(nn.Module):
         return self.embedding(x)
 
 
+class ShallowNetEmbedding(nn.Module):
+    """Wraps the shallownet model used in GLMNet."""
+
+    def __init__(self, d_model: int = 128, C: int = 62, T: int = 100,
+                 weights_path: str | None = None) -> None:
+        super().__init__()
+        self.model = shallownet(out_dim=d_model, C=C, T=T)
+        if weights_path is not None:
+            state_dict = torch.load(weights_path, map_location="cpu")
+            self.model.load_state_dict(state_dict)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x)
+
+
 class PositionalEncoding(nn.Module):
     """Injects positional information into token embeddings."""
 
@@ -63,10 +80,19 @@ class PositionalEncoding(nn.Module):
 
 
 class myTransformer(nn.Module):
-    def __init__(self, d_model: int = 512) -> None:
+    def __init__(self, d_model: int = 512, use_shallownet: bool = False,
+                 shallownet_path: str | None = None) -> None:
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
-        self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
+        if use_shallownet:
+            self.eeg_embedding = ShallowNetEmbedding(
+                d_model=d_model,
+                C=62,
+                T=100,
+                weights_path=shallownet_path,
+            )
+        else:
+            self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=d_model, nhead=4, batch_first=True),
@@ -108,8 +134,10 @@ class myTransformer(nn.Module):
             raise ValueError(f"Expected src shape (B,7,62,100) but got {tuple(src.shape)}")
 
         # Reshape EEG input for embedding while remaining robust to non-contiguous tensors
-        src = self.eeg_embedding(src.reshape(src.size(0) * src.size(1), 1, 62, 100))
-        src = src.reshape(tgt.size(0), 7, -1)
+        batch_size, seq_len, _, _ = src.shape
+        src = src.reshape(batch_size * seq_len, 1, 62, 100)
+        src = self.eeg_embedding(src)
+        src = src.reshape(batch_size, seq_len, -1)
 
         # Flatten video latents before linear embedding
         tgt = tgt.reshape(tgt.size(0), tgt.size(1), -1)
