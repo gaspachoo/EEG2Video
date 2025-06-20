@@ -1,7 +1,7 @@
 """Inference script for the autoregressive transformer.
 
 The EEG encoder can be switched between **EEGNet** and **ShallowNet** using
-``--eeg_backbone``. Pretrained ShallowNet weights can be loaded with
+``--eeg_encoder``. Pretrained ShallowNet weights can be loaded with
 ``--shallownet_ckpt``.
 """
 
@@ -31,10 +31,9 @@ def load_scaler(path: str) -> StandardScaler:
 
 
 def load_model(ckpt_path: str, device: torch.device,
-               eeg_backbone: str = 'eegnet', shallownet_ckpt: str | None = None) -> myTransformer:
+               eeg_encoder: str = 'eegnet', encoder_ckpt: str | None = None) -> myTransformer:
     """Load ``myTransformer`` from ``ckpt_path`` using the chosen EEG encoder."""
-    model = myTransformer(use_shallownet=(eeg_backbone=='shallownet'),
-        shallownet_path=shallownet_ckpt).to(device)
+    model = myTransformer(eeg_encoder=eeg_encoder,encoder_ckpt=encoder_ckpt).to(device)
     state = torch.load(ckpt_path, map_location=device)
     if isinstance(state, dict) and 'state_dict' in state:
         state = state['state_dict']
@@ -76,9 +75,9 @@ def main():
     parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--scaler_path', type=str, default="./EEG2Video/checkpoints/Seq2Seq_v2/scaler.pkl", help='Path to fitted StandardScaler')
-    parser.add_argument('--eeg_backbone', choices=['eegnet', 'shallownet'],
+    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet'],
                         default='eegnet', help='EEG encoder type')
-    parser.add_argument('--shallownet_ckpt', type=str,default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
+    parser.add_argument('--encoder_ckpt', type=str,default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
                         help='Path to pretrained ShallowNet weights')
     args = parser.parse_args()
 
@@ -88,8 +87,8 @@ def main():
     model = load_model(
         args.ckpt,
         device,
-        eeg_backbone=args.eeg_backbone,
-        shallownet_ckpt=args.shallownet_ckpt,
+        eeg_encoder=args.eeg_encoder,
+        encoder_ckpt=args.encoder_ckpt,
     )
     scaler = load_scaler(args.scaler_path)
     eeg = load_eeg_data(args.eeg_path, scaler)

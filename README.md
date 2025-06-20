@@ -140,8 +140,8 @@ Script : `EEG2Video/Seq2Seq/inference_seq2seq_v2.py`
 - During inference, provide the same `--stats_path` to restore latents to their original scale.
 
 Autoregressive variant:
-- Training script: `EEG2Video/Seq2Seq/train_my_autoregressive_transformer.py` with option `--save_scaler` to store the fitted scaler (e.g. `scaler.pkl`). Use `--eeg_backbone` to choose between `eegnet` and `shallownet`, and optionally provide `--shallownet_ckpt` for pretrained ShallowNet weights.
-- Inference script: `EEG2Video/Seq2Seq/inference_my_autoregressive_transformer.py` with option `--scaler_path` to load this scaler. The same `--eeg_backbone` and `--shallownet_ckpt` options ensure consistent EEG encoding during prediction.
+- Training script: `EEG2Video/Seq2Seq/train_my_autoregressive_transformer.py` with option `--save_scaler` to store the fitted scaler (e.g. `scaler.pkl`). Use `--eeg_encoder` to choose between `eegnet` and `shallownet`, and optionally provide `--shallownet_ckpt` for pretrained ShallowNet weights.
+- Inference script: `EEG2Video/Seq2Seq/inference_my_autoregressive_transformer.py` with option `--scaler_path` to load this scaler. The same `--eeg_encoder` and `--encoder_ckpt` options ensure consistent EEG encoding during prediction.
 
 
 

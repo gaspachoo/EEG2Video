@@ -50,7 +50,7 @@ EEG2Video/
 │   └── models/                    # Encoders, Transformers, etc.
 │       ├── encoders.py            # CLIP, GLMNetEncoder, MLPEncoder, …
 │       ├── transformers.py        # EEG2VideoTransformer
-│       └── models.py              # Video & EEG backbones (shared)
+│       └── models.py              # Video & EEG encoders (shared)
 │
 ├── EEG_preprocessing/             # Signal segmentation & feature extraction
 │   ├── segment_raw_signals_200Hz.py

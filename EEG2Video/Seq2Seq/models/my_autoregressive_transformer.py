@@ -81,19 +81,21 @@ class PositionalEncoding(nn.Module):
 
 
 class myTransformer(nn.Module):
-    def __init__(self, d_model: int = 512, use_shallownet: bool = False,
-                 shallownet_path: str | None = None) -> None:
+    def __init__(self, d_model: int = 512, eeg_encoder: str = "eegnet",
+                 encoder_ckpt: str | None = None) -> None:
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
-        if use_shallownet:
+        if eeg_encoder == "shallownet":
             self.eeg_embedding = ShallowNetEmbedding(
                 d_model=d_model,
                 C=62,
                 T=100,
-                weights_path=shallownet_path,
+                weights_path=encoder_ckpt,
             )
-        else:
+        elif eeg_encoder == "eegnet":
             self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
+        else:
+            raise ValueError("This encoder has not been implemented yet, check your typing, choices are ['shallownet','eegnet']")
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=d_model, nhead=4, batch_first=True),
