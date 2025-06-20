@@ -60,7 +60,7 @@ def parse_args():
                         help='Enable logging to Weights & Biases')
     parser.add_argument('--eeg_backbone', choices=['eegnet', 'shallownet'],
                         default='eegnet', help='EEG encoder type')
-    parser.add_argument('--shallownet_ckpt', type=str,
+    parser.add_argument('--shallownet_ckpt', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
                         help='Path to pretrained ShallowNet weights')
     return parser.parse_args()
 
@@ -155,8 +155,8 @@ def main():
     test_loader = DataLoader(test_ds, batch_size=args.batch_size)
 
     model = myTransformer(
-        eeg_backbone=args.eeg_backbone,
-        shallownet_ckpt=args.shallownet_ckpt
+        use_shallownet=args.eeg_backbone,
+        shallownet_path=args.shallownet_ckpt
     ).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
