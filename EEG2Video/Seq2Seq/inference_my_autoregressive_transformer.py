@@ -23,6 +23,24 @@ from EEG2Video.Seq2Seq.models.my_autoregressive_transformer import myTransformer
 GT_LABEL = np.load("./data/meta_info/All_video_label.npy")
 CHOSEN_LABELS = list(range(1, 41))
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Inference for myTransformer")
+    parser.add_argument('--ckpt', type=str, default = "./EEG2Video/checkpoints/Seq2Seq_v2/best.pt", help='Model checkpoint')
+    parser.add_argument(
+        '--eeg_path',
+        type=str,
+        default = './data/Preprocessing/Segmented_500ms_sw/sub3.npy',
+        help='Path to an EEG file from data/Preprocessing/Segmented_500ms_sw'
+    )
+    parser.add_argument('--output_dir', type=str, default = "./data/Seq2Seq/Latents_autoreg", help='Directory to save predictions')
+    parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--scaler_path', type=str, default="./EEG2Video/checkpoints/Seq2Seq_v2/scaler.pkl", help='Path to fitted StandardScaler')
+    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet'],
+                        default='eegnet', help='EEG encoder type')
+    parser.add_argument('--encoder_ckpt', type=str,default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
+                        help='Path to pretrained ShallowNet weights')
+    return parser.parse_args()
 
 def load_scaler(path: str) -> StandardScaler:
     """Load a fitted ``StandardScaler`` saved with ``pickle``."""
@@ -31,13 +49,13 @@ def load_scaler(path: str) -> StandardScaler:
 
 
 def load_model(ckpt_path: str, device: torch.device,
-               eeg_encoder: str = 'eegnet', encoder_ckpt: str | None = None) -> myTransformer:
+               eeg_encoder: str = 'eegnet', encoder_ckpt: str | None = None, C : int | None = None, T : int | None = None) -> myTransformer:
     """Load ``myTransformer`` from ``ckpt_path`` using the chosen EEG encoder."""
-    model = myTransformer(eeg_encoder=eeg_encoder,encoder_ckpt=encoder_ckpt).to(device)
+    model = myTransformer(eeg_encoder=eeg_encoder,encoder_ckpt=encoder_ckpt, C=C, T=T).to(device)
     state = torch.load(ckpt_path, map_location=device)
     if isinstance(state, dict) and 'state_dict' in state:
         state = state['state_dict']
-    model.load_state_dict(state)
+        model.load_state_dict(state)
     model.eval()
     return model
 
@@ -63,39 +81,26 @@ def generate_latents(model: myTransformer, eeg: torch.Tensor, device: torch.devi
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Inference for myTransformer")
-    parser.add_argument('--ckpt', type=str, default = "./EEG2Video/checkpoints/Seq2Seq_v2/best.pt", help='Model checkpoint')
-    parser.add_argument(
-        '--eeg_path',
-        type=str,
-        default = './data/Preprocessing/Segmented_500ms_sw/sub3.npy',
-        help='Path to an EEG file from data/Preprocessing/Segmented_500ms_sw'
-    )
-    parser.add_argument('--output_dir', type=str, default = "./data/Seq2Seq/Latents_autoreg", help='Directory to save predictions')
-    parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
-    parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--scaler_path', type=str, default="./EEG2Video/checkpoints/Seq2Seq_v2/scaler.pkl", help='Path to fitted StandardScaler')
-    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet'],
-                        default='eegnet', help='EEG encoder type')
-    parser.add_argument('--encoder_ckpt', type=str,default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
-                        help='Path to pretrained ShallowNet weights')
-    args = parser.parse_args()
+    args= parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
     device = torch.device('cuda' if args.device == 'cuda' and torch.cuda.is_available() else 'cpu')
 
+    scaler = load_scaler(args.scaler_path)
+    eeg = load_eeg_data(args.eeg_path, scaler)
+    
+    C,T = eeg[0].shape[-2:] if args.eeg_encoder == "shallownet" else (None,None)
+        
     model = load_model(
         args.ckpt,
         device,
         eeg_encoder=args.eeg_encoder,
         encoder_ckpt=args.encoder_ckpt,
+        C=C, T=T,
     )
-    scaler = load_scaler(args.scaler_path)
-    eeg = load_eeg_data(args.eeg_path, scaler)
-
     preds = generate_latents(model, eeg, device, args.batch_size)
     preds = preds.reshape(7, 200, 6, 4, 36, 64)
-
+    
     for blk in range(7):
         out_path = os.path.join(args.output_dir, f'block{blk}.npy')
         np.save(out_path, preds[blk])

@@ -25,7 +25,7 @@ project_root = os.path.dirname(
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
     
-from EEG2Video.Seq2Seq.models.eeg_video_dataset import Dataset
+from EEG2Video.Seq2Seq.models.s2s_dataset import Dataset
 from EEG2Video.Seq2Seq.models.my_autoregressive_transformer import myTransformer
 
 
@@ -60,7 +60,7 @@ def parse_args():
                         help='Enable logging to Weights & Biases')
     parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet'],
                         default='eegnet', help='EEG encoder type')
-    parser.add_argument('--encoder_path', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
+    parser.add_argument('--encoder_ckpt', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
                         help='Path to pretrained encoder weights')
     return parser.parse_args()
 
@@ -83,6 +83,7 @@ def load_video_latents(video_dir: str):
             raise FileNotFoundError(f'Missing video latent file: {path}')
         block = np.load(path)
         if block.ndim == 7:
+            print(block.shape)
             block = block.reshape(-1, *block.shape[-5:])
         blocks.append(block)
     return np.concatenate(blocks, axis=0)
@@ -126,6 +127,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ds = build_dataset(args.eeg_dir, args.video_dir)
+    C,T = ds[0][0].shape[-2:] if args.eeg_encoder == 'shallownet' else (None,None)
     train_sub, val_sub, test_sub = split_dataset(ds, args.train_ratio, args.val_ratio)
 
     # stack training EEG and fit scaler
@@ -156,7 +158,8 @@ def main():
 
     model = myTransformer(
         eeg_encoder=args.eeg_encoder,
-        encoder_ckpt=args.encoder_ckpt
+        encoder_ckpt=args.encoder_ckpt,
+        C=C, T=T
     ).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(

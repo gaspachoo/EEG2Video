@@ -82,14 +82,15 @@ class PositionalEncoding(nn.Module):
 
 class myTransformer(nn.Module):
     def __init__(self, d_model: int = 512, eeg_encoder: str = "eegnet",
-                 encoder_ckpt: str | None = None) -> None:
+                 encoder_ckpt: str | None = None, C : int | None = None, T : int | None = None) -> None:
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
         if eeg_encoder == "shallownet":
+            assert type(C) == int and type(T) == int
             self.eeg_embedding = ShallowNetEmbedding(
                 d_model=d_model,
-                C=62,
-                T=100,
+                C=C,
+                T=T,
                 weights_path=encoder_ckpt,
             )
         elif eeg_encoder == "eegnet":
