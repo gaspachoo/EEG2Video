@@ -86,8 +86,8 @@ def main():
     
     os.makedirs(args.save_dir, exist_ok=True)
 
-    # Sélection d’un seul sujet
-    filename = "sub3.npy"  # ou args.subj_name
+    # Select a single subject
+    filename = "sub3.npy"  # or args.subj_name
     subj_name = filename.replace(".npy", "")
 
     shallownet_path = os.path.join(args.save_dir, f"{subj_name}_{args.category}_shallownet.pt")
@@ -221,8 +221,20 @@ def main():
                        "train/loss": tl / len(ds_train), "val/loss": val_loss,
                        "lr": current_lr})
 
-    model.load_state_dict(torch.load(f"{args.save_dir}/{subj_name}_{args.category}_best.pt"))
-    model.eval(); test_acc = 0
+    best_ckpt = os.path.join(args.save_dir, f"{subj_name}_{args.category}_best.pt")
+    model = GLMNet.load_from_checkpoint(best_ckpt, OCCIPITAL_IDX, time_len, device=device)
+
+    scaler = load_scaler(
+        os.path.join(args.save_dir, f"{subj_name}_{args.category}_scaler.pkl")
+    )
+    raw_mean, raw_std = load_raw_stats(
+        os.path.join(args.save_dir, f"{subj_name}_{args.category}_rawnorm.npz")
+    )
+
+    # ``X_test`` and ``F_test_scaled`` were already prepared, this shows how to
+    # reload preprocessing objects when running evaluation separately.
+
+    test_acc = 0
     preds, labels_test = [], []
     with torch.no_grad():
         for xb, xf, yb in dl_test:
