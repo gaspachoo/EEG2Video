@@ -9,7 +9,7 @@ import pickle
 class GLMNet(nn.Module):
     """ShallowNet (raw) + MLP (freq) → concat → FC."""
 
-    def __init__(self, occipital_idx, T: int, C: int, out_dim: int = 40, emb_dim: int = 512):
+    def __init__(self, occipital_idx, C: int, T: int, out_dim: int = 40, emb_dim: int = 512):
         """Construct the GLMNet model.
 
         Parameters
@@ -45,8 +45,8 @@ class GLMNet(nn.Module):
         cls,
         ckpt_path: str,
         occipital_idx: list,
-        T: int,
         C: int,
+        T: int,
         device: str = "cpu",
     ) -> "GLMNet":
         """Instantiate ``GLMNet`` from a saved state dict."""
@@ -58,7 +58,7 @@ class GLMNet(nn.Module):
         else:
             raise KeyError("Cannot infer output dimension from checkpoint")
 
-        model = cls(occipital_idx, T, C, out_dim=out_dim)
+        model = cls(occipital_idx, C=C, T=T, out_dim=out_dim)
         model.load_state_dict(state)
         model.to(device)
         model.eval()
