@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from EEG2Video.GLMNet.modules.models_paper import shallownet
+from EEG2Video.GLMNet.modules.models_paper import shallownet, mlpnet
 
 class MyEEGNetEmbedding(nn.Module):
     """EEGNet feature extractor used before the transformer."""
@@ -58,6 +58,20 @@ class ShallowNetEmbedding(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
+    
+class MLPNetEmbedding(nn.Module):
+    """Wraps the mlp model used in GLMNet."""
+
+    def __init__(self, d_model: int = 128, C: int = 62, occipital_idx : list = list(range(50, 62)),
+                 weights_path: str | None = None) -> None:
+        super().__init__()
+        self.model = mlpnet(out_dim=d_model, input_dim=len(occipital_idx) * 5)
+        if weights_path is not None:
+            state_dict = torch.load(weights_path, map_location="cpu")
+            self.model.load_state_dict(state_dict)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x)
 
 
 
@@ -85,14 +99,25 @@ class myTransformer(nn.Module):
                  encoder_ckpt: str | None = None, C : int | None = None, T : int | None = None) -> None:
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
+        self.T = T
+        self.C = C
         if eeg_encoder == "shallownet":
             assert type(C) == int and type(T) == int
             self.eeg_embedding = ShallowNetEmbedding(
                 d_model=d_model,
-                C=C,
-                T=T,
+                C=self.C,
+                T=self.T,
                 weights_path=encoder_ckpt,
             )
+        elif eeg_encoder == 'mlpnet':
+            assert type(self.C) == int and type(self.T) == int
+            assert self.T==5, "You should use a features file for eeg"
+            self.eeg_embedding = MLPNetEmbedding(
+                d_model=d_model,
+                C=self.C,
+                weights_path=encoder_ckpt,
+            )
+            
         elif eeg_encoder == "eegnet":
             self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
         else:
@@ -130,16 +155,16 @@ class myTransformer(nn.Module):
         Raises
         ------
         ValueError
-            If ``src`` is not of shape ``(batch, 7, 62, 100)``.
+            If ``src`` is not of shape ``(batch, 7, 62, T)``.
         """
 
         # Validate EEG input dimensions
-        if src.size(1) != 7 or src.size(2) != 62 or src.size(3) != 100:
-            raise ValueError(f"Expected src shape (B,7,62,100) but got {tuple(src.shape)}")
+        if src.size(1) != 7 or src.size(2) != 62 or src.size(3) != self.T:
+            raise ValueError(f"Expected src shape (B,7,62,{self.T}) but got {tuple(src.shape)}")
 
         # Reshape EEG input for embedding while remaining robust to non-contiguous tensors
         batch_size, seq_len, _, _ = src.shape
-        src = src.reshape(batch_size * seq_len, 1, 62, 100)
+        src = src.reshape(batch_size * seq_len, 1, 62, self.T)
         src = self.eeg_embedding(src)
         src = src.reshape(batch_size, seq_len, -1)
 

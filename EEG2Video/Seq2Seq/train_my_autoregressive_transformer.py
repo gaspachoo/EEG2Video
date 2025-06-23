@@ -58,7 +58,7 @@ def parse_args():
                         help='File path to store the fitted StandardScaler')
     parser.add_argument('--use_wandb', action='store_true',
                         help='Enable logging to Weights & Biases')
-    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet'],
+    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet','mlpnet'],
                         default='eegnet', help='EEG encoder type')
     parser.add_argument('--encoder_ckpt', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
                         help='Path to pretrained encoder weights')
@@ -127,7 +127,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ds = build_dataset(args.eeg_dir, args.video_dir)
-    C,T = ds[0][0].shape[-2:] if args.eeg_encoder == 'shallownet' else (None,None)
+    C,T = ds[0][0].shape[-2:] if args.eeg_encoder != 'eegnet' else (None,None)
     train_sub, val_sub, test_sub = split_dataset(ds, args.train_ratio, args.val_ratio)
 
     # stack training EEG and fit scaler
