@@ -1,8 +1,8 @@
 """Inference script for the autoregressive transformer.
 
-The EEG encoder can be switched between **EEGNet** and **ShallowNet** using
-``--eeg_encoder``. Pretrained ShallowNet weights can be loaded with
-``--shallownet_ckpt``.
+The EEG encoder can be switched between **EEGNet**, **ShallowNet** or
+**MLPNet** using ``--eeg_encoder``. Pretrained weights for ShallowNet or
+MLPNet can be loaded via ``--encoder_ckpt``.
 """
 
 import os
@@ -36,10 +36,10 @@ def parse_args():
     parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--scaler_path', type=str, default="./EEG2Video/checkpoints/Seq2Seq_v2/scaler.pkl", help='Path to fitted StandardScaler')
-    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet'],
+    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet', 'mlpnet'],
                         default='eegnet', help='EEG encoder type')
     parser.add_argument('--encoder_ckpt', type=str,default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
-                        help='Path to pretrained ShallowNet weights')
+                        help='Path to pretrained encoder weights')
     return parser.parse_args()
 
 def load_scaler(path: str) -> StandardScaler:
@@ -89,7 +89,7 @@ def main():
     scaler = load_scaler(args.scaler_path)
     eeg = load_eeg_data(args.eeg_path, scaler)
     
-    C,T = eeg[0].shape[-2:] if args.eeg_encoder == "shallownet" else (None,None)
+    C, T = eeg[0].shape[-2:] if args.eeg_encoder != "eegnet" else (None, None)
         
     model = load_model(
         args.ckpt,
