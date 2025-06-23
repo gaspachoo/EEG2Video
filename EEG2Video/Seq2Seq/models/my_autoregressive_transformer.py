@@ -167,9 +167,9 @@ class myTransformer(nn.Module):
         # Reshape EEG input for embedding while remaining robust to non-contiguous tensors
         batch_size, seq_len, _, _ = src.shape
         if isinstance(self.eeg_embedding, MLPNetEmbedding):
-            src = src.reshape(batch_size * seq_len, 62, self.T)
+            src = src.reshape(batch_size * seq_len, self.C, self.T)
         else:
-            src = src.reshape(batch_size * seq_len, 1, 62, self.T)
+            src = src.reshape(batch_size * seq_len, 1, self.C, self.T)
         src = src.reshape(batch_size, seq_len, -1)
 
         # Flatten video latents before linear embedding
