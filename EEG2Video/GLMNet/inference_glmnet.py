@@ -75,8 +75,9 @@ def generate_all_embeddings(
         RAW_SW = np.load(os.path.join(raw_dir, fname))
         # expect shape: (7, 40, 5, 7, 62, T)
         time_len = RAW_SW.shape[-1]
+        num_channels = RAW_SW.shape[-2]
         model = GLMNet.load_from_checkpoint(
-            model_path, OCCIPITAL_IDX, time_len, device=device
+            model_path, OCCIPITAL_IDX, time_len, num_channels, device=device
         )
         embeddings = inf_glmnet(model, scaler, RAW_SW, stats, device)
         

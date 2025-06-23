@@ -114,14 +114,15 @@ def main():
 
     n_win = raw.shape[3]
     time_len = raw.shape[-1]
-
+    num_channels = raw.shape[-2]
+    
     labels = format_labels(reshape_labels(labels_raw, n_win), args.category)
     num_unique_labels = len(np.unique(labels))
     print("Number of categories:", num_unique_labels)
 
     # Flatten data and split into train/val/test
-    X_all = raw.reshape(-1, 62, time_len)
-    F_all = feat.reshape(-1, 62, 5)
+    X_all = raw.reshape(-1, num_channels, time_len)
+    F_all = feat.reshape(-1, num_channels, 5)
     y_all = labels.reshape(-1)
 
 
@@ -168,7 +169,7 @@ def main():
     dl_val = DataLoader(ds_val, args.bs)
     dl_test = DataLoader(ds_test, args.bs)
 
-    model = GLMNet(OCCIPITAL_IDX, time_len, out_dim=num_unique_labels).to(device)
+    model = GLMNet(OCCIPITAL_IDX, T = time_len, C = num_channels, out_dim=num_unique_labels).to(device)
     opt = optim.Adam(model.parameters(), lr=args.lr)
 
     if args.scheduler == "reducelronplateau":
