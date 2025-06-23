@@ -2,6 +2,15 @@ import torch
 import torch.nn as nn
 
 from EEG2Video.GLMNet.modules.models_paper import shallownet, mlpnet
+from EEG2Video.GLMNet.modules.utils_glmnet import (
+    GLMNet,
+    standard_scale_features,
+    normalize_raw,
+    load_raw_stats,
+    load_scaler,
+)
+import pickle
+import numpy as np
 
 class MyEEGNetEmbedding(nn.Module):
     """EEGNet feature extractor used before the transformer."""
@@ -76,6 +85,36 @@ class MLPNetEmbedding(nn.Module):
         return self.model(x)
 
 
+class GLMNetEmbedding(nn.Module):
+    """Use a pretrained GLMNet to extract features from raw EEG."""
+
+    def __init__(self, d_model: int, ckpt_path: str, scaler_path: str, stats_path: str, T: int) -> None:
+        super().__init__()
+        self.model = GLMNet.load_from_checkpoint(ckpt_path, list(range(50, 62)), T, device="cpu")
+        for p in self.model.parameters():
+            p.requires_grad = False
+
+        self.scaler = load_scaler(scaler_path)
+        mean, std = load_raw_stats(stats_path)
+        self.raw_mean = mean
+        self.raw_std = std
+        self.T = T
+
+        self.proj = nn.Linear(self.model.fc[0].in_features, d_model)
+
+    def forward(self, x_raw: torch.Tensor) -> torch.Tensor:
+        raw_np = x_raw.cpu().numpy()
+        raw_np = raw_np.squeeze(1) if raw_np.ndim == 4 else raw_np
+        feat_np = self.model.compute_features(raw_np, fs=200, win_sec=self.T / 200)
+        raw_norm = normalize_raw(raw_np, self.raw_mean, self.raw_std)
+        feat_scaled = standard_scale_features(feat_np, scaler=self.scaler)
+        x_raw_t = torch.from_numpy(raw_norm).unsqueeze(1).to(x_raw.device)
+        x_feat_t = torch.from_numpy(feat_scaled).to(x_raw.device)
+        with torch.no_grad():
+            features = self.model(x_raw_t, x_feat_t, return_features=True)
+        return self.proj(features)
+
+
 
 class PositionalEncoding(nn.Module):
     """Injects positional information into token embeddings."""
@@ -103,12 +142,15 @@ class PositionalEncoding(nn.Module):
 
 class myTransformer(nn.Module):
     def __init__(self, d_model: int = 512, eeg_encoder: str = "eegnet",
-                 encoder_ckpt: str | None = None, C : int | None = None, T : int | None = None) -> None:
+                 encoder_ckpt: str | None = None, C: int | None = None,
+                 T: int | None = None, glmnet_scaler: str | None = None,
+                 glmnet_stats: str | None = None) -> None:
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
         self.d_model = d_model
         self.T = T
         self.C = C
+        self.eeg_encoder = eeg_encoder
         if eeg_encoder == "shallownet":
             assert type(C) == int and type(T) == int
             self.eeg_embedding = ShallowNetEmbedding(
@@ -125,11 +167,21 @@ class myTransformer(nn.Module):
                 C=self.C,
                 weights_path=encoder_ckpt,
             )
-            
+
+        elif eeg_encoder == "glmnet":
+            assert encoder_ckpt is not None and glmnet_scaler is not None and glmnet_stats is not None
+            self.eeg_embedding = GLMNetEmbedding(
+                d_model=d_model,
+                ckpt_path=encoder_ckpt,
+                scaler_path=glmnet_scaler,
+                stats_path=glmnet_stats,
+                T=self.T,
+            )
+
         elif eeg_encoder == "eegnet":
             self.eeg_embedding = MyEEGNetEmbedding(d_model=d_model)
         else:
-            raise ValueError("This encoder has not been implemented yet, check your typing, choices are ['shallownet','eegnet']")
+            raise ValueError("This encoder has not been implemented yet, check your typing, choices are ['shallownet','mlpnet','glmnet','eegnet']")
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=d_model, nhead=4, batch_first=True),
@@ -167,8 +219,10 @@ class myTransformer(nn.Module):
         """
 
         # Validate EEG input dimensions
-        if src.size(1) != 7 or src.size(2) != 62 or src.size(3) != self.T:
-            raise ValueError(f"Expected src shape (B,7,62,{self.T}) but got {tuple(src.shape)}")
+        if src.size(1) != 7 or src.size(2) != 62 or (self.T is not None and src.size(3) != self.T):
+            raise ValueError(
+                f"Expected src shape (B,7,62,{self.T}) but got {tuple(src.shape)}"
+            )
 
         # Reshape EEG input for embedding while remaining robust to non-contiguous tensors
         batch_size, seq_len, _, _ = src.shape

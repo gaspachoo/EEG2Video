@@ -3,6 +3,8 @@ import torch.nn as nn
 from EEG2Video.GLMNet.modules.models_paper import shallownet, mlpnet
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from EEG_preprocessing.DE_PSD import DE_PSD
+import pickle
 
 class GLMNet(nn.Module):
     """ShallowNet (raw) + MLP (freq) → concat → FC."""
@@ -37,6 +39,38 @@ class GLMNet(nn.Module):
             nn.GELU(),
             nn.Linear(emb_dim, out_dim),
         )
+
+    @classmethod
+    def load_from_checkpoint(
+        cls,
+        ckpt_path: str,
+        occipital_idx: list,
+        T: int,
+        device: str = "cpu",
+    ) -> "GLMNet":
+        """Instantiate ``GLMNet`` from a saved state dict."""
+        state = torch.load(ckpt_path, map_location=device)
+        if "fc.2.weight" in state:
+            out_dim = state["fc.2.weight"].shape[0]
+        elif "fc.weight" in state:
+            out_dim = state["fc.weight"].shape[0]
+        else:
+            raise KeyError("Cannot infer output dimension from checkpoint")
+
+        model = cls(occipital_idx, T, out_dim=out_dim)
+        model.load_state_dict(state)
+        model.to(device)
+        model.eval()
+        return model
+
+    @staticmethod
+    def compute_features(raw: np.ndarray, fs: int = 200, win_sec: float = 0.5) -> np.ndarray:
+        """Compute DE features from raw EEG."""
+        feats = np.zeros((raw.shape[0], raw.shape[1], 5), dtype=np.float32)
+        for i, seg in enumerate(raw):
+            de, _ = DE_PSD(seg, fs, win_sec)
+            feats[i] = de
+        return feats
 
     def forward(self, x_raw, x_feat, return_features: bool = False):
         """Forward pass of the network.
@@ -105,3 +139,15 @@ def compute_raw_stats(X: np.ndarray):
 def normalize_raw(X: np.ndarray, mean: np.ndarray, std: np.ndarray):
     """Normalize raw EEG with provided statistics."""
     return (X - mean[None, :, None]) / std[None, :, None]
+
+
+def load_scaler(path: str) -> StandardScaler:
+    """Load a ``StandardScaler`` object from ``path``."""
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
+
+def load_raw_stats(path: str) -> tuple[np.ndarray, np.ndarray]:
+    """Load raw EEG normalization statistics from a ``.npz`` file."""
+    data = np.load(path)
+    return data["mean"], data["std"]

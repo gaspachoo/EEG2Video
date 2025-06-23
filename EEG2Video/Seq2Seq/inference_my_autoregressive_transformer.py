@@ -36,10 +36,14 @@ def parse_args():
     parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--scaler_path', type=str, default="./EEG2Video/checkpoints/Seq2Seq_v2/scaler.pkl", help='Path to fitted StandardScaler')
-    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet', 'mlpnet'],
+    parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet', 'mlpnet','glmnet'],
                         default='eegnet', help='EEG encoder type')
     parser.add_argument('--encoder_ckpt', type=str,default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
                         help='Path to pretrained encoder weights')
+    parser.add_argument('--glmnet_scaler', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_scaler.pkl",
+                        help='Path to GLMNet StandardScaler')
+    parser.add_argument('--glmnet_stats', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_rawnorm.npz",
+                        help='Path to GLMNet raw normalization stats')
     return parser.parse_args()
 
 def load_scaler(path: str) -> StandardScaler:
@@ -49,9 +53,18 @@ def load_scaler(path: str) -> StandardScaler:
 
 
 def load_model(ckpt_path: str, device: torch.device,
-               eeg_encoder: str = 'eegnet', encoder_ckpt: str | None = None, C : int | None = None, T : int | None = None) -> myTransformer:
+               eeg_encoder: str = 'eegnet', encoder_ckpt: str | None = None,
+               C: int | None = None, T: int | None = None,
+               glmnet_scaler: str | None = None, glmnet_stats: str | None = None) -> myTransformer:
     """Load ``myTransformer`` from ``ckpt_path`` using the chosen EEG encoder."""
-    model = myTransformer(eeg_encoder=eeg_encoder,encoder_ckpt=encoder_ckpt, C=C, T=T).to(device)
+    model = myTransformer(
+        eeg_encoder=eeg_encoder,
+        encoder_ckpt=encoder_ckpt,
+        C=C,
+        T=T,
+        glmnet_scaler=glmnet_scaler,
+        glmnet_stats=glmnet_stats,
+    ).to(device)
     state = torch.load(ckpt_path, map_location=device)
     if isinstance(state, dict) and 'state_dict' in state:
         state = state['state_dict']
@@ -60,13 +73,13 @@ def load_model(ckpt_path: str, device: torch.device,
     return model
 
 
-def load_eeg_data(eeg_path: str, scaler: StandardScaler) -> torch.Tensor:
-    """Load EEG embeddings from ``eeg_path`` and apply the provided scaler."""
-    eeg = np.load(eeg_path).astype(np.float32)
-    eeg = eeg.reshape(-1, *eeg.shape[-3:])
-    eeg_flat = eeg.reshape(len(eeg), -1)
-    eeg_scaled = scaler.transform(eeg_flat).reshape(eeg.shape)
-    return torch.from_numpy(eeg_scaled)
+def load_eeg_data(raw_path: str, scaler: StandardScaler) -> torch.Tensor:
+    """Load EEG data from ``raw_path`` and apply scaling."""
+    raw = np.load(raw_path).astype(np.float32)
+    raw = raw.reshape(-1, *raw.shape[-3:])
+    raw_flat = raw.reshape(len(raw), -1)
+    raw_scaled = scaler.transform(raw_flat).reshape(raw.shape)
+    return torch.from_numpy(raw_scaled)
 
 def generate_latents(model: myTransformer, eeg: torch.Tensor, device: torch.device, batch_size: int = 32):
     preds = []
@@ -87,18 +100,25 @@ def main():
     device = torch.device('cuda' if args.device == 'cuda' and torch.cuda.is_available() else 'cpu')
 
     scaler = load_scaler(args.scaler_path)
-    eeg = load_eeg_data(args.eeg_path, scaler)
+    eeg_raw = load_eeg_data(args.eeg_path, scaler)
     
-    C, T = eeg[0].shape[-2:] if args.eeg_encoder != "eegnet" else (None, None)
+    C, T = eeg_raw[0].shape[-2:]
+    if args.eeg_encoder == "eegnet":
+        C = T = None
+    elif args.eeg_encoder == "glmnet":
+        C = None
         
     model = load_model(
         args.ckpt,
         device,
         eeg_encoder=args.eeg_encoder,
         encoder_ckpt=args.encoder_ckpt,
-        C=C, T=T,
+        C=C,
+        T=T,
+        glmnet_scaler=args.glmnet_scaler,
+        glmnet_stats=args.glmnet_stats,
     )
-    preds = generate_latents(model, eeg, device, args.batch_size)
+    preds = generate_latents(model, eeg_raw, device, args.batch_size)
     preds = preds.reshape(7, 200, 6, 4, 36, 64)
     
     for blk in range(7):
