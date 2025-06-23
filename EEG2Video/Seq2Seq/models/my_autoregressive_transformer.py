@@ -62,15 +62,17 @@ class ShallowNetEmbedding(nn.Module):
 class MLPNetEmbedding(nn.Module):
     """Wraps the mlp model used in GLMNet."""
 
-    def __init__(self, d_model: int = 128, C: int = 62, occipital_idx : list = list(range(50, 62)),
+    def __init__(self, d_model: int = 128, C: int = 62, occipital_idx: list = list(range(50, 62)),
                  weights_path: str | None = None) -> None:
         super().__init__()
+        self.occipital_idx = occipital_idx
         self.model = mlpnet(out_dim=d_model, input_dim=len(occipital_idx) * 5)
         if weights_path is not None:
             state_dict = torch.load(weights_path, map_location="cpu")
             self.model.load_state_dict(state_dict)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = x[:, self.occipital_idx, :]
         return self.model(x)
 
 
@@ -164,8 +166,10 @@ class myTransformer(nn.Module):
 
         # Reshape EEG input for embedding while remaining robust to non-contiguous tensors
         batch_size, seq_len, _, _ = src.shape
-        src = src.reshape(batch_size * seq_len, 1, 62, self.T)
-        src = self.eeg_embedding(src)
+        if isinstance(self.eeg_embedding, MLPNetEmbedding):
+            src = src.reshape(batch_size * seq_len, 62, self.T)
+        else:
+            src = src.reshape(batch_size * seq_len, 1, 62, self.T)
         src = src.reshape(batch_size, seq_len, -1)
 
         # Flatten video latents before linear embedding
