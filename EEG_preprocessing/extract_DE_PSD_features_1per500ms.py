@@ -22,7 +22,7 @@ def extract_de_psd_sw(raw, fs,win_sec):
             for rep in range(raw.shape[2]):
                 for win in range(raw.shape[3]):
                     segment = raw[blk, cls, rep, win, :, :]  # (62, 100)
-                    de, psd = DE_PSD(segment, fs, win_sec)
+                    de, psd = DE_PSD(segment, fs, win_sec, which="both")
                     DE_data[blk, cls, rep, win]  = de  # (62,5)
                     PSD_data[blk, cls, rep, win] = psd # (62,5)
 
