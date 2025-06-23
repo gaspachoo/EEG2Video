@@ -84,15 +84,20 @@ def main():
     args = parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
-    
-    os.makedirs(args.save_dir, exist_ok=True)
 
     # Select a single subject
     filename = "sub3.npy"  # or args.subj_name
     subj_name = filename.replace(".npy", "")
+    
+    # Define saving paths
+    ckpt_dir = os.path.join(args.save_dir, f"{subj_name}_{args.category}")
+    os.makedirs(ckpt_dir, exist_ok=True)
+    shallownet_path = os.path.join(ckpt_dir, "shallownet.pt")
+    mlpnet_path = os.path.join(ckpt_dir, "mlpnet.pt")
+    stats_path = os.path.join(ckpt_dir, "raw_stats.npz")
+    scaler_path = os.path.join(ckpt_dir, "scaler.pkl")
+    glmnet_path = os.path.join(ckpt_dir, "glmnet_best.pt")
 
-    shallownet_path = os.path.join(args.save_dir, f"{subj_name}_{args.category}_shallownet.pt")
-    mlpnet_path = os.path.join(args.save_dir, f"{subj_name}_{args.category}_mlpnet.pt")
 
     raw = np.load(os.path.join(args.raw_dir, filename))
     # compute DE features from raw EEG windows
@@ -144,11 +149,9 @@ def main():
     F_test_scaled = standard_scale_features(F_test, scaler=scaler)
 
     # Save preprocessing objects
-    scaler_path = os.path.join(args.save_dir, f"{subj_name}_{args.category}_scaler.pkl")
     with open(scaler_path, "wb") as f:
         pickle.dump(scaler, f)
-    norm_path = os.path.join(args.save_dir, f"{subj_name}_{args.category}_rawnorm.npz")
-    np.savez(norm_path, mean=raw_mean, std=raw_std)
+    np.savez(stats_path, mean=raw_mean, std=raw_std)
 
     # DataLoaders
     ds_train = TensorDataset(torch.tensor(X_train, dtype=torch.float32).unsqueeze(1),
@@ -216,8 +219,8 @@ def main():
 
         if val_acc > best_val:
             best_val = val_acc
-            os.makedirs(args.save_dir, exist_ok=True)
-            torch.save(model.state_dict(),f"{args.save_dir}/{subj_name}_{args.category}_best.pt",)
+            os.makedirs(ckpt_dir, exist_ok=True)
+            torch.save(model.state_dict(), glmnet_path)
             torch.save(model.raw_global.state_dict(), shallownet_path)
             torch.save(model.freq_local.state_dict(), mlpnet_path)
             print(f"New best model saved at epoch {ep} with val_acc={val_acc:.3f}")
@@ -227,15 +230,10 @@ def main():
                        "train/loss": tl / len(ds_train), "val/loss": val_loss,
                        "lr": current_lr})
 
-    best_ckpt = os.path.join(args.save_dir, f"{subj_name}_{args.category}_best.pt")
-    model = GLMNet.load_from_checkpoint(best_ckpt, OCCIPITAL_IDX, time_len, device=device)
+    model = GLMNet.load_from_checkpoint(glmnet_path, OCCIPITAL_IDX, time_len, device=device)
 
-    scaler = load_scaler(
-        os.path.join(args.save_dir, f"{subj_name}_{args.category}_scaler.pkl")
-    )
-    raw_mean, raw_std = load_raw_stats(
-        os.path.join(args.save_dir, f"{subj_name}_{args.category}_rawnorm.npz")
-    )
+    scaler = load_scaler(scaler_path)
+    raw_mean, raw_std = load_raw_stats(stats_path)
 
     # ``X_test`` and ``F_test_scaled`` were already prepared, this shows how to
     # reload preprocessing objects when running evaluation separately.

@@ -53,13 +53,15 @@ def inf_glmnet(model, scaler, raw_sw, stats, device="cuda"):
 def generate_all_embeddings(
     raw_dir,
     ckpt_path,
-    scaler_path,
-    stats_path,
     output_dir,
     device="cuda",
 ):
     os.makedirs(output_dir, exist_ok=True)
 
+    scaler_path = os.path.join(ckpt_path, "scaler.pkl")
+    stats_path = os.path.join(ckpt_path, "stats.npz")
+    model_path = os.path.join(ckpt_path, "glmnet_best.pt")
+    
     scaler = load_scaler(scaler_path)
     stats = load_raw_stats(stats_path)
 
@@ -74,7 +76,7 @@ def generate_all_embeddings(
         # expect shape: (7, 40, 5, 7, 62, T)
         time_len = RAW_SW.shape[-1]
         model = GLMNet.load_from_checkpoint(
-            ckpt_path, OCCIPITAL_IDX, time_len, device=device
+            model_path, OCCIPITAL_IDX, time_len, device=device
         )
         embeddings = inf_glmnet(model, scaler, RAW_SW, stats, device)
         
@@ -87,15 +89,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--raw_dir', default="./data/Preprocessing/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
-    parser.add_argument('--checkpoint_path', default="./EEG2Video/checkpoints/glmnet/sub3_label_cluster_best.pt", help='path to GLMNet checkpoint')
-    parser.add_argument('--scaler_path', default="./EEG2Video/checkpoints/glmnet/sub3_label_cluster_scaler.pkl", help='path to saved StandardScaler')
-    parser.add_argument('--stats_path', default="./EEG2Video/checkpoints/glmnet/sub3_label_cluster_rawnorm.npz", help='path to raw EEG normalization stats')
+    parser.add_argument('--checkpoint_path', default="./EEG2Video/checkpoints/glmnet/sub3_label_cluster", help='path to GLMNet checkpoint')
     parser.add_argument('--output_dir', default="./data/GLMNet/EEG_embeddings_sw", help='where to save concatenated embeddings')
     args = parser.parse_args()
     generate_all_embeddings(
         args.raw_dir,
         args.checkpoint_path,
-        args.scaler_path,
-        args.stats_path,
         args.output_dir,
     )
