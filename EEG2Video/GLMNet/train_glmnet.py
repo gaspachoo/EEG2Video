@@ -24,6 +24,8 @@ from EEG2Video.GLMNet.modules.utils_glmnet import (
     standard_scale_features,
     compute_raw_stats,
     normalize_raw,
+    load_scaler,
+    load_raw_stats,
 )
 
 
@@ -39,7 +41,6 @@ def parse_args():
      #"/Documents/School/Centrale Med/2A/SSE/EEG2Video"
     p = argparse.ArgumentParser()
     p.add_argument("--raw_dir",  default="./data/Preprocessing/Segmented_500ms_sw", help="directory with .npy files")
-    p.add_argument("--feat_dir", default="./data/Preprocessing/DE_500ms_sw", help="directory with .npy files")
     p.add_argument("--label_dir", default="./data/meta_info", help="Label file")
     p.add_argument("--category", default="label_cluster",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
     p.add_argument("--save_dir", default="./EEG2Video/checkpoints/glmnet")
@@ -94,7 +95,10 @@ def main():
     mlpnet_path = os.path.join(args.save_dir, f"{subj_name}_{args.category}_mlpnet.pt")
 
     raw = np.load(os.path.join(args.raw_dir, filename))
-    feat = np.load(os.path.join(args.feat_dir, filename))
+    # compute DE features from raw EEG windows
+    feat = GLMNet.compute_features(
+        raw.reshape(-1, raw.shape[-2], raw.shape[-1])
+    ).reshape(*raw.shape[:4], raw.shape[-2], -1)
     labels_raw = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
@@ -102,7 +106,6 @@ def main():
 
     n_win = raw.shape[3]
     time_len = raw.shape[-1]
-    assert feat.shape[:4] == raw.shape[:4], "Feature/EEG mismatch"
 
     labels = format_labels(reshape_labels(labels_raw, n_win), args.category)
     num_unique_labels = len(np.unique(labels))
