@@ -92,6 +92,11 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe.unsqueeze(0))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.size(-1) != self.pe.size(-1):
+            raise ValueError(
+                f"Input embedding dimension {x.size(-1)} does not match positional encoding dimension {self.pe.size(-1)}"
+            )
+
         x = x + self.pe[:, : x.size(1)].requires_grad_(False)
         return self.dropout(x)
 
@@ -101,6 +106,7 @@ class myTransformer(nn.Module):
                  encoder_ckpt: str | None = None, C : int | None = None, T : int | None = None) -> None:
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
+        self.d_model = d_model
         self.T = T
         self.C = C
         if eeg_encoder == "shallownet":
@@ -170,6 +176,16 @@ class myTransformer(nn.Module):
             src = src.reshape(batch_size * seq_len, self.C, self.T)
         else:
             src = src.reshape(batch_size * seq_len, 1, self.C, self.T)
+
+        # Apply EEG embedding network to obtain feature vectors
+        src = self.eeg_embedding(src)
+
+        # Validate embedding dimension to match model configuration
+        if src.size(1) != self.d_model:
+            raise ValueError(
+                f"EEG embedding dimension {src.size(1)} does not match d_model {self.d_model}"
+            )
+
         src = src.reshape(batch_size, seq_len, -1)
 
         # Flatten video latents before linear embedding
