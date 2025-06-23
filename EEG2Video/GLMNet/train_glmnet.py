@@ -99,6 +99,9 @@ def main():
     feat = GLMNet.compute_features(
         raw.reshape(-1, raw.shape[-2], raw.shape[-1])
     ).reshape(*raw.shape[:4], raw.shape[-2], -1)
+    
+    print("Raw shape:", raw.shape)  # (7, 40, 5, 7, 62, 100)
+    print("Feature shape:", feat.shape)  # (7, 40, 5, 7 62 ,5)
     labels_raw = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}

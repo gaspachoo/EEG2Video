@@ -26,7 +26,8 @@ def inf_glmnet(model, scaler, raw_sw, stats, device="cuda"):
     # always compute spectral features from the raw windows
     raw_flat = raw_sw.reshape(-1, raw_sw.shape[-2], raw_sw.shape[-1])
     feat_sw = GLMNet.compute_features(raw_flat)
-    feat_sw = feat_sw.reshape(raw_sw.shape[:-1] + feat_sw.shape[-2:])
+    # reshape back to (runs, videos, trials, windows, channels, features)
+    feat_sw = feat_sw.reshape(raw_sw.shape[:-2] + feat_sw.shape[-2:])
 
     # flatten for batch inference
     raw_flat = raw_sw.reshape(-1, raw_sw.shape[-2], raw_sw.shape[-1])
