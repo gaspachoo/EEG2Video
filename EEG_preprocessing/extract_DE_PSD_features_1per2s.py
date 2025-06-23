@@ -21,7 +21,7 @@ def extract_de_psd_raw(raw,fs=200):
         for cls in range(raw.shape[1]):
             for rep in range(raw.shape[2]):
                 segment = raw[blk, cls, rep, :, :].reshape(raw.shape[3], 2*fre)
-                de,psd = DE_PSD(segment, fs, 2) # 2 sec
+                de, psd = DE_PSD(segment, fs, 2, which="both")  # 2 sec
                 DE_data[blk, cls, rep]  = de  # (62,5)
                 PSD_data[blk, cls, rep] = psd # (62,5)
                 

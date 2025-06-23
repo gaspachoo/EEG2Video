@@ -43,8 +43,8 @@ for subname in sub_list:
             de_class_data = np.empty((0, 2, 62, 5))
             psd_class_data = np.empty((0, 2, 62, 5))
             for i in range(5):
-                de1, psd1 = DE_PSD(now_data[class_id, i, :, :200].reshape(62, fre), fre, 1)
-                de2, psd2 = DE_PSD(now_data[class_id, i, :, 200:].reshape(62, fre), fre, 1)
+                de1, psd1 = DE_PSD(now_data[class_id, i, :, :200].reshape(62, fre), fre, 1, which="both")
+                de2, psd2 = DE_PSD(now_data[class_id, i, :, 200:].reshape(62, fre), fre, 1, which="both")
                 de_class_data = np.concatenate((de_class_data, np.concatenate((de1.reshape(1, 62, 5), de2.reshape(1, 62, 5))).reshape(1, 2, 62, 5)))
                 psd_class_data = np.concatenate((psd_class_data, np.concatenate((psd1.reshape(1, 62, 5), psd2.reshape(1, 62, 5))).reshape(1, 2, 62, 5)))
             de_block_data = np.concatenate((de_block_data, de_class_data.reshape(1, 5, 2, 62, 5)))

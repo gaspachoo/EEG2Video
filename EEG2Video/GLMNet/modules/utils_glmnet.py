@@ -68,7 +68,7 @@ class GLMNet(nn.Module):
         """Compute DE features from raw EEG."""
         feats = np.zeros((raw.shape[0], raw.shape[1], 5), dtype=np.float32)
         for i, seg in enumerate(raw):
-            de, _ = DE_PSD(seg, fs, win_sec)
+            de = DE_PSD(seg, fs, win_sec, which="de")
             feats[i] = de
         return feats
 
