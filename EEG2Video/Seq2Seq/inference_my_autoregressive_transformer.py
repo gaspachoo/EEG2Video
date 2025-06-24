@@ -91,8 +91,7 @@ def main():
     eeg_raw = load_eeg_data(args.eeg_path, scaler)
     
     C, T = eeg_raw[0].shape[-2:]
-    print(C,T)
-        
+    
     model = load_model(
         model_ckpt_path,
         device,
@@ -102,7 +101,7 @@ def main():
         T=T
         )
     preds = generate_latents(model, eeg_raw, device, args.batch_size)
-    preds = preds.reshape(7, T, 6, 4, 36, 64)
+    preds = preds.reshape(7, 40*5, 6, 4, 36, 64)
     
     for blk in range(7):
         out_path = os.path.join(args.output_dir, f'block{blk}.npy')
