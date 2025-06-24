@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import os
 from EEG2Video.GLMNet.modules.models_paper import shallownet, mlpnet
 from EEG2Video.GLMNet.modules.utils_glmnet import (
     GLMNet,
@@ -71,10 +71,11 @@ class ShallowNetEmbedding(nn.Module):
 class MLPNetEmbedding(nn.Module):
     """Wraps the mlp model used in GLMNet."""
 
-    def __init__(self, d_model: int = 128, C: int = 62, occipital_idx: list = list(range(50, 62)),
+    def __init__(self, d_model: int = 128, occipital_idx: list = list(range(50, 62)), T: int = 100,
                  weights_path: str | None = None) -> None:
         super().__init__()
         self.occipital_idx = occipital_idx
+        self.T = T
         self.model = mlpnet(out_dim=d_model, input_dim=len(occipital_idx) * 5)
         if weights_path is not None:
             state_dict = torch.load(weights_path, map_location="cpu")
@@ -82,15 +83,16 @@ class MLPNetEmbedding(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x[:, self.occipital_idx, :]
-        return self.model(x)
+        x_feat = self.model.compute_features(x, fs=200, win_sec=self.T / 200)
+        return self.model(x_feat)
 
 
 class GLMNetEmbedding(nn.Module):
     """Use a pretrained GLMNet to extract features from raw EEG."""
 
-    def __init__(self, d_model: int, ckpt_path: str, scaler_path: str, stats_path: str, T: int) -> None:
+    def __init__(self, d_model: int, T: int, C: int, ckpt_path: str, scaler_path: str, stats_path: str) -> None:
         super().__init__()
-        self.model = GLMNet.load_from_checkpoint(ckpt_path, list(range(50, 62)), T, device="cpu")
+        self.model = GLMNet.load_from_checkpoint(ckpt_path, list(range(50, 62)), C, T, device="cpu")
         for p in self.model.parameters():
             p.requires_grad = False
 
@@ -111,7 +113,7 @@ class GLMNetEmbedding(nn.Module):
         x_raw_t = torch.from_numpy(raw_norm).unsqueeze(1).to(x_raw.device)
         x_feat_t = torch.from_numpy(feat_scaled).to(x_raw.device)
         with torch.no_grad():
-            features = self.model(x_raw_t, x_feat_t, return_features=True)
+            features = self.model(x_raw_t, x_feat_t, return_features=True).astype(np.float32)
         return self.proj(features)
 
 
@@ -143,8 +145,7 @@ class PositionalEncoding(nn.Module):
 class myTransformer(nn.Module):
     def __init__(self, d_model: int = 512, eeg_encoder: str = "eegnet",
                  encoder_ckpt: str | None = None, C: int | None = None,
-                 T: int | None = None, glmnet_scaler: str | None = None,
-                 glmnet_stats: str | None = None) -> None:
+                 T: int | None = None) -> None:
         super().__init__()
         self.img_embedding = nn.Linear(4 * 36 * 64, d_model)
         self.d_model = d_model
@@ -157,25 +158,25 @@ class myTransformer(nn.Module):
                 d_model=d_model,
                 C=self.C,
                 T=self.T,
-                weights_path=encoder_ckpt,
+                weights_path=os.path.join(encoder_ckpt,"shallownet.pt")
             )
         elif eeg_encoder == 'mlpnet':
-            assert type(self.C) == int and type(self.T) == int
-            assert self.T==5, "You should use a features file for eeg"
+            assert type(self.T) == int
             self.eeg_embedding = MLPNetEmbedding(
                 d_model=d_model,
-                C=self.C,
-                weights_path=encoder_ckpt,
+                T=T,
+                weights_path=os.path.join(encoder_ckpt,"mlpnet.pt")
             )
 
         elif eeg_encoder == "glmnet":
-            assert encoder_ckpt is not None and glmnet_scaler is not None and glmnet_stats is not None
+            assert type(self.C) == int and type(self.T) == int
             self.eeg_embedding = GLMNetEmbedding(
                 d_model=d_model,
-                ckpt_path=encoder_ckpt,
-                scaler_path=glmnet_scaler,
-                stats_path=glmnet_stats,
                 T=self.T,
+                C = self.C,
+                ckpt_path=os.path.join(encoder_ckpt,"glmnet_best.pt"),
+                scaler_path=os.path.join(encoder_ckpt,"scaler.pkl"),
+                stats_path=os.path.join(encoder_ckpt,"stats.npz"),
             )
 
         elif eeg_encoder == "eegnet":

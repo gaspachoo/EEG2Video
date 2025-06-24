@@ -60,12 +60,8 @@ def parse_args():
                         help='Enable logging to Weights & Biases')
     parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet','mlpnet','glmnet'],
                         default='eegnet', help='EEG encoder type')
-    parser.add_argument('--encoder_ckpt', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_shallownet.pt",
+    parser.add_argument('--encoder_ckpt', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster",
                         help='Path to pretrained encoder weights')
-    parser.add_argument('--glmnet_scaler', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_scaler.pkl",
-                        help='Path to GLMNet StandardScaler')
-    parser.add_argument('--glmnet_stats', type=str, default="EEG2Video/checkpoints/glmnet/sub3_label_cluster_rawnorm.npz",
-                        help='Path to GLMNet raw normalization stats')
     return parser.parse_args()
 
 
@@ -131,10 +127,6 @@ def main():
 
     ds = build_dataset(args.eeg_raw_dir, args.video_dir)
     C, T = ds.eeg.shape[-2:]
-    if args.eeg_encoder == 'eegnet':
-        C = T = None
-    elif args.eeg_encoder == 'glmnet':
-        C = None
     train_sub, val_sub, test_sub = split_dataset(ds, args.train_ratio, args.val_ratio)
 
     # stack training EEG and fit scaler
@@ -168,8 +160,6 @@ def main():
         encoder_ckpt=args.encoder_ckpt,
         C=C,
         T=T,
-        glmnet_scaler=args.glmnet_scaler,
-        glmnet_stats=args.glmnet_stats,
     ).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
