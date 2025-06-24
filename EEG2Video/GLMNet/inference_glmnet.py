@@ -16,6 +16,7 @@ from EEG2Video.GLMNet.modules.utils_glmnet import (
     load_scaler,
     load_raw_stats,
 )
+from EEG2Video.GLMNet.modules.models_paper import mlpnet
 
 
 OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
@@ -25,7 +26,7 @@ def inf_glmnet(model, scaler, raw_sw, stats, device="cuda"):
 
     # always compute spectral features from the raw windows
     raw_flat = raw_sw.reshape(-1, raw_sw.shape[-2], raw_sw.shape[-1])
-    feat_sw = GLMNet.compute_features(raw_flat)
+    feat_sw = mlpnet.compute_features(raw_flat)
     # reshape back to (runs, videos, trials, windows, channels, features)
     feat_sw = feat_sw.reshape(raw_sw.shape[:-2] + feat_sw.shape[-2:])
 

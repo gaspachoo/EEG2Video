@@ -107,7 +107,7 @@ class GLMNetEmbedding(nn.Module):
     def forward(self, x_raw: torch.Tensor) -> torch.Tensor:
         raw_np = x_raw.cpu().numpy()
         raw_np = raw_np.squeeze(1) if raw_np.ndim == 4 else raw_np
-        feat_np = self.model.compute_features(raw_np, fs=200, win_sec=self.T / 200)
+        feat_np = mlpnet.compute_features(raw_np, fs=200, win_sec=self.T / 200)
         raw_norm = normalize_raw(raw_np, self.raw_mean, self.raw_std)
         feat_scaled = standard_scale_features(feat_np, scaler=self.scaler)
         x_raw_t = torch.from_numpy(raw_norm).unsqueeze(1).to(x_raw.device)
