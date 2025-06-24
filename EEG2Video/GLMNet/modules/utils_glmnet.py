@@ -3,7 +3,6 @@ import torch.nn as nn
 from EEG2Video.GLMNet.modules.models_paper import shallownet, mlpnet
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-from EEG_preprocessing.DE_PSD import DE_PSD
 import pickle
 
 class GLMNet(nn.Module):
@@ -64,14 +63,6 @@ class GLMNet(nn.Module):
         model.eval()
         return model
 
-    @staticmethod
-    def compute_features(raw: np.ndarray, fs: int = 200, win_sec: float = 0.5) -> np.ndarray:
-        """Compute DE features from raw EEG."""
-        feats = np.zeros((raw.shape[0], raw.shape[1], 5), dtype=np.float32)
-        for i, seg in enumerate(raw):
-            de = DE_PSD(seg, fs, win_sec, which="de")
-            feats[i] = de
-        return feats
 
     def forward(self, x_raw, x_feat, return_features: bool = False):
         """Forward pass of the network.

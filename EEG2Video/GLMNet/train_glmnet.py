@@ -27,6 +27,7 @@ from EEG2Video.GLMNet.modules.utils_glmnet import (
     load_scaler,
     load_raw_stats,
 )
+from EEG2Video.GLMNet.modules.models_paper import mlpnet
 
 
 # -------- W&B -------------------------------------------------------------
@@ -101,7 +102,7 @@ def main():
 
     raw = np.load(os.path.join(args.raw_dir, filename))
     # compute DE features from raw EEG windows
-    feat = GLMNet.compute_features(
+    feat = mlpnet.compute_features(
         raw.reshape(-1, raw.shape[-2], raw.shape[-1])
     ).reshape(*raw.shape[:4], raw.shape[-2], -1)
     
