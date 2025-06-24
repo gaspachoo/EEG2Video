@@ -54,8 +54,6 @@ def parse_args():
     parser.add_argument('--val_ratio', type=float, default=0.1, help='Validation split ratio')
     parser.add_argument('--save_dir', type=str, default='EEG2Video/checkpoints/Seq2Seq_v2/',
                         help='Directory to store the best checkpoint')
-    parser.add_argument('--save_scaler', type=str, default='scaler.pkl',
-                        help='File path to store the fitted StandardScaler')
     parser.add_argument('--use_wandb', action='store_true',
                         help='Enable logging to Weights & Biases')
     parser.add_argument('--eeg_encoder', choices=['eegnet', 'shallownet','mlpnet','glmnet'],
@@ -170,7 +168,7 @@ def main():
     ckpt_path = os.path.join(args.save_dir, 'best.pt')
 
     if args.use_wandb:
-        wandb.init(project='eeg2video-autoregressive', config=vars(args))
+        wandb.init(project='eeg2video-autoregressive', name=f'{args.eeg_encoder}', config=vars(args))
         wandb.watch(model, log='all')
 
     for epoch in range(1, args.epochs + 1):
