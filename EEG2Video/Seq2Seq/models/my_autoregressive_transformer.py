@@ -83,8 +83,12 @@ class MLPNetEmbedding(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x[:, self.occipital_idx, :]
-        x_feat = self.model.compute_features(x, fs=200, win_sec=self.T / 200)
-        return self.model(x_feat)
+        # convert to NumPy for feature computation
+        x_np = x.detach().cpu().numpy()
+        x_feat = self.model.compute_features(x_np, fs=200, win_sec=self.T / 200)
+        # back to tensor on the original device
+        x_feat_t = torch.from_numpy(x_feat).to(x.device)
+        return self.model(x_feat_t)
 
 
 class GLMNetEmbedding(nn.Module):
@@ -110,10 +114,13 @@ class GLMNetEmbedding(nn.Module):
         feat_np = mlpnet.compute_features(raw_np, fs=200, win_sec=self.T / 200)
         raw_norm = normalize_raw(raw_np, self.raw_mean, self.raw_std)
         feat_scaled = standard_scale_features(feat_np, scaler=self.scaler)
-        x_raw_t = torch.from_numpy(raw_norm).unsqueeze(1).to(x_raw.device)
-        x_feat_t = torch.from_numpy(feat_scaled).to(x_raw.device)
+
+        x_raw_t = torch.from_numpy(raw_norm.astype(np.float32)).unsqueeze(1).to(x_raw.device)
+        x_feat_t = torch.from_numpy(feat_scaled.astype(np.float32)).to(x_raw.device)
+
         with torch.no_grad():
-            features = self.model(x_raw_t, x_feat_t, return_features=True).astype(np.float32)
+            features = self.model(x_raw_t, x_feat_t, return_features=True)
+
         return self.proj(features)
 
 
