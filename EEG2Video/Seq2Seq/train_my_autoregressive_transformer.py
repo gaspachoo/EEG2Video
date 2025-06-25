@@ -165,7 +165,7 @@ def main():
 
     best_val = float('inf')
     os.makedirs(args.save_dir, exist_ok=True)
-    ckpt_path = os.path.join(args.save_dir, 'best.pt')
+    ckpt_path = os.path.join(args.save_dir, f"{args.eeg_encoder}best.pt")
 
     if args.use_wandb:
         wandb.init(project='eeg2video-autoregressive', name=f'{args.eeg_encoder}', config=vars(args))
