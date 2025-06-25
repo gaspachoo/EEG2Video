@@ -2,17 +2,16 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
 
 
 def load_embeddings(path: str) -> np.ndarray:
-    """Load and reshape embeddings to (blocks, concepts, reps, windows, dim)."""
+    """Load embeddings with optional reshaping."""
     data = np.load(path)
     if data.ndim == 2:
         # Flattened (7*40*5*7, dim)
         dim = data.shape[-1]
         data = data.reshape(7, 40, 5, 7, dim)
-    if data.ndim != 5:
+    if data.ndim not in {5, 6}:
         raise ValueError(f"Unexpected embedding shape {data.shape}")
     return data
 
@@ -21,42 +20,33 @@ def plot_block(
     embeddings: np.ndarray,
     block_idx: int,
     concept_ids: list[int],
+    channel_idx: int,
     save_path: str | None = None,
-    channel_pair: tuple[int, int] | None = None,
 ) -> None:
-    """Plot embeddings for a block and a list of concepts.
+    """Plot temporal curves for a selected channel."""
 
-    If ``channel_pair`` is ``None`` the function uses PCA to project the
-    embeddings to 2D. Otherwise the two specified channels are plotted
-    directly without dimensionality reduction.
-    """
     n_concepts = len(concept_ids)
-    fig, axes = plt.subplots(1, n_concepts, figsize=(5 * n_concepts, 4), squeeze=False)
+    fig, axes = plt.subplots(1, n_concepts, figsize=(5 * n_concepts, 3), squeeze=False)
 
     for i, cid in enumerate(concept_ids):
         ax = axes[0, i]
-        emb = embeddings[block_idx, cid]  # shape (5, 7, dim)
-        reps, n_win, dim = emb.shape
+        emb = embeddings[block_idx, cid]
 
-        if channel_pair is None:
-            pca = PCA(n_components=2)
-            coords = pca.fit_transform(emb.reshape(-1, dim))
-            coords = coords.reshape(reps, n_win, 2)
-            label = "PC"
-        else:
-            c1, c2 = channel_pair
-            if c1 >= dim or c2 >= dim:
-                raise IndexError(
-                    f"Channel indices {c1}, {c2} out of range for dimension {dim}"
-                )
-            coords = emb[..., [c1, c2]]
-            label = f"ch{c1}-ch{c2}"
+        if emb.ndim != 4:
+            raise ValueError(f"Expected 4D embeddings, got shape {emb.shape}")
+
+        reps, n_win, n_channels, time_len = emb.shape
+        if channel_idx >= n_channels:
+            raise IndexError(f"Channel index {channel_idx} out of range for dimension {n_channels}")
 
         for r in range(reps):
-            ax.plot(coords[r, :, 0], coords[r, :, 1], marker="o", label=f"rep {r + 1}")
+            series = emb[r, :, channel_idx, :].reshape(-1)
+            t = np.arange(series.size)
+            ax.plot(t, series, label=f"rep {r + 1}")
+
         ax.set_title(f"Concept {cid}")
-        ax.set_xlabel(label + " 1")
-        ax.set_ylabel(label + " 2")
+        ax.set_xlabel("time")
+        ax.set_ylabel(f"channel {channel_idx}")
         ax.legend()
     fig.tight_layout()
 
@@ -75,20 +65,15 @@ if __name__ == "__main__":
         "--concepts", type=str, default="0,1,2", help="Comma-separated concept indices"
     )
     parser.add_argument(
-        "--channels",
-        type=str,
-        default=None,
-        help="Two comma-separated embedding channels to plot instead of PCA",
+        "--channel",
+        type=int,
+        default=0,
+        help="Index of the embedding channel to plot",
     )
     parser.add_argument("--save", type=str, default=None, help="Optional path to save the figure")
     args = parser.parse_args()
 
     concept_ids = [int(c) for c in args.concepts.split(",")]
     emb = load_embeddings(args.embeddings)
-    ch_pair = None
-    if args.channels is not None:
-        parts = [int(p) for p in args.channels.split(",") if p]
-        if len(parts) != 2:
-            raise ValueError("--channels requires two comma-separated indices")
-        ch_pair = (parts[0], parts[1])
-    plot_block(emb, args.block, concept_ids, args.save, ch_pair)
+    plot_block(emb, args.block, concept_ids, args.channel, args.save)
+
