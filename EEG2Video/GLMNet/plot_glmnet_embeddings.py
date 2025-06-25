@@ -19,34 +19,29 @@ def load_embeddings(path: str) -> np.ndarray:
 def plot_block(
     embeddings: np.ndarray,
     block_idx: int,
+    window_idx: int,
     concept_ids: list[int],
-    channel_idx: int,
     save_path: str | None = None,
 ) -> None:
     """Plot temporal curves for a selected channel."""
 
     n_concepts = len(concept_ids)
     fig, axes = plt.subplots(1, n_concepts, figsize=(5 * n_concepts, 3), squeeze=False)
-
+    
     for i, cid in enumerate(concept_ids):
         ax = axes[0, i]
-        emb = embeddings[block_idx, cid]
+        emb = embeddings[block_idx, cid, :, window_idx]
 
-        if emb.ndim != 4:
-            raise ValueError(f"Expected 4D embeddings, got shape {emb.shape}")
-
-        reps, n_win, n_channels, time_len = emb.shape
-        if channel_idx >= n_channels:
-            raise IndexError(f"Channel index {channel_idx} out of range for dimension {n_channels}")
+        reps, time_len = emb.shape
 
         for r in range(reps):
-            series = emb[r, :, channel_idx, :].reshape(-1)
+            series = emb[r, :].reshape(-1)
             t = np.arange(series.size)
             ax.plot(t, series, label=f"rep {r + 1}")
 
         ax.set_title(f"Concept {cid}")
         ax.set_xlabel("time")
-        ax.set_ylabel(f"channel {channel_idx}")
+        ax.set_ylabel(f"Value")
         ax.legend()
     fig.tight_layout()
 
@@ -62,8 +57,9 @@ if __name__ == "__main__":
     parser.add_argument("--embeddings", default = "./data/GLMNet/EEG_embeddings_sw/sub3.npy", help="Path to embeddings .npy file")
     parser.add_argument("--block", type=int, default=0, help="Block index")
     parser.add_argument(
-        "--concepts", type=str, default="0,1,2", help="Comma-separated concept indices"
+        "--concepts", type=list[int], default=[0,1,2], help="Comma-separated concept indices"
     )
+    parser.add_argument("--window", type=int, default=0, help="Window index")
     parser.add_argument(
         "--channel",
         type=int,
@@ -73,7 +69,6 @@ if __name__ == "__main__":
     parser.add_argument("--save", type=str, default=None, help="Optional path to save the figure")
     args = parser.parse_args()
 
-    concept_ids = [int(c) for c in args.concepts.split(",")]
     emb = load_embeddings(args.embeddings)
-    plot_block(emb, args.block, concept_ids, args.channel, args.save)
+    plot_block(emb, args.block, args.window, args.concepts, args.save)
 
