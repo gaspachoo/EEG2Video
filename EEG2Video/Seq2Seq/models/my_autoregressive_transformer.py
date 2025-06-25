@@ -204,7 +204,7 @@ class myTransformer(nn.Module):
         self.txtpredictor = nn.Linear(d_model, 13)
         self.predictor = nn.Linear(d_model, 4 * 36 * 64)
 
-    def forward(self, src: torch.Tensor, tgt: torch.Tensor):
+    def forward(self, src: torch.Tensor, tgt: torch.Tensor, teacher_forcing: bool = False):
         """Forward pass.
 
         Parameters
@@ -212,7 +212,12 @@ class myTransformer(nn.Module):
         src : Tensor
             EEG input of shape ``(batch, 7, 62, 100)`` which becomes ``(batch, 7, d_model)`` after embedding.
         tgt : Tensor
-            Video latent sequence of shape ``(batch, 7, 4, 36, 64)`` where the first frame is padding.
+            Video latent sequence used as decoder input. When ``teacher_forcing``
+            is ``True`` it should contain the zero padding frame followed by the
+            first ``T-1`` ground truth latents.
+        teacher_forcing : bool, optional
+            If ``True`` feed ``tgt`` to the decoder instead of generating tokens
+            autoregressively.
 
         Returns
         -------
@@ -257,14 +262,20 @@ class myTransformer(nn.Module):
         src = self.positional_encoding(src)
         tgt = self.positional_encoding(tgt)
 
-        tgt_mask = nn.Transformer.generate_square_subsequent_mask(tgt.size(1)).to(tgt.device)
         memory = self.transformer_encoder(src)
 
-        new_tgt = torch.zeros(tgt.size(0), 1, tgt.size(2), device=tgt.device)
-        for i in range(6):
-            out = self.transformer_decoder(new_tgt, memory, tgt_mask=tgt_mask[: i + 1, : i + 1])
-            new_tgt = torch.cat((new_tgt, out[:, -1:, :]), dim=1)
+        if teacher_forcing:
+            tgt_in = tgt
+            tgt_mask = nn.Transformer.generate_square_subsequent_mask(tgt_in.size(1)).to(tgt.device)
+            out = self.transformer_decoder(tgt_in, memory, tgt_mask=tgt_mask)
+            preds = self.predictor(out).view(out.size(0), out.size(1), 4, 36, 64)
+        else:
+            tgt_mask = nn.Transformer.generate_square_subsequent_mask(tgt.size(1)).to(tgt.device)
+            new_tgt = torch.zeros(tgt.size(0), 1, tgt.size(2), device=tgt.device)
+            for i in range(6):
+                out = self.transformer_decoder(new_tgt, memory, tgt_mask=tgt_mask[: i + 1, : i + 1])
+                new_tgt = torch.cat((new_tgt, out[:, -1:, :]), dim=1)
+            preds = self.predictor(new_tgt).view(new_tgt.size(0), new_tgt.size(1), 4, 36, 64)
 
         memory = memory.mean(dim=1)
-        preds = self.predictor(new_tgt).view(new_tgt.size(0), new_tgt.size(1), 4, 36, 64)
         return self.txtpredictor(memory), preds
