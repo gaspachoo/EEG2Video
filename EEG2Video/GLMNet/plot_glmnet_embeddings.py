@@ -47,7 +47,7 @@ def plot_block(embeddings: np.ndarray, block_idx: int, concept_ids: list[int], s
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Plot GLMNet embeddings for a block")
-    parser.add_argument("embeddings", help="Path to embeddings .npy file")
+    parser.add_argument("--embeddings", default = "./data/GLMNet/EEG_embeddings_sw/sub3.npy", help="Path to embeddings .npy file")
     parser.add_argument("--block", type=int, default=0, help="Block index")
     parser.add_argument(
         "--concepts", type=str, default="0,1,2", help="Comma-separated concept indices"
