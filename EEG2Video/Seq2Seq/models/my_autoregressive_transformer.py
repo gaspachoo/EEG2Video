@@ -183,7 +183,7 @@ class myTransformer(nn.Module):
                 C = self.C,
                 ckpt_path=os.path.join(encoder_ckpt,"glmnet_best.pt"),
                 scaler_path=os.path.join(encoder_ckpt,"scaler.pkl"),
-                stats_path=os.path.join(encoder_ckpt,"stats.npz"),
+                stats_path=os.path.join(encoder_ckpt,"raw_stats.npz"),
             )
 
         elif eeg_encoder == "eegnet":
