@@ -80,6 +80,14 @@ class GLMNet(nn.Module):
 
         g_raw = self.raw_global(x_raw)
         l_freq = self.freq_local(x_feat[:, self.occipital_idx, :])
+
+        # Match frequency branch statistics to the raw branch
+        g_mean = g_raw.mean(dim=1, keepdim=True)
+        g_std = g_raw.std(dim=1, keepdim=True) + 1e-6
+        f_mean = l_freq.mean(dim=1, keepdim=True)
+        f_std = l_freq.std(dim=1, keepdim=True) + 1e-6
+        l_freq = (l_freq - f_mean) / f_std * g_std + g_mean
+
         features = torch.cat([g_raw, l_freq], dim=1)
 
         if return_features:
