@@ -60,7 +60,7 @@ def generate_all_embeddings(
     os.makedirs(output_dir, exist_ok=True)
 
     scaler_path = os.path.join(ckpt_path, "scaler.pkl")
-    stats_path = os.path.join(ckpt_path, "stats.npz")
+    stats_path = os.path.join(ckpt_path, "raw_stats.npz")
     model_path = os.path.join(ckpt_path, "glmnet_best.pt")
     
     scaler = load_scaler(scaler_path)
