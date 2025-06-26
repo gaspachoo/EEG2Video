@@ -46,7 +46,7 @@ def parse_args():
     p.add_argument("--category", default="label_cluster",choices=['color', 'face_appearance', 'human_appearance','label_cluster','label','obj_number','optical_flow_score'], help="Label file")
     p.add_argument("--save_dir", default="./EEG2Video/checkpoints/glmnet")
     p.add_argument("--epochs",   type=int, default=500)
-    p.add_argument("--bs",       type=int, default=200)
+    p.add_argument("--bs",       type=int, default=100)
     p.add_argument("--lr",       type=float, default=1e-4)
     p.add_argument("--min_lr",   type=float, default=1e-6, help="Minimum learning rate for the scheduler")
     p.add_argument("--scheduler",type=str, choices=["steplr", "reducelronplateau", "cosine"], default="reducelronplateau", help="Type of learning rate scheduler",)
@@ -232,7 +232,7 @@ def main():
                        "train/loss": tl / len(ds_train), "val/loss": val_loss,
                        "lr": current_lr})
 
-    model = GLMNet.load_from_checkpoint(glmnet_path, OCCIPITAL_IDX, time_len, device=device)
+    model = GLMNet.load_from_checkpoint(glmnet_path, OCCIPITAL_IDX, num_channels, time_len, device=device)
 
     scaler = load_scaler(scaler_path)
     raw_mean, raw_std = load_raw_stats(stats_path)

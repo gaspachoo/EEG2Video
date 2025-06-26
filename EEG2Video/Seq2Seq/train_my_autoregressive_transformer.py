@@ -143,6 +143,7 @@ def main():
     test_ds = transform_split(test_sub.indices)
 
     # save scaler for later inference
+    os.makedirs(args.save_dir, exist_ok=True)
     scaler_path = os.path.join(args.save_dir, f"scaler_{args.eeg_encoder}.pkl")
     with open(scaler_path, 'wb') as f:
         pickle.dump(scaler, f)
