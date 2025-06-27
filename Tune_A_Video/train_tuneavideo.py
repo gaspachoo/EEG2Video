@@ -24,7 +24,7 @@ from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from tuneavideo.models.unet import UNet3DConditionModel
-from tuneavideo.data.dataset import TuneAVideoDataset
+from tuneavideo.dataset.dataset import TuneAVideoDataset
 from tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
 from tuneavideo.util import save_videos_grid, ddim_inversion
 from einops import rearrange
@@ -96,6 +96,7 @@ def main(
     if accelerator.is_main_process:
         # now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         # output_dir = os.path.join(output_dir, now)
+        print(output_dir)
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(f"{output_dir}/samples", exist_ok=True)
         os.makedirs(f"{output_dir}/inv_latents", exist_ok=True)
