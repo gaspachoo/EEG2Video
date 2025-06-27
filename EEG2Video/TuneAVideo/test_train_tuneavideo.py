@@ -33,13 +33,37 @@ def train_one_video(cfg):
     unet = UNet3DConditionModel.from_pretrained_2d(cfg.pretrained_model_path, subfolder="unet").to(device)
     noise_scheduler = DDPMScheduler.from_pretrained(cfg.pretrained_model_path, subfolder="scheduler")
 
+    # Freeze VAE and text encoder
+    vae.requires_grad_(False)
+    text_encoder.requires_grad_(False)
+    vae.eval()
+    text_encoder.eval()
+
+    # Freeze UNet and unfreeze query projections only
+    unet.requires_grad_(False)
+    trainable_suffixes = ("attn1.to_q", "attn2.to_q", "attn_temp")
+    for name, module in unet.named_modules():
+        if name.endswith(trainable_suffixes):
+            for p in module.parameters():
+                p.requires_grad_(True)
+    # Only these layers are fine-tuned to save memory
+
+    if hasattr(unet, "enable_gradient_checkpointing"):
+        unet.enable_gradient_checkpointing()
+    try:
+        unet.enable_xformers_memory_efficient_attention()
+    except Exception:
+        pass
+
     # Prepare dataset
     dataset = TuneAVideoDataset(**cfg.train_data)
     dataset.prompt_ids = tokenizer(dataset.prompt, max_length=tokenizer.model_max_length,
                                    padding="max_length", truncation=True, return_tensors="pt").input_ids[0]
     loader = torch.utils.data.DataLoader(dataset, batch_size=cfg.train_batch_size)
 
-    optimizer = torch.optim.Adam(unet.parameters(), lr=cfg.learning_rate)
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, unet.parameters()), lr=cfg.learning_rate
+    )
     unet.train()
     for step, batch in enumerate(loader):
         if step >= cfg.max_train_steps:
