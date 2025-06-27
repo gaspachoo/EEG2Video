@@ -14,7 +14,7 @@ from EEG2Video.GLMNet.inference_glmnet import (
 )
 from EEG2Video.Seq2Seq.inference_seq2seq_v2 import inf_seq2seq, load_s2s_from_checkpoint
 from EEG2Video.SemanticPredictor.inference_semantic import inf_semantic_predictor, load_semantic_predictor_from_checkpoint
-from EEG2Video.TuneAVideo.inference_tuneavideo import inf_tuneavideo, load_tuneavideo_from_checkpoint, load_pairs
+from EEG2Video.TuneAVideo.inference_eeg2video import inf_tuneavideo, load_tuneavideo_from_checkpoint, load_pairs
 from EEG2Video.TuneAVideo.tuneavideo.util import save_videos_grid
 
 
