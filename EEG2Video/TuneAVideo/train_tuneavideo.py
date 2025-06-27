@@ -12,9 +12,6 @@ import numpy as np
 from itertools import cycle
 from torch.cuda.amp import autocast, GradScaler
 
-from EEG2Video.TuneAVideo.tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
-from EEG2Video.TuneAVideo.tuneavideo.util_tuneavideo import save_videos_grid
-
 project_root = os.path.dirname(
     os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +19,9 @@ project_root = os.path.dirname(
 )
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-
+    
+from EEG2Video.TuneAVideo.tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
+from EEG2Video.TuneAVideo.tuneavideo.util_tuneavideo import save_videos_grid
 from EEG2Video.TuneAVideo.tuneavideo.models.unet import UNet3DConditionModel
 from EEG2Video.TuneAVideo.tuneavideo.datasets.dataset import TuneAVideoDataset
 
