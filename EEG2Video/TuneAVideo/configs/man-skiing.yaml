@@ -3,7 +3,7 @@ output_dir: "./outputs/man-skiing"
 
 train_data:
   video_path: "./EEG2Video/TuneAVideo/data/man-skiing.mp4"
-  prompt: "a man is skiing"
+  prompt: "a man is snowboarding"
   n_sample_frames: 24
   width: 512
   height: 512
@@ -12,11 +12,11 @@ train_data:
 
 validation_data:
   prompts:
-    - "mickey mouse is skiing on the snow"
-    - "spider man is skiing on the beach, cartoon style"
-    - "wonder woman, wearing a cowboy hat, is skiing"
-    - "a man, wearing pink clothes, is skiing at sunset"
-    - "jackie chan, wearing a red helmet, is skiing on a lake"
+    - "mickey mouse is snowboarding on the snow"
+    - "spider man is snowboarding on the beach, cartoon style"
+    - "wonder woman, wearing a cowboy hat, is snowboarding"
+    - "a man, wearing pink clothes, is snowboarding at sunset"
+    - "jackie chan, wearing a red helmet, is snowboarding on a lake"
   video_length: 24
   width: 512
   height: 512
