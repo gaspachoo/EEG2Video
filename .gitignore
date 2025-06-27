@@ -5,6 +5,7 @@ checkpoints/
 __pycache__/
 ClassificationResults/
 stable-diffusion-v1-4/
+Tune-A-Video/
 outputs/
 gifs/
 
