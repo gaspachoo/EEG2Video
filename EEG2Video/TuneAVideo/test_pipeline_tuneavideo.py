@@ -26,6 +26,12 @@ def main():
         default="Tune-A-Video/configs/car-turn.yaml",
         help="Path to a Tune-A-Video YAML configuration file",
     )
+    parser.add_argument(
+        "--unet_path",
+        type=str,
+        default=None,
+        help="Optional path to a saved UNet directory",
+    )
     args = parser.parse_args()
 
     cfg = OmegaConf.load(args.config)
@@ -43,7 +49,12 @@ def main():
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_path, subfolder="tokenizer")
     text_encoder = CLIPTextModel.from_pretrained(pretrained_path, subfolder="text_encoder")
     vae = AutoencoderKL.from_pretrained(pretrained_path, subfolder="vae")
-    unet = UNet3DConditionModel.from_pretrained_2d(pretrained_path, subfolder="unet")
+    # When --unet_path is specified, load the UNet weights from this location
+    # instead of the base pretrained model. This helps testing trained checkpoints.
+    if args.unet_path:
+        unet = UNet3DConditionModel.from_pretrained_2d(args.unet_path)
+    else:
+        unet = UNet3DConditionModel.from_pretrained_2d(pretrained_path, subfolder="unet")
     scheduler = DDIMScheduler.from_pretrained(pretrained_path, subfolder="scheduler")
 
     pipe = TuneAVideoPipeline(
