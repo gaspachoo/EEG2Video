@@ -36,7 +36,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     pretrained_path = cfg.pretrained_model_path
-    prompt = cfg.validation_data.prompts[0]
+    prompts = cfg.validation_data.prompts
     video_length = cfg.validation_data.video_length
     height = cfg.validation_data.height
     width = cfg.validation_data.width
@@ -60,17 +60,24 @@ def main():
     pipe.enable_xformers_memory_efficient_attention()
     pipe.enable_vae_slicing()
 
-    output = pipe(
-        prompt=prompt,
-        video_length=video_length,
-        height=height,
-        width=width,
-        num_inference_steps=num_steps,
-        guidance_scale=guidance_scale,
-    )
-
     os.makedirs(cfg.output_dir, exist_ok=True)
-    save_videos_grid(output.videos, os.path.join(cfg.output_dir, "test.gif"), rescale=False)
+
+    # Generate a video for each prompt in the config
+    for i, prompt in enumerate(prompts):
+        output = pipe(
+            prompt=prompt,
+            video_length=video_length,
+            height=height,
+            width=width,
+            num_inference_steps=num_steps,
+            guidance_scale=guidance_scale,
+        )
+
+        save_videos_grid(
+            output.videos,
+            os.path.join(cfg.output_dir, f"test_{i+1}.gif"),
+            rescale=False,
+        )
 
 
 if __name__ == "__main__":
