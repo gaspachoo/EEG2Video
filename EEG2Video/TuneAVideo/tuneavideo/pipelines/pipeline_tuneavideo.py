@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import torch
+import os,sys
 
 from diffusers.utils import is_accelerate_available
 from packaging import version
@@ -26,7 +27,15 @@ from diffusers.utils import deprecate, logging, BaseOutput
 
 from einops import rearrange
 
-from models.unet import UNet3DConditionModel
+project_root = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from EEG2Video.TuneAVideo.tuneavideo.models.unet import UNet3DConditionModel
 
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name

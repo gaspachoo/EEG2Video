@@ -26,13 +26,13 @@ def main():
     parser.add_argument(
         "--config",
         type=str,
-        default="Tune_A_Video/configs/man-skiing.yaml",
+        default="./EEG2Video/TuneAVideo/configs/man-skiing.yaml",
         help="Path to a Tune-A-Video YAML configuration file",
     )
     parser.add_argument(
         "--unet_path",
         type=str,
-        default='./Tune_A_Video/outputs/man-skiing/unet',
+        default='./outputs/man-skiing/unet',
         help="Optional path to a saved UNet directory",
     )
     args = parser.parse_args()
