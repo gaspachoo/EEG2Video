@@ -29,12 +29,6 @@ def main():
         default="./EEG2Video/TuneAVideo/configs/man-skiing.yaml",
         help="Path to a Tune-A-Video YAML configuration file",
     )
-    parser.add_argument(
-        "--unet_path",
-        type=str,
-        default='./outputs/man-skiing/unet',
-        help="Optional path to a saved UNet directory",
-    )
     args = parser.parse_args()
 
     cfg = OmegaConf.load(args.config)
@@ -52,12 +46,7 @@ def main():
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_path, subfolder="tokenizer")
     text_encoder = CLIPTextModel.from_pretrained(pretrained_path, subfolder="text_encoder")
     vae = AutoencoderKL.from_pretrained(pretrained_path, subfolder="vae")
-    # When --unet_path is specified, load the UNet weights from this location
-    # instead of the base pretrained model. This helps testing trained checkpoints.
-    if args.unet_path:
-        unet = UNet3DConditionModel.from_pretrained_2d(args.unet_path)
-    else:
-        unet = UNet3DConditionModel.from_pretrained_2d(pretrained_path, subfolder="unet")
+    unet = UNet3DConditionModel.from_pretrained_2d(cfg.output_dir, subfolder="unet")
     scheduler = DDIMScheduler.from_pretrained(pretrained_path, subfolder="scheduler")
 
     pipe = TuneAVideoPipeline(
