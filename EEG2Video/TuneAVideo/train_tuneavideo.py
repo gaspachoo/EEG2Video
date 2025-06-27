@@ -88,25 +88,6 @@ def train_one_video(cfg):
 
     os.makedirs(cfg.output_dir, exist_ok=True)
     unet.save_pretrained(os.path.join(cfg.output_dir, "unet"))
-    return vae, text_encoder, tokenizer, unet
-
-
-def run_inference(models, cfg):
-    vae, text_encoder, tokenizer, unet = models
-    device = vae.device
-    scheduler = DDIMScheduler.from_pretrained(cfg.pretrained_model_path, subfolder="scheduler")
-    pipe = TuneAVideoPipeline(vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet, scheduler=scheduler).to(device)
-    pipe.enable_xformers_memory_efficient_attention()
-    pipe.enable_vae_slicing()
-    prompt = cfg.validation_data.prompts[0]
-    out = pipe(prompt=prompt,
-               video_length=cfg.validation_data.video_length,
-               height=cfg.validation_data.height,
-               width=cfg.validation_data.width,
-               num_inference_steps=cfg.validation_data.num_inference_steps,
-               guidance_scale=cfg.validation_data.guidance_scale)
-    save_videos_grid(out.videos, os.path.join(cfg.output_dir, "train_test.gif"), rescale=False)
-
 
 def main():
     parser = argparse.ArgumentParser(description="Tiny training loop for TuneAVideo text pipeline")
@@ -114,9 +95,8 @@ def main():
                         help="Path to a Tune-A-Video YAML config")
     args = parser.parse_args()
     cfg = OmegaConf.load(args.config)
-    models = train_one_video(cfg)
-    run_inference(models, cfg)
-
+    train_one_video(cfg)
+    print(f"[INFO] UNet saved in {cfg.output_dir}/unet")
 
 if __name__ == "__main__":
     main()
