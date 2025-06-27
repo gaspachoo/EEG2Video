@@ -15,8 +15,8 @@ project_root = os.path.dirname(
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from EEG2Video.TuneAVideo.models.unet import UNet3DConditionModel
-from EEG2Video.TuneAVideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
+from EEG2Video.TuneAVideo.tuneavideo.models.unet import UNet3DConditionModel
+from EEG2Video.TuneAVideo.tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
 
 # Add original Tune-A-Video package to path for utility functions
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

@@ -17,8 +17,8 @@ project_root = os.path.dirname(
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from EEG2Video.TuneAVideo.models.unet import UNet3DConditionModel
-from EEG2Video.TuneAVideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
+from EEG2Video.TuneAVideo.tuneavideo.models.unet import UNet3DConditionModel
+from EEG2Video.TuneAVideo.tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
 
 from Tune_A_Video.tuneavideo.util import save_videos_grid
 from Tune_A_Video.tuneavideo.dataset.dataset import TuneAVideoDataset

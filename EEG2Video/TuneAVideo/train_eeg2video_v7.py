@@ -18,8 +18,8 @@ from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR, ReduceLROnPlatea
 import numpy as np
 from transformers import CLIPTokenizer
 from diffusers import AutoencoderKL, PNDMScheduler
-from models.unet import UNet3DConditionModel
-from pipelines.pipeline_tuneeeg2video import TuneAVideoPipeline
+from tuneavideo.models.unet import UNet3DConditionModel
+from tuneavideo.pipelines.pipeline_tuneeeg2video import TuneAVideoPipeline
 from tqdm import tqdm
 import pynvml
 import wandb
