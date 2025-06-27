@@ -25,7 +25,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from EEG2Video.TuneAVideo.pipelines.pipeline_tuneeeg2video import TuneAVideoPipeline
 from EEG2Video.TuneAVideo.models.unet import UNet3DConditionModel
-from EEG2Video.TuneAVideo.tuneavideo.util import save_videos_grid
+from EEG2Video.TuneAVideo.tuneavideo.util_eeg2video import save_videos_grid
 
 
 def parse_args():
