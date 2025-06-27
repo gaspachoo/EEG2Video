@@ -90,7 +90,7 @@ def train_one_video(cfg):
 
 def main():
     parser = argparse.ArgumentParser(description="Tiny training loop for TuneAVideo text pipeline")
-    parser.add_argument("--config", type=str, default="Tune_A_Video/configs/man-skiing.yaml",
+    parser.add_argument("--config", type=str, default="./EEG2Video/TuneAVideo/configs/man-skiing.yaml",
                         help="Path to a Tune-A-Video YAML config")
     args = parser.parse_args()
     cfg = OmegaConf.load(args.config)
