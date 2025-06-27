@@ -7,6 +7,14 @@ from omegaconf import OmegaConf
 from diffusers import DDIMScheduler, AutoencoderKL
 from transformers import CLIPTextModel, CLIPTokenizer
 
+project_root = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from EEG2Video.TuneAVideo.models.unet import UNet3DConditionModel
 from EEG2Video.TuneAVideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
 
@@ -23,7 +31,7 @@ def main():
     parser.add_argument(
         "--config",
         type=str,
-        default="Tune-A-Video/configs/car-turn.yaml",
+        default="Tune_A_Video/configs/man-skiing.yaml",
         help="Path to a Tune-A-Video YAML configuration file",
     )
     parser.add_argument(
