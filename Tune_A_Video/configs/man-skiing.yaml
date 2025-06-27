@@ -1,8 +1,8 @@
-pretrained_model_path: "../stable-diffusion-v1-4"
-output_dir: "./outputs/man-skiing"
+pretrained_model_path: "./stable-diffusion-v1-4"
+output_dir: "./Tune_A_Video/outputs/man-skiing"
 
 train_data:
-  video_path: "data/man-skiing.mp4"
+  video_path: "./Tune_A_Video/data/man-skiing.mp4"
   prompt: "a man is skiing"
   n_sample_frames: 24
   width: 512
