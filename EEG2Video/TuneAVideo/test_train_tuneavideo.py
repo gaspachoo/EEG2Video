@@ -9,15 +9,19 @@ from einops import rearrange
 from diffusers import DDPMScheduler, DDIMScheduler, AutoencoderKL
 from transformers import CLIPTokenizer, CLIPTextModel
 
+project_root = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from EEG2Video.TuneAVideo.models.unet import UNet3DConditionModel
 from EEG2Video.TuneAVideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
 
-# Add original Tune-A-Video utilities to path
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ORIG = os.path.join(ROOT, "..", "Tune-A-Video")
-sys.path.insert(0, ORIG)
-from tuneavideo.util import save_videos_grid
-from tuneavideo.data_t.dataset import TuneAVideoDataset
+from Tune_A_Video.tuneavideo.util import save_videos_grid
+from Tune_A_Video.tuneavideo.dataset.dataset import TuneAVideoDataset
 
 
 def train_one_video(cfg):
@@ -82,7 +86,7 @@ def run_inference(models, cfg):
 
 def main():
     parser = argparse.ArgumentParser(description="Tiny training loop for TuneAVideo text pipeline")
-    parser.add_argument("--config", type=str, default="Tune-A-Video/configs/car-turn.yaml",
+    parser.add_argument("--config", type=str, default="Tune_A_Video/configs/man-skiing.yaml",
                         help="Path to a Tune-A-Video YAML config")
     args = parser.parse_args()
     cfg = OmegaConf.load(args.config)

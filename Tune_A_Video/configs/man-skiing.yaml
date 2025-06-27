@@ -1,4 +1,4 @@
-pretrained_model_path: "./EEG2Video/stable-diffusion-v1-4"
+pretrained_model_path: "../stable-diffusion-v1-4"
 output_dir: "./outputs/man-skiing"
 
 train_data:
