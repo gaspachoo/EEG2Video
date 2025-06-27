@@ -22,7 +22,7 @@ from EEG2Video.TuneAVideo.pipelines.pipeline_tuneavideo import TuneAVideoPipelin
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ORIG_TAV_PATH = os.path.join(ROOT_DIR, "..", "Tune-A-Video")
 sys.path.insert(0, ORIG_TAV_PATH)
-from tuneavideo.util import save_videos_grid
+from EEG2Video.TuneAVideo.tuneavideo.util_tuneavideo import save_videos_grid
 
 def main():
     parser = argparse.ArgumentParser(
@@ -37,7 +37,7 @@ def main():
     parser.add_argument(
         "--unet_path",
         type=str,
-        default=None,
+        default='./Tune_A_Video/outputs/man-skiing/unet',
         help="Optional path to a saved UNet directory",
     )
     args = parser.parse_args()
