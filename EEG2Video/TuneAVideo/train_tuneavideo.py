@@ -18,10 +18,9 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from EEG2Video.TuneAVideo.tuneavideo.models.unet import UNet3DConditionModel
-from EEG2Video.TuneAVideo.tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
 
-from Tune_A_Video.tuneavideo.util import save_videos_grid
-from Tune_A_Video.tuneavideo.dataset.dataset import TuneAVideoDataset
+from EEG2Video.TuneAVideo.tuneavideo.util_tuneavideo import save_videos_grid
+from EEG2Video.TuneAVideo.tuneavideo.datasets.dataset import TuneAVideoDataset
 
 
 def train_one_video(cfg):

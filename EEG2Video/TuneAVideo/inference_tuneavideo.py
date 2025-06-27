@@ -17,11 +17,6 @@ if project_root not in sys.path:
 
 from EEG2Video.TuneAVideo.tuneavideo.models.unet import UNet3DConditionModel
 from EEG2Video.TuneAVideo.tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
-
-# Add original Tune-A-Video package to path for utility functions
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ORIG_TAV_PATH = os.path.join(ROOT_DIR, "..", "Tune-A-Video")
-sys.path.insert(0, ORIG_TAV_PATH)
 from EEG2Video.TuneAVideo.tuneavideo.util_tuneavideo import save_videos_grid
 
 def main():
