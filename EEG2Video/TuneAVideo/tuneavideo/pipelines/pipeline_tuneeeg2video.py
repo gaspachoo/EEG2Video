@@ -36,7 +36,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 )
 if project_root not in sys.path:
     sys.path.insert(1, project_root)
-from EEG2Video.TuneAVideo.models.unet import UNet3DConditionModel
+from EEG2Video.TuneAVideo.tuneavideo.models.unet import UNet3DConditionModel
 
 torch.cuda.set_device(0)
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
