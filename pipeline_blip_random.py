@@ -1,7 +1,9 @@
-import os, argparse
+import os
+import argparse
 import numpy as np
 import torch
-from transformers import BertTokenizer, BertModel
+from transformers import BertTokenizer, BertModel, CLIPTokenizer, CLIPTextModel
+from diffusers import DDIMScheduler, AutoencoderKL
 import imageio
 import matplotlib.pyplot as plt
 from EEG_preprocessing.segment_raw_signals_200Hz import extract_2s_segment
@@ -9,8 +11,49 @@ from EEG_preprocessing.segment_sliding_window import seg_sliding_window
 from EEG_preprocessing.extract_DE_PSD_features_1per500ms import extract_de_psd_sw
 from EEG_preprocessing.extract_DE_PSD_features_1per2s import extract_de_psd_raw
 
-from EEG2Video.TuneAVideo.inference_eeg2video import inf_tuneavideo, load_tuneavideo_from_checkpoint, load_pairs
+from EEG2Video.TuneAVideo.tuneavideo.models.unet import UNet3DConditionModel
+from EEG2Video.TuneAVideo.tuneavideo.pipelines.pipeline_tuneavideo import TuneAVideoPipeline
 from EEG2Video.TuneAVideo.tuneavideo.util_eeg2video import save_videos_grid
+
+
+def load_tuneavideo_with_bert(ckpt_path: str, diffusion_model_path: str, device: torch.device,
+                              bert_embeddings: torch.Tensor) -> TuneAVideoPipeline:
+    """Load TuneAVideo pipeline and replace text encoding with pre-computed BERT embeddings."""
+
+    vae = AutoencoderKL.from_pretrained(diffusion_model_path, subfolder="vae").to(device).half().eval()
+    tokenizer = CLIPTokenizer.from_pretrained(diffusion_model_path, subfolder="tokenizer")
+    text_encoder = CLIPTextModel.from_pretrained(diffusion_model_path, subfolder="text_encoder").to(device).half().eval()
+    unet = UNet3DConditionModel.from_pretrained_2d(ckpt_path).to(device).half().eval()
+    scheduler = DDIMScheduler.from_pretrained(diffusion_model_path, subfolder="scheduler")
+
+    pipe = TuneAVideoPipeline(
+        vae=vae,
+        text_encoder=text_encoder,
+        tokenizer=tokenizer,
+        unet=unet,
+        scheduler=scheduler,
+    ).to(device)
+
+    pipe.enable_xformers_memory_efficient_attention()
+    pipe.enable_vae_slicing()
+
+    pipe.custom_embeddings = bert_embeddings
+    pipe.custom_negative = bert_embeddings.mean(dim=1, keepdim=True).expand(-1, bert_embeddings.size(1), -1)
+
+    def _encode_prompt_override(self, prompt, device, num_videos_per_prompt, do_classifier_free_guidance, negative_prompt):
+        embeds = self.custom_embeddings.to(device)
+        embeds = embeds.repeat(1, num_videos_per_prompt, 1)
+        embeds = embeds.view(embeds.shape[0] * num_videos_per_prompt, embeds.shape[1], embeds.shape[2])
+
+        if do_classifier_free_guidance:
+            uncond = self.custom_negative.to(device)
+            uncond = uncond.repeat(1, num_videos_per_prompt, 1)
+            uncond = uncond.view(embeds.shape[0], embeds.shape[1], embeds.shape[2])
+            embeds = torch.cat([uncond, embeds])
+        return embeds
+
+    pipe._encode_prompt = _encode_prompt_override.__get__(pipe, TuneAVideoPipeline)
+    return pipe
 
 
 
@@ -52,7 +95,7 @@ if __name__ == "__main__":
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     # Initialize random video latents instead of Seq2Seq inference
-    vid_latents = np.random.rand(1, 6, 4, 36, 64)
+    vid_latents = np.random.randn(1, 4, 6, 36, 64).astype(np.float32)
     print("Video latents shape:", vid_latents.shape)
 
     # Load BLIP caption for current sample and compute BERT embeddings
@@ -76,20 +119,28 @@ if __name__ == "__main__":
             input_ids=tokens.input_ids.to(DEVICE),
             attention_mask=tokens.attention_mask.to(DEVICE)
         )
-    bert_embeddings = outputs.last_hidden_state.cpu().numpy()
+    bert_embeddings = outputs.last_hidden_state.to(DEVICE).half()
     print("BERT embeddings shape:", bert_embeddings.shape)
-    
-    # TuneAvideo inference using BERT embeddings
-    video_latents, semantic_embeddings = load_pairs(vid_latents, bert_embeddings, DEVICE)
-    print("Video latents shape:", video_latents.shape)
-    print("Semantic embeddings shape:", semantic_embeddings.shape)
 
-    pipe = load_tuneavideo_from_checkpoint(args.tuneavideo_path,args.diffusion_model_path, DEVICE)
+    video_latents = torch.from_numpy(vid_latents).to(DEVICE).half()
+
+    pipe = load_tuneavideo_with_bert(
+        args.tuneavideo_path,
+        args.diffusion_model_path,
+        DEVICE,
+        bert_embeddings,
+    )
     pipe.scheduler.set_timesteps(args.num_inference_steps)
 
-    z0 = video_latents[:1]
-    emb = semantic_embeddings[:1]
-    videos = inf_tuneavideo(pipe, emb, z0,args.num_inference_steps, args.guidance_scale, DEVICE)
+    videos = pipe(
+        "",
+        video_length=6,
+        height=288,
+        width=512,
+        num_inference_steps=args.num_inference_steps,
+        guidance_scale=args.guidance_scale,
+        latents=video_latents,
+    ).videos
     
     os.makedirs(os.path.join(args.output_dir, f'Block{args.block}'), exist_ok=True)
 
