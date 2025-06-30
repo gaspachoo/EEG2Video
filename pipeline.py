@@ -1,5 +1,7 @@
 import os, argparse
 import numpy as np
+import torch
+from transformers import BertTokenizer, BertModel
 import imageio
 import matplotlib.pyplot as plt
 from EEG_preprocessing.segment_raw_signals_200Hz import extract_2s_segment
@@ -90,9 +92,8 @@ if __name__ == "__main__":
     )[None, None, None, ...]
     print("EEG embeddings shape:", eeg_embeddings.shape)
     
-    # Seq2Seq inference
-    model_s2s = load_s2s_from_checkpoint(args.s2s_path, device=DEVICE)
-    vid_latents = inf_seq2seq(model_s2s, eeg_embeddings, device=DEVICE)
+    # Initialize random video latents instead of Seq2Seq inference
+    vid_latents = np.random.rand(1, 6, 4, 36, 64)
     print("Video latents shape:", vid_latents.shape)
     
     # Semantic Predictor inference
@@ -100,9 +101,32 @@ if __name__ == "__main__":
     scaler_semantic = load_scaler(args.sempred_scaler_path)
     sem_embeddings = inf_semantic_predictor(model_semantic, scaler_semantic, features_raw[0], device=DEVICE)
     print("Semantic embeddings shape:", sem_embeddings.shape)
+
+    # Load BLIP caption for current sample and compute BERT embeddings
+    bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    bert_model = BertModel.from_pretrained("bert-base-uncased").to(DEVICE)
+    blip_file = os.path.join("./data/BLIP", f"block{args.block}_10min.txt")
+    with open(blip_file, "r") as f:
+        captions = [line.strip() for line in f if line.strip()]
+    idx = args.concept * 5 + args.rep
+    caption = captions[idx]
+    tokens = bert_tokenizer(
+        caption,
+        padding="max_length",
+        max_length=77,
+        truncation=True,
+        return_tensors="pt",
+    )
+    with torch.no_grad():
+        outputs = bert_model(
+            input_ids=tokens.input_ids.to(DEVICE),
+            attention_mask=tokens.attention_mask.to(DEVICE)
+        )
+    bert_embeddings = outputs.last_hidden_state.cpu().numpy()
+    print("BERT embeddings shape:", bert_embeddings.shape)
     
-    # TuneAvideo inference    
-    video_latents, semantic_embeddings = load_pairs(vid_latents, sem_embeddings, DEVICE)
+    # TuneAvideo inference using BERT embeddings
+    video_latents, semantic_embeddings = load_pairs(vid_latents, bert_embeddings, DEVICE)
     print("Video latents shape:", video_latents.shape)
     print("Semantic embeddings shape:", semantic_embeddings.shape)
 
