@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument("--s2s_path", type=str, default="./EEG2Video/checkpoints/seq2seq/seq2seq_v2_classic.pth", help="Path to Seq2Seq model checkpoint")
     parser.add_argument("--sempred_path", type=str, default="./EEG2Video/checkpoints/semantic/eeg2text_clip.pt", help="Path to Semantic Predictor model checkpoint")
     parser.add_argument("--sempred_scaler_path", type=str, default="./EEG2Video/checkpoints/semantic/scaler.pkl", help="Path to Semantic Predictor StandardScaler")
-    parser.add_argument("--tuneavideo_path", type=str,default="./EEG2Video/checkpoints/TuneAVideo/unet_ep89.pt",help="Path to TuneAVideo model checkpoint")
+    parser.add_argument("--tuneavideo_path", type=str,default="./EEG2Video/checkpoints/TuneAVideo/unet_ep1.pt",help="Path to TuneAVideo model checkpoint")
     
     # TuneAVideo parameters
     parser.add_argument("--diffusion_model_path", type=str, default="./stable-diffusion-v1-4", help="Chemin vers SD-v1-4 pré-entraîné")
