@@ -1,6 +1,9 @@
 # Folders
 wandb/
 data/
+!data/
+!data/video_latents/
+!data/video_latents/**
 checkpoints/
 __pycache__/
 ClassificationResults/
@@ -16,3 +19,7 @@ gifs/
 
 # Specific files
 NeurIPS-2024-eeg2video-towards-decoding-dynamic-visual-perception-from-eeg-signals-Paper-Conference.pdf
+
+# Allow storing generated latents
+!data/video_latents/
+!data/video_latents/**
