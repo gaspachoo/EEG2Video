@@ -57,7 +57,11 @@ if __name__ == "__main__":
     parser.add_argument("--embeddings", default = "./data/GLMNet/EEG_embeddings_sw/sub3.npy", help="Path to embeddings .npy file")
     parser.add_argument("--block", type=int, default=0, help="Block index")
     parser.add_argument(
-        "--concepts", type=list[int], default=[0,1,2], help="Comma-separated concept indices"
+        "--concepts",
+        type=int,
+        nargs="+",
+        default=[0, 1, 2],
+        help="Space-separated list of concept indices (e.g., --concepts 0 1 2)",
     )
     parser.add_argument("--window", type=int, default=0, help="Window index")
     parser.add_argument(
