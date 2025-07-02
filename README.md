@@ -83,5 +83,20 @@ The same normalization parameters are loaded to preprocess raw EEGs at inference
 Script: `EEGtoVideo/GLMNet/inference_glmnet.py`
 Embeddings can also be produced with the features-only model using `EEGtoVideo/GLMNet/inference_glfnet_mlp.py`.
 
+## 3. Video Latent Extraction
+Video clips are converted into 2-second GIFs and encoded with the VAE from Stable Diffusion. Each clip becomes a latent tensor stored alongside the EEG embeddings.
+
+## 4. Pair Creation
+EEG embeddings and video latents share the same block/concept/repetition identifiers. We serialize these pairs in `npz` archives to feed them into the Transformer.
+
+## 5. Transformer Training
+The Transformer takes EEG embeddings as input and predicts the corresponding video latent. Training scripts build upon the `EEGtoVideo/GLMNet` utilities and stream the paired data.
+
+## 6. Video Generation with Diffusion
+At inference time, the Transformer predicts a latent from unseen EEG signals. This latent is then decoded by Stable Diffusion to produce the final video.
+
 # Further work
 Investigate on the reason why generated videos lack of contrast.
+
+## License
+EEG2Video is released under the MIT License. See the [LICENSE](LICENSE) file for details.
