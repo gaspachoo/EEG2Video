@@ -76,9 +76,5 @@ The same normalization parameters are loaded to preprocess raw EEGs at inference
 Script: `EEGtoVideo/GLMNet/inference_glmnet.py`
 Embeddings can also be produced with the features-only model using `EEGtoVideo/GLMNet/inference_glfnet_mlp.py`.
 
-## Missing pipeline steps
-
-The original project includes Seq2Seq, SemanticPredictor, and TuneAVideo modules to align EEG embeddings with video latents and captions. These components and their associated scripts are not present in this repository.
-
 # Further work
 Investigate on the reason why generated videos lack of contrast.
