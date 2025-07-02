@@ -1,30 +1,30 @@
-# EEG2Video Pipeline 
+# EEG2Video Pipeline
 Acronyms used:
--   EEG = ElectroEncephaloGram
--   DE = Differential Entropy
--   PSD = Power Spectral Density
+- EEG = ElectroEncephaloGram
+- DE = Differential Entropy
+- PSD = Power Spectral Density
 
-## 1. Data Preprocessing  ($\approx$ 1 week)
+## 1. Data Preprocessing (~1 week)
 ### 1. EEG data segmentation:
 
-**Purpose** : Segment raw  8min 40s EEG recordings into shorter recordings 
+**Purpose**: Segment raw 8min 40s EEG recordings into shorter recordings
 
-- First step :
+- First step:
 
-    Segment (62 channels, 200Hz, 8min40s)  into 2s windows (per video : 40 concepts, 5 repetitions per concept, remove hint sequences)
+  Segment (62 channels, 200Hz, 8min40s) into 2s windows (per video: 40 concepts, 5 repetitions per concept, remove hint sequences)
 
-    Shapes are : (block, concept, repetition, channel, time).
+  Shapes are: (block, concept, repetition, channel, time).
 
-    Script : `EEG_preprocessing/segment_raw_signals_200Hz.py`
-    (also exposes `extract_2s_segment` to grab a single 2‑second window on the fly)
+  Script: `EEG_preprocessing/segment_raw_signals_200Hz.py`
+  (also exposes `extract_2s_segment` to grab a single 2-second window on the fly)
 
-- Second step :
-    
-    Segment each 2s windows into 500ms windows using a 250 ms overlap (=7 windows)
+- Second step:
 
-    Shapes adapted to (block, concept, repetition, window, channel, time).
+  Segment each 2s window into 500ms windows using a 250 ms overlap (=7 windows)
 
-    Script : `EEG_preprocessing/segment_sliding_window.py`
+  Shapes adapted to (block, concept, repetition, window, channel, time).
+
+  Script: `EEG_preprocessing/segment_sliding_window.py`
 
 ### 2. DE/PSD Features detection on 5 frequency bands:
 
@@ -36,164 +36,49 @@ Acronyms used:
 - Beta (14-31 Hz)
 - Gamma (31-99 Hz)
 
-We detect on 3 types of windows :
+We detect on 3 types of windows:
 
 - Detect features on 2s raw windows.
 
-    Shapes adapted to (block, concept, repetition, channel, band).
+  Shapes adapted to (block, concept, repetition, channel, band).
 
-    Script : `EEG_preprocessing/extract_DE_PSD_features_1per2s.py`
+  Script: `EEG_preprocessing/extract_DE_PSD_features_1per2s.py`
 
-- Detect features on 500ms windows with a 250 ms overlap.
+- Detect features on 500ms windows with a 250 ms overlap.
 
-    Shapes adapted to (block, concept, repetition, window, channel, band).
+  Shapes adapted to (block, concept, repetition, window, channel, band).
 
-    Script : `EEG_preprocessing/extract_DE_PSD_features_1per500ms.py`
+  Script: `EEG_preprocessing/extract_DE_PSD_features_1per500ms.py`
 
 ### 3. Video alignment and GIF creation:
 
-**Purpose** : Segment raw  8min 40s Video recordings into shorter downscaled GIFs
+This repository does not include the script for extracting GIFs. Videos should be segmented externally into 2s GIFs before using the downstream models.
 
-- Segment 8 min 40s videos into 200 (40 concepts × 5 repetitions) 2s clips  using cv2.
-
-    Downscale to (512, 288), extract 6 frames (3 FPS) and save to .gif format using imageio.
-
-    Script: `EEG2Video/extract_gif.py`
-
-
-
-
-## 2. EEG Feature Encoding ($\approx$ 2 weeks)
-
-### Purpose :
-
+## 2. EEG Feature Encoding (~2 weeks)
+### Purpose:
 We use a GLMNet which uses a ShallowNet on raw EEGs, and a MLP on DE/PSD features to extract features from EEGs.
+One layer in ShallowNet is modified compared to the original: AvgPool2d -> AdaptiveAvgPool2d
+Models path: `EEGtoVideo/GLMNet/modules/models_paper.py`
 
-One layer in Shallownet is modified compared to original : AvgPool2d -> AdaptiveAvgPool2d
-
-Models path : `EEG2Video/GLMNet/models.py` 
-
-### Training :
-
-Training uses 2s raw EEGs split into 500&nbsp;ms sliding windows for DE/PSD features.
-The pre‑segmented data is stored in `Segmented_500ms_sw` and `DE_500ms_sw`.
-
-Script : `EEG2Video/GLMNet/train_glmnet.py`
-
-An alternative, lighter model that relies only on spectral features can be
-trained with `EEG2Video/GLMNet/train_glfnet_mlp.py`.
-
+### Training:
+Training uses 2s raw EEGs split into 500 ms sliding windows for DE/PSD features.
+The pre-segmented data is stored in `Segmented_500ms_sw` and `DE_500ms_sw`.
+Script: `EEGtoVideo/GLMNet/train_glmnet.py`
+An alternative, lighter model relying only on spectral features can be trained with `EEGtoVideo/GLMNet/train_glfnet_mlp.py`.
 - Raw EEGs are normalized per channel using the training split statistics.
-- Both trainers accept a `--scheduler` argument (`steplr`,
-  `reducelronplateau`, `cosine`) and a `--min_lr` value to set the learning rate
-  floor.
+- Both trainers accept a `--scheduler` argument (`steplr`, `reducelronplateau`, `cosine`) and a `--min_lr` value to set the learning rate floor.
+- The best checkpoint is saved as `<subject>_<category>_best.pt` and the ShallowNet weights are also stored in `<subject>_<category>_shallownet.pt`.
 
-- The best checkpoint is saved as `<subject>_<category>_best.pt` and the
-  ShallowNet weights are also stored in
-  `<subject>_<category>_shallownet.pt`.
-
-### Inference :
-    
-We generate EEgs embeddings from train GLMNet.
-
+### Inference:
+We generate EEG embeddings from a trained GLMNet.
 We use 2s raw EEGs and 500ms windows for DE/PSD features.
-
 The same normalization parameters are loaded to preprocess raw EEGs at inference time.
+Script: `EEGtoVideo/GLMNet/inference_glmnet.py`
+Embeddings can also be produced with the features-only model using `EEGtoVideo/GLMNet/inference_glfnet_mlp.py`.
 
-Script : `EEG2Video/GLMNet/inference_glmnet.py`
+## Missing pipeline steps
 
-Embeddings can also be produced with the features‑only model using
-`EEG2Video/GLMNet/inference_glfnet_mlp.py`.
-
-
-
-
-## 3. Seq2Seq Transformer ($\approx$ 1 week)
-
-### Purpose :
-
-We align EEG embeddings with videos
-
-The model is just a rewriting of original model : `EEG2Video/Seq2Seq/models/transformer.py`
-
-### Training :
-
-#### 1. Generate latents from pretrained VAE:
-
-- A pre-trained VAE is used to convert 6-frame video GIFs (shape [n_frames, sample_f, height, width] = [6, 3, 288, 512]) into latent tensors [n_frames, d1, d2, d3] = [6, 4, 36, 64] where d1, d2, d3 are due to VAE model.
-
-    Script : `EEG2Video/Seq2Seq/generate_video_latents.py`
-
-#### 2. Use Seq2Seq model to align EEGs embeddings and video latents
-
-- We use the generated EEG embeddings from part 2 as source (shape : `[batch, 7, 512]`) and the video latents from part 3.1 as target (shape : `[batch, 6, 9216]`).
-- Training shifts the target sequence by one step: `tgt_in[:,1:] = tgt[:,:-1]` and the first step is filled with zeros. The decoder therefore receives the previous latent at each time step instead of the ground truth.
-- The option `--stats_path` defines where to save `mean_z` and `std_z` when `--normalize` is active (default: `--save_path`). The resulting `stats.npz` must also be provided at inference to restore the latents to their original scale.
-
-Script : `EEG2Video/Seq2Seq/train_seq2seq_v2.py`
-
- ### Inference : 
-
-We use the generated EEG embeddings from part 2 to generate predicted latents.
-
-Script : `EEG2Video/Seq2Seq/inference_seq2seq_v2.py`
-- During inference, provide the same `--stats_path` to restore latents to their original scale.
-
-Autoregressive variant:
-- Training script: `EEG2Video/Seq2Seq/train_my_autoregressive_transformer.py` with option `--save_scaler` to store the fitted scaler (e.g. `scaler.pkl`). Use `--eeg_encoder` to choose between `eegnet` and `shallownet`, and optionally provide `--shallownet_ckpt` for pretrained ShallowNet weights.
-- Inference script: `EEG2Video/Seq2Seq/inference_my_autoregressive_transformer.py` with option `--scaler_path` to load this scaler. The same `--eeg_encoder` and `--encoder_ckpt` options ensure consistent EEG encoding during prediction.
-
-
-
-
-
-## 4. Semantic Predictor ($\approx$ 2 days)
-
-### Purpose :
-We use a semantic predictor to align EEG features with BLIP captions
-
-Model path : `EEG2Video/SemanticPredictor/models.py`
-
-### Training :
-
-#### 1. Generate text embeddings
-
-- We process the BLIP captions into pretrained CLIP model to generate text embeddings.
-
-    Script : `EEG2Video/SemanticPredictor/generate_text_emb.py`
-
-#### 2. Align EEG features with BLIP captions
-
-    
-- We use the DE/PSD features of part 2 as source and the text embeddings from part 4.1 as target.
-
-    Script : `EEG2Video/SemanticPredictor/train_semantic.py`
-
-### Inference : 
-
-- We used the generated text embeddings from part 4.1 to generate semantic embeddings.
-
-    Script : `EEG2Video/SemanticPredictor/inference_semantic.py`
-
-
-
-
-## 5. TuneAVideo pipeline ($\approx$ 3 weeks)
-
-### Purpose : We use the TuneAVideo pipeline to improve the quality of the video latents from part 3 in adding context thanks to semantic predictor.
-
-### Training :
-
-- We use the predicted latents of part 3.2 as source and semantic embeddings of part 4.2 as a target to finetune the TuneAVideo pipeline.
-
-    Script : `EEG2Video/TuneAVideo/train_tuneavideo_v7.py --mixed_precision --batch_size 7 --use_xformers --num_workers 2 --pin_memory --use_empty_cache --use_channels_last`
-
-### Inference :
-    
-- We generate precise video latents, and respective videos from predicted latents of part 3.2.
-
-    Script : `EEG2Video/TuneAVideo/inference_tuneavideo.py`
-
+The original project includes Seq2Seq, SemanticPredictor, and TuneAVideo modules to align EEG embeddings with video latents and captions. These components and their associated scripts are not present in this repository.
 
 # Further work
 Investigate on the reason why generated videos lack of contrast.
