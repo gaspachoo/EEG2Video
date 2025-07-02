@@ -99,4 +99,4 @@ At inference time, the Transformer predicts a latent from unseen EEG signals. Th
 Investigate on the reason why generated videos lack of contrast.
 
 ## License
-EEG2Video is released under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is released under the [MIT License](LICENSE).
