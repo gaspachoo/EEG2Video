@@ -214,7 +214,7 @@ class tsconv(nn.Module):
 
 # Convolution module
 # use conv to capture local features, instead of postion embedding.
-class PatchEmbedding(nn.Module):
+class PatchEmbedding2(nn.Module):
     def __init__(self, emb_size=40):
         # self.patch_size = patch_size
         super().__init__()
