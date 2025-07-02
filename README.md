@@ -78,3 +78,6 @@ Embeddings can also be produced with the features-only model using `EEGtoVideo/G
 
 # Further work
 Investigate on the reason why generated videos lack of contrast.
+
+## License
+This project is released under the [MIT License](LICENSE).
