@@ -1,8 +1,7 @@
 import os
 import numpy as np
 import math
-import scipy.io as sio
-from scipy.fftpack import fft, ifft
+from scipy.fftpack import fft
 
 
 def DE_PSD(data, fre, time_window, which="both"):
