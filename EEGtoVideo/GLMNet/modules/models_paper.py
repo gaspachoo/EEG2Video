@@ -28,7 +28,8 @@ from einops import rearrange
 from einops.layers.torch import Rearrange, Reduce
 from einops import rearrange
 
-class PatchEmbedding(nn.Module):
+# Legacy feature extractor using several CNN variants.
+class EEGFeatureExtractor(nn.Module):
     def __init__(self, emb_size=40):
         # self.patch_size = patch_size
         super().__init__()
@@ -214,6 +215,7 @@ class tsconv(nn.Module):
 
 # Convolution module
 # use conv to capture local features, instead of postion embedding.
+# Extracts patch tokens from EEG signals for the Transformer encoder.
 class PatchEmbedding(nn.Module):
     def __init__(self, emb_size=40):
         # self.patch_size = patch_size
