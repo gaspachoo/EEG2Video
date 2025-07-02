@@ -71,6 +71,13 @@ An alternative, lighter model relying only on spectral features can be trained w
 
 ### Inference:
 We generate EEG embeddings from a trained GLMNet.
+## 3. Training pipeline
+The project includes three sequential passes:
+- **P0**: pre-training the GLMNet (run `make p0`).
+- **P1**: training the Transformer while the VAE and the diffusion model stay frozen (run `make p1`).
+- **P2**: end-to-end fine tuning with a learning rate of 1e-5 for one or two epochs (run `make p2`).
+You can pass extra options to each step with `ARGS`.
+
 We use 2s raw EEGs and 500ms windows for DE/PSD features.
 The same normalization parameters are loaded to preprocess raw EEGs at inference time.
 Script: `EEGtoVideo/GLMNet/inference_glmnet.py`
