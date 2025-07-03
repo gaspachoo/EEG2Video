@@ -88,6 +88,9 @@ Video clips are converted into 2-second GIFs and encoded with the VAE from Stabl
 
 ## 4. Pair Creation
 EEG embeddings and video latents share the same block/concept/repetition identifiers. We serialize these pairs in `npz` archives to feed them into the Transformer.
+A utility `utils/pairs_to_torch.py` loads every archive from `data/latent_pairs/`,
+stacks the `eeg_latent` and `video_latent` arrays and saves them in a single
+`torch` file with the keys `src` and `tgt`.
 
 ## 5. Transformer Training
 The Transformer takes EEG embeddings as input and predicts the corresponding video latent. Training scripts build upon the `EEGtoVideo/GLMNet` utilities and stream the paired data.
