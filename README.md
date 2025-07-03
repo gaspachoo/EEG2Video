@@ -70,7 +70,8 @@ An alternative, lighter model relying only on spectral features can be trained w
 - The best checkpoint is saved as `<subject>_<category>_best.pt` and the ShallowNet weights are also stored in `<subject>_<category>_shallownet.pt`.
 
 ### Inference:
-We generate EEG embeddings from a trained GLMNet.
+We generate EEG embeddings from a trained GLMNet. Run `make eeg_latents` to
+produce the per‑clip latents used by `utils/build_pairs.py`.
 ## 3. Training pipeline
 The project includes three sequential passes:
 - **P0**: pre-training the GLMNet (run `make p0`).
