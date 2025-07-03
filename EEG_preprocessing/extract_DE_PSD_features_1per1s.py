@@ -54,7 +54,5 @@ for subname in sub_list:
     
     os.makedirs('./data/Preprocessing/DE_1per1s', exist_ok=True)
     os.makedirs('./data/Preprocessing/PSD_1per1s', exist_ok=True)
-    np.save("./data/Preprocessing/DE_1per1s/" + subname , DE_data) #+ ".npy"
-    np.save("./data/Preprocessing/PSD_1per1s/" + subname, PSD_data) #+ ".npy"
-
-    # break
+    np.save("./data/Preprocessing/DE_1per1s/" + subname , DE_data)
+    np.save("./data/Preprocessing/PSD_1per1s/" + subname, PSD_data)
