@@ -1,4 +1,4 @@
-.PHONY: p0 p1 p2
+.PHONY: pairs p0 p1 p2
 
 # Pass additional options with ARGS
 
@@ -13,3 +13,7 @@ p1:
 # P2: fine-tune end-to-end at low learning rate
 p2:
 	python scripts/finetune_end2end.py --lr 1e-5 $(ARGS)
+
+# Build EEG/video latent pairs
+pairs:
+	python utils/build_pairs.py \$(ARGS)
