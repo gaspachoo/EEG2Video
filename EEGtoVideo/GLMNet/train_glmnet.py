@@ -171,14 +171,7 @@ def main():
     opt = optim.Adam(model.parameters(), lr=args.lr)
 
     if args.scheduler == "reducelronplateau":
-        scheduler = ReduceLROnPlateau(
-            opt,
-            mode="max",
-            factor=0.8,
-            patience=10,
-            verbose=False,  # Disable automatic prints interfering with tqdm
-            min_lr=args.min_lr,
-        )
+        scheduler = ReduceLROnPlateau(opt, mode="max", factor=0.8, patience=10, verbose=False, min_lr=args.min_lr)
     elif args.scheduler == "steplr":
         scheduler = StepLR(opt, step_size=10, gamma=0.5)
     elif args.scheduler == "cosine":
