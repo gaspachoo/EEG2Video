@@ -74,7 +74,7 @@ We generate EEG embeddings from a trained GLMNet.
 ## 3. Training pipeline
 The project includes three sequential passes:
 - **P0**: pre-training the GLMNet (run `make p0`).
-- **P1**: training the Transformer while the VAE and the diffusion model stay frozen (run `make p1`).
+- **P1**: training the Transformer while the VAE and the diffusion model stay frozen. It reads the `.npz` pairs created in the previous step (run `make p1 ARGS=data/latent_pairs`).
 - **P2**: end-to-end fine tuning with a learning rate of 1e-5 for one or two epochs (run `make p2`).
 You can pass extra options to each step with `ARGS`.
 
@@ -87,8 +87,8 @@ Embeddings can also be produced with the features-only model using `EEGtoVideo/G
 Video clips are converted into 2-second GIFs and encoded with the VAE from Stable Diffusion. Each clip becomes a latent tensor stored alongside the EEG embeddings.
 
 ## 4. Pair Creation
-EEG embeddings and video latents share the same block/concept/repetition identifiers. We serialize these pairs in `npz` archives to feed them into the Transformer.
-A utility `utils/pairs_to_torch.py` loads every archive from `data/latent_pairs/`,
+EEG embeddings and video latents share the same block/concept/repetition identifiers. Run `make pairs` to call `utils/build_pairs.py`, which aligns both sets of latents and writes `.npz` files to `data/latent_pairs/`.
+The optional helper `utils/pairs_to_torch.py` loads every archive from this directory,
 stacks the `eeg_latent` and `video_latent` arrays and saves them in a single
 `torch` file with the keys `src` and `tgt`.
 
