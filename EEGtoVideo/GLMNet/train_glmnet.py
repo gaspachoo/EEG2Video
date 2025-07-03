@@ -51,6 +51,7 @@ def parse_args():
     p.add_argument("--min_lr",   type=float, default=1e-6, help="Minimum learning rate for the scheduler")
     p.add_argument("--scheduler",type=str, choices=["steplr", "reducelronplateau", "cosine"], default="reducelronplateau", help="Type of learning rate scheduler",)
     p.add_argument("--use_wandb", action="store_true")
+    p.add_argument("--subj_name", default="sub3", help="Subject name to process")
     return p.parse_args()
 
 def reshape_labels(labels: np.ndarray, n_win: int) -> np.ndarray:
@@ -85,13 +86,9 @@ def main():
     args = parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
-
-    # Select a single subject
-    filename = "sub3.npy"  # or args.subj_name
-    subj_name = filename.replace(".npy", "")
     
     # Define saving paths
-    ckpt_dir = os.path.join(args.save_dir, f"{subj_name}_{args.category}")
+    ckpt_dir = os.path.join(args.save_dir, f"{args.subj_name}_{args.category}")
     os.makedirs(ckpt_dir, exist_ok=True)
     shallownet_path = os.path.join(ckpt_dir, "shallownet.pt")
     mlpnet_path = os.path.join(ckpt_dir, "mlpnet.pt")
@@ -100,7 +97,7 @@ def main():
     glmnet_path = os.path.join(ckpt_dir, "glmnet_best.pt")
 
 
-    raw = np.load(os.path.join(args.raw_dir, filename))
+    raw = np.load(os.path.join(args.raw_dir, f"{args.subj_name}.npy"))
     # compute DE features from raw EEG windows
     feat = mlpnet.compute_features(
         raw.reshape(-1, raw.shape[-2], raw.shape[-1])
@@ -181,7 +178,7 @@ def main():
     criterion = nn.CrossEntropyLoss()
 
     if args.use_wandb:
-        wandb.init(project=PROJECT_NAME, name=f"{subj_name}_{args.category}", config=vars(args))
+        wandb.init(project=PROJECT_NAME, name=f"{args.subj_name}_{args.category}", config=vars(args))
         wandb.watch(model, log="all")
 
     best_val = 0.0
