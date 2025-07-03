@@ -40,3 +40,4 @@ if __name__ == "__main__":
         np.save("./data/Preprocessing/PSD_1per2s/sub" + str(subname) + ".npy", PSD_data)
         print(f"Saved DE data in ./data/Preprocessing/DE_1per2s/sub{str(subname)}.npy")
         print(f"Saved PSD data in ./data/Preprocessing/PSD_1per2s/sub{str(subname)}.npy")
+        
