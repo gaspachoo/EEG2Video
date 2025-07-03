@@ -48,7 +48,7 @@ def inf_glmnet(model, scaler, raw_sw, stats, device="cuda"):
             z = model(x_raw, x_feat, return_features=True)
             embeddings.append(z.squeeze(0).cpu().numpy())
 
-    return np.stack(embeddings)  # shape: (N_segments, emb_dim*2)
+    return np.stack(embeddings)  # shape: (N_segments, emb_dim // 2)
 
 # --- Main generation loop ---
 def generate_all_embeddings(
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     
     parser.add_argument('--raw_dir', default="./data/Preprocessing/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
     parser.add_argument('--checkpoint_path', default="./EEGtoVideo/checkpoints/glmnet/sub3_label_cluster", help='path to GLMNet checkpoint')
-    parser.add_argument('--output_dir', default="./data/GLMNet/EEG_embeddings_sw", help='where to save concatenated embeddings')
+    parser.add_argument('--output_dir', default="./data/eeg_segments", help='where to save projected embeddings')
     args = parser.parse_args()
     generate_all_embeddings(
         args.raw_dir,
