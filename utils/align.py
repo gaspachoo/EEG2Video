@@ -1,6 +1,31 @@
 import numpy as np
 
-__all__ = ["stack_eeg_windows"]
+__all__ = [
+    "stack_eeg_windows",
+    "load_aligned_latents",
+]
+
+
+def load_aligned_latents(eeg_path: str, video_path: str):
+    """Load EEG and video latents and align them by length.
+
+    Parameters
+    ----------
+    eeg_path : str
+        Path to the EEG latent .npy file.
+    video_path : str
+        Path to the video latent .npy file.
+
+    Returns
+    -------
+    tuple of np.ndarray
+        Tuple `(eeg_latent, video_latent)` trimmed to the same number of samples.
+    """
+    eeg_latent = np.load(eeg_path)
+    video_latent = np.load(video_path)
+
+    n = min(len(eeg_latent), len(video_latent))
+    return eeg_latent[:n], video_latent[:n]
 
 def stack_eeg_windows(eeg_windows: np.ndarray, start: int, *, windows_per_clip: int = 7, video_latents: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
     """Stack 6 consecutive EEG windows and optionally return the matching video latent.
