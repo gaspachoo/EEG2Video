@@ -55,8 +55,11 @@ def generate_all_embeddings(
     raw_dir,
     ckpt_path,
     output_dir,
+    subject_prefix,
     device="cuda",
 ):
+    """Run GLMNet inference for all subjects matching the prefix."""
+
     os.makedirs(output_dir, exist_ok=True)
 
     scaler_path = os.path.join(ckpt_path, "scaler.pkl")
@@ -67,7 +70,7 @@ def generate_all_embeddings(
     stats = load_raw_stats(stats_path)
 
     for fname in os.listdir(raw_dir):
-        if not (fname.endswith('.npy') and fname.startswith('sub3')):
+        if not (fname.endswith('.npy') and fname.startswith(subject_prefix)):
             continue
         print(f"Processing {fname}...")
         subj = os.path.splitext(fname)[0]
@@ -89,13 +92,19 @@ def generate_all_embeddings(
 # --- CLI ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    
+
     parser.add_argument('--raw_dir', default="./data/Preprocessing/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
-    parser.add_argument('--checkpoint_path', default="./EEGtoVideo/checkpoints/glmnet/sub3_label_cluster", help='path to GLMNet checkpoint')
+    parser.add_argument('--subject_prefix', default='sub3', help='prefix of subject files to process')
+    parser.add_argument('--checkpoint_path', help='path to GLMNet checkpoint')
     parser.add_argument('--output_dir', default="./data/eeg_segments", help='where to save projected embeddings')
     args = parser.parse_args()
+
+    if args.checkpoint_path is None:
+        args.checkpoint_path = f"./EEGtoVideo/checkpoints/glmnet/{args.subject_prefix}_label_cluster"
+
     generate_all_embeddings(
         args.raw_dir,
         args.checkpoint_path,
         args.output_dir,
+        args.subject_prefix,
     )
