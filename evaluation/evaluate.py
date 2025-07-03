@@ -1,4 +1,4 @@
-"""Evaluation utilities for EEG2Video pipeline."""
+"""Evaluation utilities for EEGtoVideo pipeline."""
 
 import os
 import glob

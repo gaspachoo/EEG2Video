@@ -1,4 +1,4 @@
-# EEG2Video Pipeline
+# EEGtoVideo Pipeline
 Acronyms used:
 - EEG = ElectroEncephaloGram
 - DE = Differential Entropy

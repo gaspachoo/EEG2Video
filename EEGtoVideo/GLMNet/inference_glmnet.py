@@ -9,14 +9,14 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
     
 
-from EEG2Video.GLMNet.modules.utils_glmnet import (
+from EEGtoVideo.GLMNet.modules.utils_glmnet import (
     GLMNet,
     standard_scale_features,
     normalize_raw,
     load_scaler,
     load_raw_stats,
 )
-from EEG2Video.GLMNet.modules.models_paper import mlpnet
+from EEGtoVideo.GLMNet.modules.models_paper import mlpnet
 
 
 OCCIPITAL_IDX = list(range(50, 62))  # 12 occipital channels
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--raw_dir', default="./data/Preprocessing/Segmented_500ms_sw", help='directory of pre-windowed raw EEG .npy files')
-    parser.add_argument('--checkpoint_path', default="./EEG2Video/checkpoints/glmnet/sub3_label_cluster", help='path to GLMNet checkpoint')
+    parser.add_argument('--checkpoint_path', default="./EEGtoVideo/checkpoints/glmnet/sub3_label_cluster", help='path to GLMNet checkpoint')
     parser.add_argument('--output_dir', default="./data/GLMNet/EEG_embeddings_sw", help='where to save concatenated embeddings')
     args = parser.parse_args()
     generate_all_embeddings(
