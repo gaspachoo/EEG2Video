@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from torch import nn
 from decord import VideoReader, cpu
+import imageio
 
 
 class SimpleVideoVAE(nn.Module):
@@ -43,10 +44,21 @@ def load_vae(weights_path: str, device: str = "cpu") -> nn.Module:
 def extract_clip_latents(path: str, vae: nn.Module, device: str = "cpu") -> np.ndarray:
     """Return latent tensor of shape ``(6, 256)`` for the given clip."""
     reader = VideoReader(path, width=512, height=288, ctx=cpu(0))
-    if len(reader) < 6:
-        raise RuntimeError(f"Video {path} is too short: {len(reader)} frames")
-    indices = np.linspace(0, len(reader) - 1, 6).astype(np.int64)
-    frames = reader.get_batch(indices).asnumpy()
+    frames = None
+    if len(reader) < 6 and path.lower().endswith(".gif"):
+        # Fall back to imageio when Decord does not decode all GIF frames
+        gif_reader = imageio.get_reader(path)
+        images = [im for im in gif_reader]
+        gif_reader.close()
+        if len(images) < 6:
+            raise RuntimeError(f"Video {path} is too short: {len(images)} frames")
+        indices = np.linspace(0, len(images) - 1, 6).astype(np.int64)
+        frames = np.stack([images[i] for i in indices], axis=0)
+    else:
+        if len(reader) < 6:
+            raise RuntimeError(f"Video {path} is too short: {len(reader)} frames")
+        indices = np.linspace(0, len(reader) - 1, 6).astype(np.int64)
+        frames = reader.get_batch(indices).asnumpy()
     frames = torch.from_numpy(frames).permute(0, 3, 1, 2).float() / 255.0
     frames = frames.to(device)
     with torch.no_grad():
