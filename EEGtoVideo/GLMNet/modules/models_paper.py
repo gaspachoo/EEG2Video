@@ -424,3 +424,4 @@ class glfnet_mlp(nn.Module):
         # print("occipital_feature.shape = ", occipital_feature.shape)
         out = self.out(torch.cat((global_feature, occipital_feature), 1))
         return out
+    
