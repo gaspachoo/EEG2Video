@@ -1,10 +1,14 @@
 """Generate aligned EEG/video latent pairs."""
 
 import os
+import sys
 import numpy as np
 from tqdm import tqdm
 
-from align import load_aligned_latents
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root) if project_root not in sys.path else None
+
+from utils.align import load_aligned_latents
 
 
 def build_pairs(eeg_dir: str, video_dir: str, output_dir: str) -> None:
