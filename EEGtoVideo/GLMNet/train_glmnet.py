@@ -172,7 +172,12 @@ def main():
 
     if args.scheduler == "reducelronplateau":
         scheduler = ReduceLROnPlateau(
-            opt, mode="max", factor=0.8, patience=10, verbose=True, min_lr=args.min_lr
+            opt,
+            mode="max",
+            factor=0.8,
+            patience=10,
+            verbose=False,  # Disable automatic prints interfering with tqdm
+            min_lr=args.min_lr,
         )
     elif args.scheduler == "steplr":
         scheduler = StepLR(opt, step_size=10, gamma=0.5)
@@ -207,6 +212,7 @@ def main():
         val_acc = va / len(ds_val)
         val_loss = vl / len(ds_val)
         if scheduler is not None:
+            old_lr = opt.param_groups[0]["lr"]
             if args.scheduler == "reducelronplateau":
                 scheduler.step(val_acc)
             else:
@@ -214,6 +220,11 @@ def main():
             for pg in opt.param_groups:
                 if pg["lr"] < args.min_lr:
                     pg["lr"] = args.min_lr
+            new_lr = opt.param_groups[0]["lr"]
+            if new_lr < old_lr:
+                tqdm.write(
+                    f"Epoch {ep:05d}: reducing learning rate of group 0 to {new_lr:.4e}."
+                )
         current_lr = opt.param_groups[0]["lr"]
 
         if val_acc > best_val:
