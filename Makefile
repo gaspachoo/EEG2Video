@@ -1,4 +1,4 @@
-.PHONY: p0 p1 p2 pairs
+.PHONY: p0 p1 p2 pairs video_latents
 
 
 # Pass additional options with ARGS
@@ -9,8 +9,12 @@ p0:
 
 # Build npz/torch latent pairs
 pairs:
-	python utils/build_pairs.py $(ARGS)
-	python utils/pairs_to_torch.py $(ARGS)
+        python utils/build_pairs.py $(ARGS)
+        python utils/pairs_to_torch.py $(ARGS)
+
+# Extract video latents organized by block
+video_latents:
+        python encoders/video_vae/extract_latents.py $(ARGS)
 
 # P1: train Transformer with VAE and diffusion frozen
 p1:
