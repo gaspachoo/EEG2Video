@@ -17,17 +17,28 @@ from encoders.video_vae.extract_latents import load_vae
 
 
 class PairDataset(Dataset):
-    """Dataset loading EEG/video latent pairs stored as ``.npz`` files."""
+    """Load pairs stored in ``npz`` files or a single ``.pt`` archive."""
 
-    def __init__(self, root: str | Path):
-        self.files = sorted(Path(root).rglob("*.npz"))
-        if not self.files:
-            raise RuntimeError(f"No npz files found in {root}")
+    def __init__(self, path: str | Path):
+        path = Path(path)
+        if path.is_file():
+            data = torch.load(path)
+            self.src = data["src"].float()
+            self.tgt = data["tgt"].float()
+            self.files = None
+        else:
+            self.files = sorted(path.rglob("*.npz"))
+            if not self.files:
+                raise RuntimeError(f"No npz files found in {path}")
 
     def __len__(self) -> int:
+        if self.files is None:
+            return len(self.src)
         return len(self.files)
 
     def __getitem__(self, idx: int):
+        if self.files is None:
+            return self.src[idx], self.tgt[idx]
         data = np.load(self.files[idx])
         src = torch.from_numpy(data["eeg_latent"]).float()
         tgt = torch.from_numpy(data["video_latent"]).float()
@@ -36,7 +47,8 @@ class PairDataset(Dataset):
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Train Transformer with frozen VAE and diffusion modules")
-    p.add_argument("data", type=Path, help="folder with paired latents")
+    p.add_argument("--data", type=Path, default=Path("./data/pairs.pt"),
+                   help="path to pair dataset (.pt or folder of npz)")
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch_size", type=int, default=4)
     p.add_argument("--lr", type=float, default=1e-4)
