@@ -3,7 +3,16 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
 
-def seg_sliding_window(data, win_s, step_s, fs=200):    
+def seg_sliding_window(data, win_s, step_s, fs=200):
+    """Segment data into sliding windows.
+    data : np.ndarray
+        Input data of shape (7, 40, 5, 62, 2 * fs)
+    win_s : float
+        Window size in seconds (e.g., 0.5 for 500 ms)
+    step_s : float
+        Step size in seconds (e.g., 0.25 for 250 ms)
+    fs : int
+        Sampling frequency in Hz (default 200 Hz)"""
     
     win_t = int(fs * win_s)   # points temporels par fenêtre (100)
     step_t = int(fs * step_s) # pas entre fenêtres (50)
@@ -42,14 +51,14 @@ if __name__ == "__main__":
         path_in = os.path.join(INPUT_DIR, fname)
         data = np.load(path_in)  # shape: (7, 40, 5, 62, 400)
         
-        # Vérification de la forme
+        # Check if data has the expected shape
         if data.ndim != 5 or data.shape[-1] != 2 * FS:
             print(f"Skipping {fname}: unexpected shape {data.shape}")
             continue
         
         windows = seg_sliding_window(data, WIN_S, STEP_S, fs=FS)
         
-        # Enregistrement
+        # Save segmented windows
         out_path = os.path.join(OUTPUT_DIR, fname)
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         np.save(out_path, windows)
