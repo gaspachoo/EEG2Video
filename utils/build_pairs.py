@@ -17,9 +17,12 @@ def build_pairs(eeg_dir: str, video_dir: str, output_dir: str) -> None:
     Parameters
     ----------
     eeg_dir : str
-        Directory containing EEG latent ``.npy`` files.
+        Directory containing EEG latent ``.npy`` files. Each subject has its
+        own folder ``subX`` with files organised as ``subX/block/index.npy``
+        where ``index = 5 * concept + repetition``.
     video_dir : str
-        Directory with the corresponding video latents.
+        Directory with the corresponding video latents. The hierarchy mirrors the
+        EEG data but without the subject prefix, i.e. ``block/index.npy``.
     output_dir : str
         Where the paired ``.npz`` files will be written.
     """
@@ -33,9 +36,15 @@ def build_pairs(eeg_dir: str, video_dir: str, output_dir: str) -> None:
 
     for eeg_path in tqdm(eeg_files, desc="Pairing latents"):
         rel_path = os.path.relpath(eeg_path, eeg_dir)
-        video_path = os.path.join(video_dir, rel_path)
+        parts = rel_path.split(os.sep)
+        if len(parts) < 2:
+            video_rel = rel_path
+        else:
+            # Drop the subject folder to match the video hierarchy
+            video_rel = os.path.join(*parts[1:])
+        video_path = os.path.join(video_dir, video_rel)
         if not os.path.exists(video_path):
-            print(f"Video latent missing for {rel_path}, skipping")
+            print(f"Video latent missing for {video_rel}, skipping")
             continue
         out_path = os.path.join(output_dir, os.path.splitext(rel_path)[0] + ".npz")
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
