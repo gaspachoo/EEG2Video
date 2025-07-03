@@ -106,8 +106,6 @@ def main():
         raw.reshape(-1, raw.shape[-2], raw.shape[-1])
     ).reshape(*raw.shape[:4], raw.shape[-2], -1)
     
-    print("Raw shape:", raw.shape)  # (7, 40, 5, 7, 62, 100)
-    print("Feature shape:", feat.shape)  # (7, 40, 5, 7 62 ,5)
     labels_raw = np.load(f'{args.label_dir}/All_video_{args.category}.npy')                       # (7,40)
     unique_labels, counts_labels = np.unique(labels_raw, return_counts=True)
     label_distribution = {int(u): int(c) for u, c in zip(unique_labels, counts_labels)}
@@ -119,7 +117,6 @@ def main():
     
     labels = format_labels(reshape_labels(labels_raw, n_win), args.category)
     num_unique_labels = len(np.unique(labels))
-    print("Number of categories:", num_unique_labels)
 
     # Flatten data and split into train/val/test
     X_all = raw.reshape(-1, num_channels, time_len)
@@ -225,7 +222,7 @@ def main():
             torch.save(model.state_dict(), glmnet_path)
             torch.save(model.raw_global.state_dict(), shallownet_path)
             torch.save(model.freq_local.state_dict(), mlpnet_path)
-            print(f"New best model saved at epoch {ep} with val_acc={val_acc:.3f}")
+            tqdm.write(f"New best model saved at epoch {ep} with val_acc={val_acc:.3f}")
 
         if args.use_wandb:
             wandb.log({"epoch": ep, "train/acc": train_acc, "val/acc": val_acc,
