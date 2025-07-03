@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Training script for the Transformer (P1).
 The VAE and diffusion models remain frozen during this stage."""
-
+import os
+import sys
 import argparse
 from pathlib import Path
 
@@ -11,10 +12,13 @@ import torch.nn.functional as F
 from torch import optim
 from torch.utils.data import DataLoader, Dataset
 
-from transformer.model import Seq2SeqTransformer
 from diffusers import DiffusionPipeline
-from encoders.video_vae.extract_latents import load_vae
 
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root) if project_root not in sys.path else None
+    
+from transformer.model import Seq2SeqTransformer
+from encoders.video_vae.extract_latents import load_vae
 
 class PairDataset(Dataset):
     """Dataset loading EEG/video latent pairs stored as ``.npz`` files."""
