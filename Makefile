@@ -21,6 +21,3 @@ p1:
 p2:
 	python scripts/finetune_end2end.py --lr 1e-5 $(ARGS)
 
-# Build EEG/video latent pairs
-pairs:
-	python utils/build_pairs.py \$(ARGS)
