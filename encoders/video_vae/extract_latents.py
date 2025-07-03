@@ -79,11 +79,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract video latents with a frozen VAE")
     parser.add_argument(
         "--input_dir",
-        default="./data/Video_mp4",
+        default="./data/Seq2Seq/Video_gifs",
         help="directory with 2s clips organized by block",
     )
     parser.add_argument("--weights", default="encoders/video_vae/vae.pt", help="path to VAE weights")
-    parser.add_argument("--output_dir", default="data/video_latents", help="where to store latent tensors")
+    parser.add_argument("--output_dir", default="data/gaspardnew/video_latents", help="where to store latent tensors")
     parser.add_argument("--device", default="cpu", help="computation device")
     args = parser.parse_args()
 
