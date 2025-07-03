@@ -32,11 +32,15 @@ class GLMNet(nn.Module):
         # Local branch processing spectral features
         self.freq_local = mlpnet(emb_dim, len(self.occipital_idx) * 5)
 
-        # Final classification head
-        self.fc = nn.Sequential(
+        # Projection of concatenated features followed by classifier
+        self.projection = nn.Sequential(
             nn.Linear(emb_dim * 2, emb_dim),
             nn.GELU(),
-            nn.Linear(emb_dim, out_dim),
+            nn.Linear(emb_dim, emb_dim // 2),
+        )
+        self.classifier = nn.Sequential(
+            nn.GELU(),
+            nn.Linear(emb_dim // 2, out_dim),
         )
 
     @classmethod
@@ -50,7 +54,9 @@ class GLMNet(nn.Module):
     ) -> "GLMNet":
         """Instantiate ``GLMNet`` from a saved state dict."""
         state = torch.load(ckpt_path, map_location=device)
-        if "fc.2.weight" in state:
+        if "classifier.1.weight" in state:
+            out_dim = state["classifier.1.weight"].shape[0]
+        elif "fc.2.weight" in state:
             out_dim = state["fc.2.weight"].shape[0]
         elif "fc.weight" in state:
             out_dim = state["fc.weight"].shape[0]
@@ -74,8 +80,8 @@ class GLMNet(nn.Module):
         x_feat : torch.Tensor
             Spectral features of shape ``(B, 62, 5)``.
         return_features : bool, optional
-            If ``True`` returns the concatenated features before the final
-            projection layer. Defaults to ``False``.
+            If ``True`` returns the projected features before the
+            classification layer. Defaults to ``False``.
         """
 
         g_raw = self.raw_global(x_raw)
@@ -89,11 +95,12 @@ class GLMNet(nn.Module):
         l_freq = (l_freq - f_mean) / f_std * g_std + g_mean
 
         features = torch.cat([g_raw, l_freq], dim=1)
+        projected = self.projection(features)
 
         if return_features:
-            return features
+            return projected
 
-        return self.fc(features)
+        return self.classifier(projected)
 
 def standard_scale_features(X, scaler=None, return_scaler=False):
     """Scale features with ``StandardScaler``.
