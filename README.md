@@ -85,14 +85,14 @@ Script: `EEGtoVideo/GLMNet/inference_glmnet.py`
 Embeddings can also be produced with the features-only model using `EEGtoVideo/GLMNet/inference_glfnet_mlp.py`.
 
 ## 3. Video Latent Extraction
-Video clips are converted into 2-second GIFs and encoded with the VAE from Stable Diffusion. Each clip becomes a latent tensor stored alongside the EEG embeddings.
+Video clips are converted into 2-second GIFs and encoded with the VAE from Stable Diffusion. Each clip becomes a latent tensor stored alongside the EEG embeddings. Latents are saved as `.npz` archives.
 
 ## 4. Pair Creation
 EEG embeddings are stored per subject under `subX/block/index.npy` where
 `index = 5 * concept + repetition` (200 files per block). Video latents share the
 same `block/index.npy` structure without the subject prefix. Run `make pairs` to
 call `utils/build_pairs.py`, which drops the subject level, aligns both sets of
-latents and writes `.npz` files to `data/latent_pairs/`.
+latents (from `.npy` or `.npz` files) and writes `.npz` files to `data/latent_pairs/`.
 The optional helper `utils/pairs_to_torch.py` loads every archive from this directory,
 stacks the `eeg_latent` and `video_latent` arrays and saves them in a single
 `torch` file with the keys `src` and `tgt`.

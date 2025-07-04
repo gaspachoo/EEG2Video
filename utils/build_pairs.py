@@ -21,8 +21,9 @@ def build_pairs(eeg_dir: str, video_dir: str, output_dir: str) -> None:
         own folder ``subX`` with files organised as ``subX/block/index.npy``
         where ``index = 5 * concept + repetition``.
     video_dir : str
-        Directory with the corresponding video latents. The hierarchy mirrors the
-        EEG data but without the subject prefix, i.e. ``block/index.npy``.
+        Directory with the corresponding video latents (``.npy`` or ``.npz``).
+        The hierarchy mirrors the EEG data but without the subject prefix,
+        i.e. ``block/index.npy``.
     output_dir : str
         Where the paired ``.npz`` files will be written.
     """
@@ -44,8 +45,12 @@ def build_pairs(eeg_dir: str, video_dir: str, output_dir: str) -> None:
             video_rel = os.path.join(*parts[1:])
         video_path = os.path.join(video_dir, video_rel)
         if not os.path.exists(video_path):
-            print(f"Video latent missing for {video_rel}, skipping")
-            continue
+            alt = os.path.splitext(video_path)[0] + ".npz"
+            if os.path.exists(alt):
+                video_path = alt
+            else:
+                print(f"Video latent missing for {video_rel}, skipping")
+                continue
         out_path = os.path.join(output_dir, os.path.splitext(rel_path)[0] + ".npz")
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
