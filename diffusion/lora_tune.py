@@ -69,7 +69,7 @@ def add_lora(model, ratio=0.05):
 async def train(args):
     accelerator = Accelerator()
     pipe = DiffusionPipeline.from_pretrained(
-        "open-sora/open_sora", torch_dtype=torch.float16
+        args.diffusion_weights, torch_dtype=torch.float16
     )
     pipe.to(accelerator.device)
 
@@ -119,6 +119,12 @@ def parse_args():
     parser.add_argument("--output", type=str, required=True, help="Path to save LoRA")
     parser.add_argument("--steps", type=int, default=5000, help="Training steps")
     parser.add_argument("--batch_size", type=int, default=1)
+    parser.add_argument(
+        "--diffusion_weights",
+        type=str,
+        default="hpcai-tech/Open-Sora-Plan-1.3",
+        help="Diffusion model checkpoint to load",
+    )
     return parser.parse_args()
 
 

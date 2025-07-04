@@ -102,6 +102,8 @@ The Transformer takes EEG embeddings as input and predicts the corresponding vid
 
 ## 6. Video Generation with Diffusion
 At inference time, the Transformer predicts a latent from unseen EEG signals. This latent is then decoded by Stable Diffusion to produce the final video.
+By default, all scripts load the diffusion weights from `hpcai-tech/Open-Sora-Plan-1.3`.
+You can override this with `--diffusion_weights` (or `--model` in `diffusion/generate.py`).
 
 # Further work
 Investigate on the reason why generated videos lack of contrast.

@@ -32,7 +32,12 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate video from latent")
-    parser.add_argument("--model", type=str, default="open-sora/open_sora")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="hpcai-tech/Open-Sora-Plan-1.3",
+        help="Diffusion model checkpoint to load",
+    )
     parser.add_argument("--latent", type=str, required=True)
     parser.add_argument("--latent_dim", type=int, default=1024)
     parser.add_argument("--output", type=str, default="output.mp4")

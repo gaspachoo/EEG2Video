@@ -60,7 +60,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--freeze_vae", action="store_true")
     p.add_argument("--freeze_diffuser", action="store_true")
     p.add_argument("--vae_weights", type=str, default="encoders/video_vae/vae.pt")
-    p.add_argument("--diffusion_weights", type=str, default="open-sora/open_sora")
+    p.add_argument(
+        "--diffusion_weights",
+        type=str,
+        default="hpcai-tech/Open-Sora-Plan-1.3",
+        help="Diffusion model checkpoint to load",
+    )
     return p.parse_args()
 
 
