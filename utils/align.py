@@ -6,6 +6,17 @@ __all__ = [
 ]
 
 
+def _load_latent(path: str) -> np.ndarray:
+    """Return latent array from ``path`` regardless of extension."""
+    data = np.load(path)
+    if isinstance(data, np.lib.npyio.NpzFile):
+        key = "latents" if "latents" in data else data.files[0]
+        arr = data[key]
+        data.close()
+        return arr
+    return data
+
+
 def load_aligned_latents(eeg_path: str, video_path: str):
     """Load EEG and video latents and align them by length.
 
@@ -21,8 +32,8 @@ def load_aligned_latents(eeg_path: str, video_path: str):
     tuple of np.ndarray
         Tuple `(eeg_latent, video_latent)` trimmed to the same number of samples.
     """
-    eeg_latent = np.load(eeg_path)
-    video_latent = np.load(video_path)
+    eeg_latent = _load_latent(eeg_path)
+    video_latent = _load_latent(video_path)
 
     n = min(len(eeg_latent), len(video_latent))
     return eeg_latent[:n], video_latent[:n]
