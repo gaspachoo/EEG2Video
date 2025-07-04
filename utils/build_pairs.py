@@ -62,7 +62,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Build EEG-video latent pairs")
-    parser.add_argument("--eeg_dir", default="./data/eeg_segments", help="directory with EEG latents")
+    parser.add_argument("--eeg_dir", default="./data/gaspardnew/eeg_segments", help="directory with EEG latents")
     parser.add_argument("--video_dir", default="./data/gaspardnew/video_latents", help="directory with video latents")
     parser.add_argument("--output_dir", default="./data/gaspardnew/latent_pairs", help="where to save paired latents")
     args = parser.parse_args()
