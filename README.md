@@ -88,9 +88,9 @@ Embeddings can also be produced with the features-only model using `EEGtoVideo/G
 Video clips are converted into 2-second GIFs and encoded with the VAE from Stable Diffusion. Each clip becomes a latent tensor stored alongside the EEG embeddings. Latents are saved as `.npz` archives.
 
 ## 4. Pair Creation
-EEG embeddings are stored per subject under `subX/block/index.npy` where
-`index = 5 * concept + repetition` (200 files per block). Video latents share the
-same `block/index.npy` structure without the subject prefix. Run `make pairs` to
+EEG embeddings are stored per subject under `subX/Block{block}/index.npy` where
+`index = 5 * concept + repetition` (indices 1–200 per block). Video latents share the
+same `Block{block}/index.npy` structure without the subject prefix. Run `make pairs` to
 call `utils/build_pairs.py`, which drops the subject level, aligns both sets of
 latents (from `.npy` or `.npz` files) and writes `.npz` files to `data/latent_pairs/`.
 The optional helper `utils/pairs_to_torch.py` loads every archive from this directory,

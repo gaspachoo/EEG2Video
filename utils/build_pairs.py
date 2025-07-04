@@ -18,49 +18,48 @@ def build_pairs(eeg_dir: str, video_dir: str, output_dir: str) -> None:
     ----------
     eeg_dir : str
         Directory containing EEG latent ``.npy`` files. Each subject has its
-        own folder ``subX`` with files organised as ``subX/block/index.npy``
-        where ``index = 5 * concept + repetition``.
+        own folder ``subX`` with files organised as ``subX/Block{block}/index.npy``.
+        Indices range from ``1`` to ``200`` following
+        ``index = 5 * concept + repetition``.
     video_dir : str
         Directory with the corresponding video latents (``.npy`` or ``.npz``).
         The hierarchy mirrors the EEG data but without the subject prefix,
-        i.e. ``block/index.npy``.
+        i.e. ``Block{block}/index.npy``.
     output_dir : str
         Where the paired ``.npz`` files will be written.
     """
     os.makedirs(output_dir, exist_ok=True)
 
-    eeg_files = []
-    for root, _, files in os.walk(eeg_dir):
-        for fname in files:
-            if fname.endswith(".npy"):
-                eeg_files.append(os.path.join(root, fname))
-
-    for eeg_path in tqdm(eeg_files, desc="Pairing latents"):
-        rel_path = os.path.relpath(eeg_path, eeg_dir)
-        parts = rel_path.split(os.sep)
-        if len(parts) < 2:
-            video_rel = rel_path
-        else:
-            # Drop the subject folder to match the video hierarchy
-            video_rel = os.path.join(*parts[1:])
-        video_path = os.path.join(video_dir, video_rel)
-        if not os.path.exists(video_path):
-            alt = os.path.splitext(video_path)[0] + ".npz"
-            if os.path.exists(alt):
-                video_path = alt
-            else:
-                print(f"Video latent missing for {video_rel}, skipping")
+    subjects = [d for d in os.listdir(eeg_dir) if os.path.isdir(os.path.join(eeg_dir, d))]
+    for sub in subjects:
+        for block in os.listdir(os.path.join(eeg_dir, sub)):
+            eeg_block = os.path.join(eeg_dir, sub, block)
+            if not os.path.isdir(eeg_block):
                 continue
-        out_path = os.path.join(output_dir, os.path.splitext(rel_path)[0] + ".npz")
-        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+            for idx in tqdm(range(1, 201), desc=f"{sub}/{block}", leave=False):
+                eeg_path = os.path.join(eeg_block, f"{idx}.npy")
+                if not os.path.exists(eeg_path):
+                    continue
+                video_path = os.path.join(video_dir, block, f"{idx}.npy")
+                if not os.path.exists(video_path):
+                    alt = os.path.splitext(video_path)[0] + ".npz"
+                    if os.path.exists(alt):
+                        video_path = alt
+                    else:
+                        print(f"Video latent missing for {block}/{idx}, skipping")
+                        continue
 
-        eeg_latent, video_latent = load_aligned_latents(eeg_path, video_path)
+                rel_path = os.path.relpath(eeg_path, eeg_dir)
+                out_path = os.path.join(output_dir, os.path.splitext(rel_path)[0] + ".npz")
+                os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
-        np.savez_compressed(
-            out_path,
-            eeg_latent=eeg_latent.astype(np.float32),
-            video_latent=video_latent.astype(np.float32),
-        )
+                eeg_latent, video_latent = load_aligned_latents(eeg_path, video_path)
+
+                np.savez_compressed(
+                    out_path,
+                    eeg_latent=eeg_latent.astype(np.float32),
+                    video_latent=video_latent.astype(np.float32),
+                )
 
 
 def main():
