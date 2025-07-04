@@ -21,7 +21,7 @@ video_latents:
 
 # P1: train Transformer with VAE and diffusion frozen
 p1:
-	python scripts/train_transformer.py --data ./data/latent_pairs \
+	python scripts/train_transformer.py --data ./data/gaspardnew/latent_pairs \
 	        --freeze_vae --freeze_diffuser $(ARGS)
 
 # P2: fine-tune end-to-end at low learning rate
