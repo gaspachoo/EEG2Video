@@ -31,23 +31,19 @@ def build_pairs(eeg_dir: str, video_dir: str, output_dir: str) -> None:
     os.makedirs(output_dir, exist_ok=True)
 
     subjects = [d for d in os.listdir(eeg_dir) if os.path.isdir(os.path.join(eeg_dir, d))]
-    for sub in subjects:
+    for sub in tqdm(subjects, desc="Processing subjects"):
         for block in os.listdir(os.path.join(eeg_dir, sub)):
             eeg_block = os.path.join(eeg_dir, sub, block)
             if not os.path.isdir(eeg_block):
                 continue
-            for idx in tqdm(range(1, 201), desc=f"{sub}/{block}", leave=False):
+            for idx in range(1, 201):
                 eeg_path = os.path.join(eeg_block, f"{idx}.npy")
                 if not os.path.exists(eeg_path):
                     continue
-                video_path = os.path.join(video_dir, block, f"{idx}.npy")
+                video_path = os.path.join(video_dir, block, f"{idx}.npz")
                 if not os.path.exists(video_path):
-                    alt = os.path.splitext(video_path)[0] + ".npz"
-                    if os.path.exists(alt):
-                        video_path = alt
-                    else:
-                        print(f"Video latent missing for {block}/{idx}, skipping")
-                        continue
+                    print(f"Video latent missing at path {video_path}, skipping")
+                    continue
 
                 rel_path = os.path.relpath(eeg_path, eeg_dir)
                 out_path = os.path.join(output_dir, os.path.splitext(rel_path)[0] + ".npz")

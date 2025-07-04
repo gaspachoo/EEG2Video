@@ -14,7 +14,6 @@ eeg_latents:
 # Build npz/torch latent pairs
 pairs:
 	python utils/build_pairs.py $(ARGS)
-	python utils/pairs_to_torch.py $(ARGS)
 
 # Extract video latents organized by block
 video_latents:
