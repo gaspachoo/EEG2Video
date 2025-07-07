@@ -35,7 +35,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        default="hpcai-tech/Open-Sora-Plan-1.3",
+        default="Open-Sora-Plan-1.3",
         help="Diffusion model checkpoint to load",
     )
     parser.add_argument("--latent", type=str, required=True)
