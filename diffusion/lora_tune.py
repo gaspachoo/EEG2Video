@@ -122,7 +122,7 @@ def parse_args():
     parser.add_argument(
         "--diffusion_weights",
         type=str,
-        default="hpcai-tech/Open-Sora-Plan-1.3",
+        default="Open-Sora-Plan-1.3",
         help="Diffusion model checkpoint to load",
     )
     return parser.parse_args()

@@ -63,7 +63,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--diffusion_weights",
         type=str,
-        default="hpcai-tech/Open-Sora-Plan-1.3",
+        default="Open-Sora-Plan-1.3",
         help="Diffusion model checkpoint to load",
     )
     return p.parse_args()
