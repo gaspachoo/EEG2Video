@@ -296,9 +296,14 @@ def train_category(
     )
 
     raw_mean, raw_std = stats
-    X_train = normalize_raw(X_train, raw_mean, raw_std)
-    X_val = normalize_raw(X_val, raw_mean, raw_std)
-    X_test = normalize_raw(X_test_raw, raw_mean, raw_std)
+    # Normalize only the raw EEG part and keep features untouched
+    X_train_raw = normalize_raw(X_train[:, :, :T], raw_mean, raw_std)
+    X_val_raw = normalize_raw(X_val[:, :, :T], raw_mean, raw_std)
+    X_test_raw_norm = normalize_raw(X_test_raw[:, :, :T], raw_mean, raw_std)
+
+    X_train = np.concatenate([X_train_raw, X_train[:, :, T:]], axis=2)
+    X_val = np.concatenate([X_val_raw, X_val[:, :, T:]], axis=2)
+    X_test = np.concatenate([X_test_raw_norm, X_test_raw[:, :, T:]], axis=2)
 
     scaler = None
     feat_dim = 0
@@ -333,7 +338,8 @@ def train_category(
         T,
     )
 
-    return model, (raw_mean, raw_std), scaler, (X_test_raw, y_test)
+    # Return unnormalized raw EEG for evaluation
+    return model, (raw_mean, raw_std), scaler, (X_test_raw[:, :, :T], y_test)
 
 
 def two_stage_predict(eeg: np.ndarray, models: Dict[str, nn.Module], scalers, stats, device: str, model_type: str) -> int:
